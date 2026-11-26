@@ -1,0 +1,39 @@
+views: main*
+ok   views
+ok   new-view detail
+views: main detail*
+ok   views
+ok   rename-view orders
+views: main orders*
+ok   views
+ok   undo
+views: main* detail
+ok   views
+ok   view detail
+ok   remove-view
+views: main*
+ok   views
+ok   remove-view
+ok   undo
+views: main* detail
+ok   views
+ok   new-view 9bad
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+
+view detail {
+  include *
+}
+--- status
+"9bad" is not a view name: use letters, digits and _, not starting with a digit

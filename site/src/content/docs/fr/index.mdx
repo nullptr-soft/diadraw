@@ -1,0 +1,34 @@
+---
+title: DiaDraw
+description: Des diagrammes en texte et sur un canevas, à partir d’un même modèle.
+template: splash
+hero:
+  tagline: Écrivez vos diagrammes sous forme de texte ou dessinez-les sur un canevas. Les deux restent synchronisés. Un modèle, plusieurs vues et un moteur de disposition que vous pouvez guider.
+  image:
+    file: ../../../assets/logo.svg
+  actions:
+    - text: Premiers pas
+      link: getting-started/
+      icon: right-arrow
+    - text: Ouvrir l’application
+      link: ../app/
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Un modèle, deux éditeurs" icon="pencil">
+    Définissez une seule fois les éléments et leurs relations, puis modifiez-les dans le texte ou sur le canevas. Chaque modification sur le canevas se traduit par une petite retouche du texte : celui-ci fait toujours foi et les différences restent faciles à lire dans Git.
+  </Card>
+  <Card title="Plusieurs vues du même modèle" icon="seti:folder">
+    Le contexte d’un système, ses conteneurs, une séquence d’appels : chaque diagramme est une vue qui sélectionne et agence des parties du même modèle.
+  </Card>
+  <Card title="Une disposition que vous pouvez guider" icon="setting">
+    Disposez les éléments par couches, en arbre, en grille, en étoile, par forces, à la main ou en séquence. Déplacer un bloc inscrit une indication telle que `pin db below api` plutôt que des coordonnées. Le diagramme reste ainsi bien ordonné quand le modèle s’agrandit.
+  </Card>
+  <Card title="Réutilisez vos diagrammes" icon="document">
+    Importez des diagrammes PlantUML, Mermaid, Structurizr, draw.io et BPMN. Exportez-les aux formats SVG, PNG, PDF, draw.io et BPMN.
+  </Card>
+</CardGrid>

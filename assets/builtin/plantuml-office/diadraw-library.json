@@ -1,0 +1,20 @@
+{
+  "name": "plantuml-office",
+  "version": "1.0.0",
+  "description": "Names from the PlantUML standard library's Office icon set. Any shape name is accepted and drawn as an icon box labelled with the name; the icons themselves are not included.",
+  "license": "MIT",
+  "author": "DiaDraw",
+  "source": {
+    "kind": "original",
+    "url": "https://github.com/plantuml/plantuml-stdlib"
+  },
+  "open": {
+    "base": "image",
+    "kind": "component"
+  },
+  "mappings": {
+    "plantuml-include": {
+      "^<?office\\b": "*"
+    }
+  }
+}

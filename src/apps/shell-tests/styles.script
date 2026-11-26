@@ -1,0 +1,14 @@
+# Theme and style blocks from the canvas: the element's Shared styles, then the document's panel.
+select db
+set shared-styles database: fill=#dae8fc;stroke=#6c8ebf
+set shared-styles database: fill=#ffe6cc;stroke=#6c8ebf
+styles
+set theme dark
+set view-theme mono
+set styles database: fill=#ffe6cc;stroke=#6c8ebf\nrelationship: dashed=1
+undo
+set theme night
+set theme-keys background=#000000
+set view-theme
+set theme-keys background=#101418
+set theme-nodes person: fill=#08427b

@@ -1,0 +1,45 @@
+{
+  "name": "diadraw",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "src/wasm",
+    "src/markdown",
+    "src/node",
+    "src/apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "eslint . && prettier --check . && node tools/check-version.mjs && node tools/gen/credits.mjs --check",
+    "version:sync": "node tools/check-version.mjs --write",
+    "version:bump": "node tools/bump-version.mjs",
+    "format": "prettier --write .",
+    "dev:web": "turbo run dev --filter=@diadraw/web",
+    "dev:site": "npm run dev --prefix site",
+    "pages:build": "node tools/pages/build.mjs",
+    "pages:preview": "node tools/pages/serve.mjs",
+    "pages:deploy": "gh workflow run pages.yml --ref main",
+    "pages:publish": "node tools/pages/publish-branch.mjs",
+    "docs:diagrams": "cmake --preset core && cmake --build --preset core --target diadraw_cli && ../diadraw-build/core/diadraw render docs/architecture.draw --view containers -o docs/architecture.svg && ../diadraw-build/core/diadraw render docs/architecture.draw --view engine -o docs/engine.svg"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "@types/node": "^22.15.0",
+    "eslint": "^9.30.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^3.2.0"
+  },
+  "dependencies": {
+    "@forge/cli": "^14.2.0"
+  }
+}

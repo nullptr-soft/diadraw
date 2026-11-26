@@ -1,0 +1,36 @@
+add_subdirectory(base)
+add_subdirectory(canvas)
+add_subdirectory(capi)
+add_subdirectory(dsl)
+add_subdirectory(editor)
+add_subdirectory(export)
+add_subdirectory(io)
+add_subdirectory(layout)
+add_subdirectory(library)
+add_subdirectory(lsp)
+add_subdirectory(model)
+add_subdirectory(render)
+
+if(NOT EMSCRIPTEN)
+  add_subdirectory(host "${CMAKE_BINARY_DIR}/host")
+endif()
+
+if(DIADRAW_BUILD_NODE AND NOT EMSCRIPTEN)
+  add_subdirectory(node "${CMAKE_BINARY_DIR}/node")
+endif()
+
+if(DIADRAW_BUILD_PYTHON AND NOT EMSCRIPTEN)
+  add_subdirectory(python "${CMAKE_BINARY_DIR}/python")
+endif()
+
+if(DIADRAW_BUILD_WINUI AND WIN32 AND MSVC)
+  add_subdirectory(apps/winui "${CMAKE_BINARY_DIR}/apps/winui")
+endif()
+
+if(DIADRAW_BUILD_GTK AND NOT EMSCRIPTEN)
+  add_subdirectory(apps/gtk "${CMAKE_BINARY_DIR}/apps/gtk")
+endif()
+
+if(DIADRAW_BUILD_MACOS AND APPLE AND NOT EMSCRIPTEN)
+  add_subdirectory(apps/macos "${CMAKE_BINARY_DIR}/apps/macos")
+endif()

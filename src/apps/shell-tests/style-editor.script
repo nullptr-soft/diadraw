@@ -1,0 +1,24 @@
+# The visual style editor: each control writes one key of the inline style and leaves the rest;
+# a control set back to its default removes its key.
+select db
+set style.fill #DAE8FC
+set style.stroke #6c8ebf
+set style.lineStyle dashed
+set style.fontStyle 3
+set style.align left
+set style.other shadow=1
+set style.lineStyle
+set style.fill
+select user->shop
+set style.endArrow open
+set style.endFill 0
+set style.strokeWidth 2
+set style.edgeStyle orthogonalEdgeStyle
+set style.endFill 1
+set style.startArrow ERmandOne
+set style.endArrow ERzeroToMany
+set style.lineStyle 1 3
+set style.double 1
+set style.curved 1
+set style.double 0
+set style.nothing 1

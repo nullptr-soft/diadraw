@@ -1,0 +1,12 @@
+# The inspector's Id field renames the element and every reference to it, and the element stays
+# selected under its new id. Undo takes it back in one step.
+select shop
+set id store
+selection
+set id store
+undo
+select db
+set id orders
+selection
+set id 2bad
+selection

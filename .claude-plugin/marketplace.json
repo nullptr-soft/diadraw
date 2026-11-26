@@ -1,0 +1,18 @@
+{
+  "name": "diadraw",
+  "owner": {
+    "name": "DiaDraw"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for DiaDraw, the text-first diagramming engine"
+  },
+  "plugins": [
+    {
+      "name": "diadraw",
+      "source": "./plugins/diadraw",
+      "description": "Draw diagrams with DiaDraw: write the .draw DSL, check it, render it to SVG or PNG and look at the result",
+      "category": "productivity",
+      "keywords": ["diagrams", "architecture", "c4", "uml", "bpmn", "sequence", "flowchart"]
+    }
+  ]
+}

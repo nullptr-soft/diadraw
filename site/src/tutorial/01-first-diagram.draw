@@ -1,0 +1,9 @@
+model {
+  customer = person "Customer"
+  shop = system "Shop"
+  customer -> shop "buys from"
+}
+
+view context {
+  include *
+}

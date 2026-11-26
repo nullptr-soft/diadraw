@@ -1,0 +1,28 @@
+ok   select shop
+ok   set id store
+selected: store
+ok   selection
+ok   set id store
+ok   undo
+ok   select db
+ok   set id orders
+selected: orders
+ok   selection
+ok   set id 2bad
+selected: orders
+ok   selection
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  orders = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+"2bad" is not a name: use letters, digits and _, not starting with a digit

@@ -1,0 +1,10 @@
+@startuml
+object "tanaka : User" as t {
+  id = 1
+  name = "田中"
+}
+object "order1 : Order" as o {
+  total = 3000
+}
+t --> o : 注文した
+@enduml

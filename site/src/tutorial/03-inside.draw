@@ -1,0 +1,26 @@
+model {
+  customer = person "Customer"
+  shop = system "Shop" description "Sells things online" {
+    web = container "Web app" tech "React"
+    api = container "API" tech "Go"
+    db  = container "Orders DB" tech "Postgres" shape cylinder
+
+    web -> api "calls" tech "JSON/HTTPS"
+    api -> db "reads and writes"
+  }
+  payments = system "Payment provider" tag "external"
+
+  customer -> shop.web "places orders"
+  shop.api -> payments "charges cards" tech "HTTPS"
+  payments --> shop.api "confirms payment"
+}
+
+view context {
+  include customer shop payments
+  layout layered direction right
+}
+
+view containers of shop {
+  include * customer payments
+  layout layered direction right
+}

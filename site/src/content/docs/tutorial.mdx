@@ -1,0 +1,111 @@
+---
+title: Tutorial
+description: Build a diagram of an online shop step by step, from two boxes to several views, styles and a sequence diagram.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import TryIt from '../../components/TryIt.astro';
+import step1 from '../../tutorial/01-first-diagram.draw?raw';
+import step2 from '../../tutorial/02-relationships.draw?raw';
+import step3 from '../../tutorial/03-inside.draw?raw';
+import step4 from '../../tutorial/04-layout.draw?raw';
+import step5 from '../../tutorial/05-style.draw?raw';
+import step6 from '../../tutorial/06-sequence.draw?raw';
+
+In this tutorial you describe a small online shop: who uses it, what it is made of, and how an
+order goes through it. Along the way you meet everything a DiaDraw document is made of: the
+model, views, layout hints, styles and sequence diagrams.
+
+Each step shows the whole document. **Open this step in DiaDraw** loads it into the app, so you
+can follow along, change it and see what happens.
+
+## 1. Two boxes and a line
+
+A document has a `model`, which says what exists, and one or more `view`s, which say what to
+draw.
+
+<TryIt code={step1} name="01-first-diagram" views={['context']} />
+
+- `customer = person "Customer"` declares an element: an identifier (`customer`), a kind
+  (`person`) and a label. The kind decides how it is drawn.
+- `customer -> shop "buys from"` is a relationship with a label.
+- `view context { include * }` draws every element of the model.
+
+## 2. More about relationships
+
+Elements and relationships take extra details: a `description`, a `tech`nology, and `tag`s you
+can style by later.
+
+<TryIt code={step2} name="02-relationships" views={['context']} />
+
+- `->` is a solid line and `-->` a dashed one; `<->` points both ways.
+- `layout layered direction right` lays the diagram out from left to right. Without a `layout`
+  line, a view uses `layered` from top to bottom.
+
+## 3. Look inside
+
+The shop is made of parts. Give it a body with the elements inside it, and add a second view that
+shows them.
+
+<TryIt code={step3} name="03-inside" views={['context', 'containers']} />
+
+- Elements nest. Inside `shop { … }` the web app is simply `web`; outside it is `shop.web`.
+- `view containers of shop` is scoped to the shop: `include *` takes the shop's children, and
+  `customer` and `payments` are added by name.
+- The `context` view still shows the shop as one box. Its lines to `shop.web` and `shop.api` are
+  lifted to the shop itself, so the high-level picture stays right as you add detail.
+
+Pick the view to draw from the view picker in the app's toolbar.
+
+<Aside type="tip">
+  Both views are drawn from the same model. Rename **Web app** in one and it is renamed in the
+  other.
+</Aside>
+
+## 4. Steer the layout
+
+DiaDraw places boxes for you. When you want something somewhere else, you give it a hint instead
+of coordinates, so the diagram stays tidy as it grows.
+
+<TryIt code={step4} name="04-layout" views={['containers']} />
+
+- `pin db below api` and `pin payments right of api` place one element next to another.
+- `spacing 60` puts more room between the layers.
+- Dragging a box on the canvas writes a `pin … at` line for you; hold Option (Alt) while dragging
+  to write a hint like these instead.
+
+Other layouts suit other diagrams: `tree`, `grid`, `radial`, `force`, and `fixed` for diagrams
+drawn by hand. The [layouts chapter](../reference/guide/layouts/) explains when to use each.
+
+## 5. Make it yours
+
+Themes and style blocks change how a whole document looks, and notes, text and boxes annotate a
+view without adding anything to the model.
+
+<TryIt code={step5} name="05-style" views={['containers']} />
+
+- `theme dark` draws every view on a dark background. `default` and `mono` are built in too, and
+  you can declare your own.
+- `style container { … }` styles every element of a kind, and `style tag "external" { … }`
+  everything with that tag.
+- `text`, `note` and `box … around` belong to the view, so the `context` view stays clean.
+
+## 6. Tell a story with a sequence diagram
+
+A view with `layout sequence` draws its elements as lifelines and the messages of its `sequence`
+block from top to bottom.
+
+<TryIt code={step6} name="06-sequence" views={['checkout']} />
+
+- `->` is a call, `->>` an asynchronous message and `-->` a reply.
+- `activate` and `deactivate` draw an activation bar; `alt`, `opt`, `loop`, `par` and the other
+  frames group messages.
+- Messages live in the view, not in the model, so the same participants can appear in many
+  sequence views.
+
+## What next
+
+- Share the diagram with a link, or export it as SVG, PNG, draw.io or BPMN, from the toolbar.
+- Read the [user guide](../reference/guide/) for what each feature is for, and the
+  [DSL reference](../reference/dsl/) for every statement.
+- Tell us what you think on the [feedback](../feedback/) page.

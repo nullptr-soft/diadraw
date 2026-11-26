@@ -1,0 +1,21 @@
+ok   clear-canvas
+views: default*
+ok   views
+ok   undo
+views: main*
+ok   views
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

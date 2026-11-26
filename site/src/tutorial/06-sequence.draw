@@ -1,0 +1,37 @@
+model {
+  customer = person "Customer"
+  shop = system "Shop" description "Sells things online" {
+    web = container "Web app" tech "React"
+    api = container "API" tech "Go"
+    db  = container "Orders DB" tech "Postgres" shape cylinder
+
+    web -> api "calls" tech "JSON/HTTPS"
+    api -> db "reads and writes"
+  }
+  payments = system "Payment provider" tag "external"
+
+  customer -> shop.web "places orders"
+  shop.api -> payments "charges cards" tech "HTTPS"
+  payments --> shop.api "confirms payment"
+}
+
+view checkout {
+  include customer shop.web shop.api payments
+  layout sequence
+  sequence {
+    autonumber
+    customer -> shop.web "Place order"
+    shop.web -> shop.api "Create order"
+    activate shop.api
+    shop.api -> payments "Charge card"
+    alt "accepted" {
+      payments --> shop.api "Paid"
+      shop.api --> shop.web "Order confirmed"
+    } else "declined" {
+      payments --> shop.api "Declined"
+      shop.api --> shop.web "Payment failed"
+    }
+    deactivate shop.api
+    shop.web --> customer "Show result"
+  }
+}

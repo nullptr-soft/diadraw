@@ -1,0 +1,13 @@
+# Generated from docs/ by scripts/sync-docs.mjs before every build.
+src/content/docs/reference/dsl.md
+src/content/docs/reference/grammar.md
+src/content/docs/reference/libraries.md
+src/content/docs/reference/guide/*.md
+src/content/docs/credits.md
+src/content/docs/*/reference/dsl.md
+src/content/docs/*/reference/grammar.md
+src/content/docs/*/reference/libraries.md
+src/content/docs/*/reference/guide/*.md
+src/content/docs/*/credits.md
+# Rendered from src/tutorial/ by scripts/render-tutorial.mjs.
+public/tutorial/

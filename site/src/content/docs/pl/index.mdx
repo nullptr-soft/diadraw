@@ -1,0 +1,40 @@
+---
+title: DiaDraw
+description: Diagramy w postaci tekstu i na płótnie, oparte na jednym modelu.
+template: splash
+hero:
+  tagline: Zapisuj diagramy jako tekst lub rysuj je na płótnie. Zmiany w jednym miejscu od razu widać w drugim. Jeden model, wiele widoków i układ, na który masz wpływ.
+  image:
+    file: ../../../assets/logo.svg
+  actions:
+    - text: Pierwsze kroki
+      link: getting-started/
+      icon: right-arrow
+    - text: Otwórz aplikację
+      link: ../app/
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Jeden model, dwa edytory" icon="pencil">
+    Zdefiniuj elementy i relacje tylko raz, a potem edytuj je w tekście lub na płótnie. Każda
+    zmiana na płótnie modyfikuje tylko odpowiedni fragment tekstu. Tekst pozostaje więc
+    źródłem prawdy, a różnice między wersjami są czytelne w Git.
+  </Card>
+  <Card title="Wiele widoków jednego modelu" icon="seti:folder">
+    Kontekst systemu, jego kontenery, sekwencja wywołań: każdy diagram jest widokiem,
+    który wybiera i rozmieszcza części tego samego modelu.
+  </Card>
+  <Card title="Układ, na który masz wpływ" icon="setting">
+    Do wyboru masz układ warstwowy, drzewiasty, siatkowy, promienisty, siłowy, stały i sekwencyjny.
+    Przeciągnięcie prostokąta zapisuje wskazówkę, np. `pin db below api`, zamiast współrzędnych.
+    Dzięki temu układ pozostaje czytelny w miarę rozbudowy modelu.
+  </Card>
+  <Card title="Wykorzystaj swoje diagramy" icon="document">
+    Importuj diagramy w formatach PlantUML, Mermaid, Structurizr, draw.io i BPMN.
+    Eksportuj je do formatów SVG, PNG, PDF, draw.io i BPMN.
+  </Card>
+</CardGrid>

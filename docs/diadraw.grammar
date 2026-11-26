@@ -1,0 +1,222 @@
+// DiaDraw DSL — reference grammar in Lezer notation. See docs/dsl.md.
+// Nothing compiles this file. The parser in src/dsl/src/syntax.cpp is hand-written
+// to build the tree described here: node names match dd::dsl::NodeType, and
+// contextual keywords (kw<…>) and @dynamicPrecedence mirror its choices. Keep the
+// two in step when the syntax changes.
+
+@top Document { (UseDecl | ThemeDef | ThemeDecl | StyleBlock | ModelBlock | ViewBlock)* }
+
+// ---------------------------------------------------------------- libraries
+
+UseDecl { kw<"use"> String (kw<"as"> Name)? }
+
+// ---------------------------------------------------------------- styles and themes
+
+ThemeDecl [@dynamicPrecedence=1] { kw<"theme"> QualifiedName }
+
+ThemeDef [@dynamicPrecedence=2] { kw<"theme"> Name ThemeBase? ThemeBody }
+
+ThemeBase { kw<"extends"> QualifiedName }
+
+ThemeBody { "{" (StyleDecl | ThemeNode)* "}" }
+
+ThemeNode [@dynamicPrecedence=1] { kw<"node"> Name StyleBody }
+
+StyleBlock { kw<"style"> StyleSelector StyleBody }
+
+StyleSelector { (Wildcard | kw<"relationship"> | ElementKind) Tag? | Tag }
+
+StyleBody { "{" StyleDecl* "}" }
+
+StyleDecl { Name (String | Number | Identifier) }
+
+// ---------------------------------------------------------------- model
+
+ModelBlock { kw<"model"> ModelBody }
+
+ModelBody { "{" modelItem* "}" }
+
+modelItem { ElementDecl | Relationship | Group | Port }
+
+ElementDecl { Name "=" ElementKind Label? property* ModelBody? }
+
+// `name = a -> b` gives the relationship an explicit id. The parser reads `name = x ->` as a
+// relationship and `name = x` without an arrow as an element.
+Relationship { (Name "=")? QualifiedName Arrow QualifiedName Label? property* }
+
+Arrow { "->" | "-->" | "<->" }
+
+Group [@dynamicPrecedence=1] { kw<"group"> Label ModelBody }
+
+Port [@dynamicPrecedence=1] { kw<"port"> Name PortSide? }
+
+PortSide [@dynamicPrecedence=1] { kw<"north"> | kw<"south"> | kw<"east"> | kw<"west"> }
+
+property { Technology | Shape | Tag | Description | StyleProp | Prop }
+
+Technology [@dynamicPrecedence=1] { kw<"tech"> String }
+
+Shape [@dynamicPrecedence=1] { kw<"shape"> QualifiedName }
+
+Tag [@dynamicPrecedence=1] { kw<"tag"> String }
+
+Description [@dynamicPrecedence=1] { kw<"description"> String }
+
+StyleProp [@dynamicPrecedence=1] { kw<"style"> String }
+
+Prop [@dynamicPrecedence=1] { kw<"prop"> String String }
+
+Name { Identifier }
+
+// A built-in kind, or a library's kind through its alias (`acme.service`).
+ElementKind { Identifier ("." Identifier)? }
+
+Label { String }
+
+QualifiedName { Identifier ("." Identifier)* }
+
+// ---------------------------------------------------------------- views
+
+ViewBlock { kw<"view"> Name (kw<"of"> QualifiedName)? ViewBody }
+
+ViewBody { "{" viewItem* "}" }
+
+viewItem { Include | Exclude | LayoutStmt | Pin | Align | Order | Route | Resize | Rotate | Sequence | ThemeDecl | decoration }
+
+Include [@dynamicPrecedence=1] { kw<"include"> selector+ }
+
+Exclude [@dynamicPrecedence=1] { kw<"exclude"> selector+ }
+
+selector { Wildcard | QualifiedName }
+
+Wildcard { "*" }
+
+LayoutStmt [@dynamicPrecedence=1] { kw<"layout"> Algorithm layoutOption* }
+
+Algorithm { Identifier }
+
+layoutOption { DirectionOption | SpacingOption }
+
+DirectionOption [@dynamicPrecedence=1] { kw<"direction"> Direction }
+
+Direction [@dynamicPrecedence=1] { kw<"right"> | kw<"left"> | kw<"down"> | kw<"up"> }
+
+SpacingOption [@dynamicPrecedence=1] { kw<"spacing"> Number }
+
+Pin [@dynamicPrecedence=1] {
+  kw<"pin"> QualifiedName (Placement QualifiedName | kw<"at"> Coord Size?)
+}
+
+Size [@dynamicPrecedence=1] { kw<"size"> Coord }
+
+Coord { Number "," Number }
+
+Resize [@dynamicPrecedence=1] { kw<"size"> QualifiedName Coord }
+
+Rotate [@dynamicPrecedence=1] { kw<"rotate"> QualifiedName Number }
+
+Route [@dynamicPrecedence=1] {
+  kw<"route"> String (kw<"via"> Coord+)? Exit? Entry?
+}
+
+Exit [@dynamicPrecedence=1] { kw<"from"> Coord }
+
+Entry [@dynamicPrecedence=1] { kw<"to"> Coord }
+
+Placement [@dynamicPrecedence=1] { kw<"below"> | kw<"above"> | kw<"left"> kw<"of"> | kw<"right"> kw<"of"> }
+
+Align [@dynamicPrecedence=1] { kw<"align"> QualifiedName QualifiedName+ Axis? }
+
+Axis [@dynamicPrecedence=1] { kw<"horizontally"> | kw<"vertically"> }
+
+Order [@dynamicPrecedence=1] { kw<"order"> QualifiedName QualifiedName+ }
+
+// ---------------------------------------------------------------- decorations
+
+decoration { ViewNote | ViewText | ViewBox }
+
+ViewNote [@dynamicPrecedence=1] { kw<"note"> Name? Label decorationAnchor? StyleProp? }
+
+ViewText [@dynamicPrecedence=1] { kw<"text"> Name? Label decorationAnchor? StyleProp? }
+
+ViewBox [@dynamicPrecedence=1] {
+  kw<"box"> Name? Label? (Around | kw<"at"> Coord Size) StyleProp?
+}
+
+decorationAnchor { Placement QualifiedName | kw<"at"> Coord Size? }
+
+Around [@dynamicPrecedence=1] { kw<"around"> QualifiedName+ }
+
+// ---------------------------------------------------------------- sequences
+
+Sequence [@dynamicPrecedence=1] { kw<"sequence"> SeqBody }
+
+SeqBody { "{" seqItem* "}" }
+
+seqItem { Message | Activate | Deactivate | SeqNote | Divider | Delay | Ref | Frame | Autonumber }
+
+Message { QualifiedName MessageArrow QualifiedName Label? }
+
+MessageArrow { "->" | "->>" | "-->" }
+
+Activate [@dynamicPrecedence=1] { kw<"activate"> QualifiedName }
+
+Deactivate [@dynamicPrecedence=1] { kw<"deactivate"> QualifiedName }
+
+SeqNote [@dynamicPrecedence=1] {
+  kw<"note"> (NoteOver QualifiedName+ | NoteSide kw<"of"> QualifiedName) Label
+}
+
+NoteOver [@dynamicPrecedence=1] { kw<"over"> }
+
+NoteSide [@dynamicPrecedence=1] { kw<"left"> | kw<"right"> }
+
+Divider [@dynamicPrecedence=1] { kw<"divider"> Label? }
+
+Delay [@dynamicPrecedence=1] { kw<"delay"> Label? }
+
+Ref [@dynamicPrecedence=1] { kw<"ref"> kw<"over"> QualifiedName+ Label }
+
+Autonumber [@dynamicPrecedence=1] { kw<"autonumber"> }
+
+Frame [@dynamicPrecedence=1] { FrameKind Label? SeqBody (Else Label? SeqBody)* }
+
+Else [@dynamicPrecedence=1] { kw<"else"> }
+
+FrameKind [@dynamicPrecedence=1] {
+  kw<"alt"> | kw<"opt"> | kw<"loop"> | kw<"par"> | kw<"critical"> | kw<"break"> | kw<"group">
+}
+
+// ---------------------------------------------------------------- tokens
+
+// Keywords are contextual: `layout`, `order`, `left`… still work as element names.
+kw<term> { @extend[@name={term}]<Identifier, term> }
+
+@skip { space | LineComment | BlockComment }
+
+@tokens {
+  space { @whitespace+ }
+
+  LineComment { "//" ![\n]* }
+
+  BlockComment { "/*" blockCommentRest }
+  blockCommentRest { ![*] blockCommentRest | "*" blockCommentAfterStar }
+  blockCommentAfterStar { "/" | "*" blockCommentAfterStar | ![/*] blockCommentRest }
+
+  Identifier { $[a-zA-Z_] $[a-zA-Z0-9_]* }
+
+  String { '"' (!["\\\n] | "\\" _)* '"' | blockString }
+
+  // `"""` … `"""` across lines; see "Lexical rules" in dsl.md for the indentation it drops.
+  blockString { '"""' blockStringRest }
+  blockStringRest { !["\\] blockStringRest | "\\" _ blockStringRest | '"' blockStringQuote1 }
+  blockStringQuote1 { !["\\] blockStringRest | "\\" _ blockStringRest | '"' blockStringQuote2 }
+  blockStringQuote2 { !["\\] blockStringRest | "\\" _ blockStringRest | '"' }
+
+  Number { "-"? @digit+ ("." @digit+)? }
+
+  "->" "-->" "<->" "->>"
+  "{" "}" "=" "." "," "*"
+}
+
+@detectDelim

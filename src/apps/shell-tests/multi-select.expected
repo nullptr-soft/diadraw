@@ -1,0 +1,37 @@
+ok   select user
+ok   add-select db
+selected: user db
+ok   selection
+ok   drag db 40 60
+ok   drag db 10 0
+ok   undo
+ok   band -1000 -1000 5000 5000
+selected: user shop db user->shop
+ok   selection
+ok   select-all
+selected: user shop db user->shop
+ok   selection
+ok   delete-selection
+selected:
+ok   selection
+ok   undo
+ok   add-select shop
+selected: shop
+ok   selection
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+  pin user at 73, 72
+  pin db at 172, 80
+}
+--- status
+

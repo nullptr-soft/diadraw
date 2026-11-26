@@ -1,0 +1,210 @@
+{
+  "$comment": "Third-party code and assets in DiaDraw that do not come from npm: the one hand-kept list of them. tools/gen/credits.mjs adds the npm packages from the lockfiles and writes docs/credits.md (the website's Credits page) and src/host/data/credits.tsv (the About dialogs of every app). Run `node tools/gen/credits.mjs` after changing this file or a dependency. `apps` names where a component ships: cli, gtk, macos, winui, web, desktop, vscode, confluence, confluence-drawio, markdown, node, python, rust, site, or repo (in the repository only, for building or testing); `core` is every build of the C++ core, `native` its native builds and `wasm` its WebAssembly build.",
+  "components": [
+    {
+      "name": "miniz",
+      "version": "3.0.2",
+      "license": "MIT",
+      "url": "https://github.com/richgel999/miniz",
+      "copyright": "Rich Geldreich, RAD Game Tools, Valve Software",
+      "use": "Deflate and inflate: compressed draw.io pages, PNG text chunks, gzip and packed libraries",
+      "apps": ["core"]
+    },
+    {
+      "name": "lunasvg",
+      "version": "3.5.0",
+      "license": "MIT",
+      "url": "https://github.com/sammycage/lunasvg",
+      "copyright": "Samuel Ugochukwu",
+      "use": "PNG export in native builds",
+      "apps": ["native"]
+    },
+    {
+      "name": "plutovg",
+      "version": "bundled with lunasvg 3.5.0",
+      "license": "MIT",
+      "url": "https://github.com/sammycage/plutovg",
+      "copyright": "Samuel Ugochukwu",
+      "use": "The 2D rasteriser under lunasvg",
+      "apps": ["native"]
+    },
+    {
+      "name": "C4-PlantUML",
+      "version": "f998c46",
+      "license": "MIT",
+      "url": "https://github.com/plantuml-stdlib/C4-PlantUML",
+      "copyright": "Ricardo Niepel, kirchsth and contributors",
+      "use": "Macro signatures for the PlantUML importer (vendored in third_party/C4-PlantUML)",
+      "apps": ["core"]
+    },
+    {
+      "name": "Adobe Helvetica font metrics",
+      "version": "Core 14 AFM 4.1",
+      "license": "APAFML",
+      "url": "https://github.com/mykulyak/diadraw/blob/main/tools/gen/helvetica_metrics.py",
+      "copyright": "Adobe Systems Incorporated",
+      "use": "Character widths of Helvetica for PDF export (no font is embedded)",
+      "apps": ["core"]
+    },
+    {
+      "name": "Unicode Character Database",
+      "version": "as of Node 22",
+      "license": "Unicode-3.0",
+      "url": "https://www.unicode.org/ucd/",
+      "copyright": "Unicode, Inc.",
+      "use": "Letter, number, case and NFKD tables compiled into the core",
+      "apps": ["core"]
+    },
+    {
+      "name": "draw.io stencil sets",
+      "version": "32.6.9",
+      "license": "Apache-2.0",
+      "url": "https://github.com/jgraph/drawio",
+      "copyright": "JGraph Ltd",
+      "use": "The drawio-* shape libraries, converted to SVG (assets/drawio, see assets/NOTICE)",
+      "apps": ["gtk", "macos", "winui", "web", "desktop"],
+      "notes": "draw.io adds a restriction to its stencils: they and their derivatives may not be used in Atlassian products or products distributed through the Atlassian Marketplace without JGraph's written permission. The icon sets of vendors (AWS, Azure, Google Cloud, Cisco and others) stay subject to their owners' trademark and icon terms."
+    },
+    {
+      "name": "draw.io",
+      "version": "32.7.7",
+      "license": "Apache-2.0",
+      "url": "https://github.com/jgraph/drawio",
+      "copyright": "JGraph Ltd",
+      "use": "The diagram editor that the Confluence draw.io app bundles (with draw.io's LICENSE)",
+      "apps": ["confluence-drawio"],
+      "notes": "The bundled web app includes draw.io's stencils, which carry the Atlassian restriction described under draw.io stencil sets."
+    },
+    {
+      "name": "Emscripten runtime",
+      "version": "emsdk",
+      "license": "MIT OR NCSA",
+      "url": "https://emscripten.org",
+      "copyright": "Emscripten authors",
+      "use": "The WebAssembly module's JavaScript glue and C library (with musl, MIT, and LLVM libc++, Apache-2.0 WITH LLVM-exception)",
+      "apps": ["wasm"]
+    },
+    {
+      "name": "gtkmm",
+      "version": "4",
+      "license": "LGPL-2.1-or-later",
+      "url": "https://gtkmm.org",
+      "copyright": "The gtkmm Development Team",
+      "use": "The Linux app's C++ interface to GTK, with glibmm, cairomm and pangomm (LGPL-2.1-or-later), dynamically linked",
+      "apps": ["gtk"]
+    },
+    {
+      "name": "libsigc++",
+      "version": "3",
+      "license": "LGPL-3.0-or-later",
+      "url": "https://libsigcplusplus.github.io/libsigcplusplus/",
+      "copyright": "The libsigc++ Development Team",
+      "use": "Signals and slots for gtkmm, dynamically linked",
+      "apps": ["gtk"]
+    },
+    {
+      "name": "GTK",
+      "version": "4",
+      "license": "LGPL-2.1-or-later",
+      "url": "https://www.gtk.org",
+      "copyright": "The GTK Team",
+      "use": "The Linux app's toolkit, with GLib, Pango and Cairo, dynamically linked",
+      "apps": ["gtk"]
+    },
+    {
+      "name": "libcurl",
+      "version": "system",
+      "license": "curl",
+      "url": "https://curl.se/libcurl/",
+      "copyright": "Daniel Stenberg and contributors",
+      "use": "HTTPS for Google Drive and OneDrive in the macOS and Linux apps",
+      "apps": ["gtk", "macos"]
+    },
+    {
+      "name": "Windows App SDK (WinUI 3)",
+      "version": "1.6.241114003",
+      "license": "MIT (source); runtime under Microsoft Software License Terms",
+      "url": "https://github.com/microsoft/WindowsAppSDK",
+      "copyright": "Microsoft Corporation",
+      "use": "The Windows app's user interface",
+      "apps": ["winui"]
+    },
+    {
+      "name": "C++/WinRT",
+      "version": "2.0.240405.15",
+      "license": "MIT",
+      "url": "https://github.com/microsoft/cppwinrt",
+      "copyright": "Microsoft Corporation",
+      "use": "The Windows app's C++ projection of the Windows Runtime",
+      "apps": ["winui"]
+    },
+    {
+      "name": "Win2D",
+      "version": "1.3.0",
+      "license": "MIT",
+      "url": "https://github.com/microsoft/Win2D",
+      "copyright": "Microsoft Corporation",
+      "use": "The Windows app's canvas drawing",
+      "apps": ["winui"]
+    },
+    {
+      "name": "WebView2 SDK",
+      "version": "1.0.2651.64",
+      "license": "BSD-3-Clause",
+      "url": "https://www.nuget.org/packages/Microsoft.Web.WebView2",
+      "copyright": "Microsoft Corporation",
+      "use": "Referenced by WinUI",
+      "apps": ["winui"]
+    },
+    {
+      "name": "Tauri",
+      "version": "2",
+      "license": "MIT OR Apache-2.0",
+      "url": "https://tauri.app",
+      "copyright": "The Tauri Programme within The Commons Conservancy",
+      "use": "The desktop app's shell, with tauri-plugin-dialog and tauri-plugin-fs",
+      "apps": ["desktop"],
+      "notes": "Its Rust crates (and theirs) are listed here once the desktop app has a Cargo.lock."
+    },
+    {
+      "name": "serde, serde_json",
+      "version": "1",
+      "license": "MIT OR Apache-2.0",
+      "url": "https://serde.rs",
+      "copyright": "Erick Tryzelaar, David Tolnay",
+      "use": "JSON in the desktop app's Rust side",
+      "apps": ["desktop"]
+    },
+    {
+      "name": "nanobind",
+      "version": "2.4 or later",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/wjakob/nanobind",
+      "copyright": "Wenzel Jakob",
+      "use": "The Python package's bindings (with robin-map, MIT)",
+      "apps": ["python"]
+    },
+    {
+      "name": "node-addon-api",
+      "version": "8.9.2",
+      "license": "MIT",
+      "url": "https://github.com/nodejs/node-addon-api",
+      "copyright": "Node.js API collaborators",
+      "use": "The Node.js addon's C++ bindings (header-only)",
+      "apps": ["node"]
+    },
+    {
+      "name": "googletest",
+      "version": "1.15.2",
+      "license": "BSD-3-Clause",
+      "url": "https://github.com/google/googletest",
+      "copyright": "Google Inc.",
+      "use": "C++ tests",
+      "apps": ["repo"]
+    }
+  ],
+  "npmLicenses": {
+    "$comment": "Licences for npm packages whose package.json does not name an SPDX licence, by package name or scope prefix.",
+    "@forge/": "Atlassian Developer Terms"
+  }
+}

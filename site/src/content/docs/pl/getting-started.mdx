@@ -1,0 +1,74 @@
+---
+title: Pierwsze kroki
+description: Otwórz DiaDraw, narysuj pierwszy diagram i poznaj aplikację.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import AppLink from '../../../components/AppLink.astro';
+
+DiaDraw działa w przeglądarce. Nie musisz niczego instalować ani zakładać konta.
+Dopóki nie udostępnisz swoich diagramów, pozostają na Twoim komputerze.
+
+<AppLink>Otwórz DiaDraw</AppLink>
+
+## Twój pierwszy diagram
+
+<Steps>
+
+1. Otwórz aplikację. Po jednej stronie zobaczysz edytor tekstu, a po drugiej płótno.
+   W obu miejscach masz przed sobą ten sam dokument.
+
+2. Zastąp tekst w edytorze poniższym przykładem:
+
+   ```diadraw
+   model {
+     customer = person "Customer"
+     shop = system "Shop"
+     customer -> shop "buys from"
+   }
+
+   view context {
+     include *
+   }
+   ```
+
+   Diagram pojawia się na płótnie już podczas pisania. Edytor podkreśla błędy w tekście
+   i podaje numer wiersza oraz kolumny. Pozostała część dokumentu nadal jest rysowana.
+
+3. Przeciągnij prostokąt **Shop** na płótnie. W definicji widoku pojawi się wiersz w rodzaju
+   `pin shop at …`: zmiany na płótnie modyfikują tekst i to właśnie tekst zapisuje DiaDraw.
+
+4. Kliknij dwukrotnie prostokąt, aby zmienić jego nazwę, lub zaznacz go i zmień jego
+   właściwości w inspektorze. Każda zmiana modyfikuje tylko ten fragment tekstu, którego dotyczy.
+
+</Steps>
+
+## Jak poruszać się po aplikacji
+
+- **Tekst i płótno.** Oba edytory modyfikują ten sam model i korzystają ze wspólnej historii zmian.
+  Cofanie działa więc tak samo niezależnie od tego, gdzie wprowadzisz zmianę.
+- **Widoki.** Dokument zawiera model (`model`) i co najmniej jeden widok (`view`).
+  Z listy widoków na pasku narzędzi wybierz ten, który chcesz wyświetlić.
+- **Paleta.** Przeciągaj na płótno kształty z wbudowanych bibliotek i zestawów szablonów draw.io.
+- **Pliki.** Otwieraj i zapisuj pliki `.draw` lub zacznij od jednego z przykładów.
+- **Import i eksport.** Importuj diagramy w formatach Mermaid, PlantUML, Structurizr, draw.io
+  i BPMN. Eksportuj je do formatów SVG, PNG, draw.io i BPMN.
+- **Udostępnianie.** Link do udostępniania zawiera cały dokument w adresie. Każdy, kto go
+  otworzy, zobaczy Twój diagram bez pośrednictwa serwera.
+
+<Aside type="tip">
+  W [samouczku](../tutorial/) krok po kroku zbudujesz kompletny diagram, a w
+  [dokumentacji](../reference/) znajdziesz opis każdej instrukcji języka.
+</Aside>
+
+## Inne sposoby korzystania z DiaDraw
+
+Ten sam silnik działa na każdej platformie, więc plik `.draw` wygląda tak samo w każdym z tych środowisk:
+
+- **Aplikacje desktopowe** na macOS, Windows i Linux, z systemowymi menu i natywną obsługą plików.
+- **VS Code**: rozszerzenie z podświetlaniem składni, serwerem językowym silnika DiaDraw i podglądem na żywo.
+- **Wiersz poleceń**: polecenia `diadraw render`, `check`, `format` i `import` do użycia w skryptach i w CI.
+- **Agenci AI**: `diadraw mcp` pozwala Claude Code, Claude Desktop i innym agentom sprawdzać i renderować diagramy oraz oglądać wynik; zobacz [Rysowanie z agentami AI](../reference/guide/agents/).
+
+Na razie trzeba je zbudować z kodu źródłowego. Instrukcje znajdziesz w
+[pliku README w repozytorium](https://github.com/mykulyak/diadraw#readme).

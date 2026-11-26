@@ -1,0 +1,14 @@
+# Element properties from the inspector: each field becomes a clause of the declaration.
+select db
+set technology Postgres 16
+set tags orders, pii
+set shape cylinder
+set style fill=#dae8fc;stroke=#6c8ebf
+set props owner=Ann\ntier=1
+set kind container
+set description Every order, ever
+set tags pii
+undo
+select user
+set name Buyer
+set props

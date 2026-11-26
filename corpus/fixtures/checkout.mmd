@@ -1,0 +1,16 @@
+%% Checkout flow
+flowchart LR
+  start([Start]) --> cart[View cart]
+  cart --> pay{Pay now?}
+  pay -->|yes| card[(Card vault)]
+  pay -- later --> save[Save cart]
+  card & save --> done([Done])
+  save -.-> cart
+  subgraph backend [Backend]
+    card
+    audit((Audit))
+  end
+  card --- audit
+  classDef hot fill:#f96
+  class pay hot
+  click pay "https://example.com"

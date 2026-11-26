@@ -1,0 +1,80 @@
+# Publishes .draw files to a Confluence Cloud page: each view is drawn as SVG and attached to the
+# page, replacing the earlier version, so the page's images follow the repository.
+#
+#   - uses: mykulyak/diadraw/src/apps/confluence@main
+#     with:
+#       files: docs/diagrams/*.draw
+#       page-id: '123456'
+#       base-url: https://example.atlassian.net
+#       email: ${{ secrets.CONFLUENCE_EMAIL }}
+#       api-token: ${{ secrets.CONFLUENCE_API_TOKEN }}
+#
+# It builds the DiaDraw core as WebAssembly from this repository on each run (a few minutes on a
+# Linux runner), until the core is published as a package.
+name: DiaDraw to Confluence
+description: Draw DiaDraw diagrams and attach them to a Confluence Cloud page as SVG.
+branding:
+  icon: image
+  color: blue
+inputs:
+  files:
+    description: The .draw files, separated by spaces or new lines; globs such as docs/**/*.draw work.
+    required: true
+  page-id:
+    description: The page to attach the diagrams to (the number in the page's URL).
+    required: true
+  base-url:
+    description: The Confluence Cloud site, https://<site>.atlassian.net.
+    required: true
+  email:
+    description: The Atlassian account that publishes.
+    required: true
+  api-token:
+    description: An Atlassian API token for that account; keep it in a secret.
+    required: true
+  views:
+    description: Only these views, separated by spaces; every view of each file by default.
+    required: false
+    default: ''
+  insert:
+    description: "'true' to also add an image of each new attachment to the end of the page."
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - uses: mymindstorm/setup-emsdk@v14
+      with:
+        version: 6.0.10
+    - name: Build the DiaDraw core and publisher
+      shell: bash
+      working-directory: ${{ github.action_path }}/../../..
+      run: |
+        command -v ninja >/dev/null || sudo apt-get install -y ninja-build
+        npm ci --no-audit --no-fund
+        npx turbo run build --filter=@diadraw/confluence
+    - name: Publish the diagrams
+      shell: bash
+      env:
+        CLI: ${{ github.action_path }}/dist/cli.js
+        FILES: ${{ inputs.files }}
+        PAGE_ID: ${{ inputs.page-id }}
+        VIEWS: ${{ inputs.views }}
+        INSERT: ${{ inputs.insert }}
+        CONFLUENCE_BASE_URL: ${{ inputs.base-url }}
+        CONFLUENCE_EMAIL: ${{ inputs.email }}
+        CONFLUENCE_API_TOKEN: ${{ inputs.api-token }}
+      run: |
+        shopt -s globstar nullglob
+        args=(publish)
+        # Word splitting and globbing of FILES are wanted here: it lists files and patterns.
+        # shellcheck disable=SC2206
+        args+=($FILES)
+        if [ "${#args[@]}" -eq 1 ]; then echo "No files match: $FILES" >&2; exit 1; fi
+        args+=(--page "$PAGE_ID")
+        for view in $VIEWS; do args+=(--view "$view"); done
+        if [ "$INSERT" = "true" ]; then args+=(--insert); fi
+        node "$CLI" "${args[@]}"

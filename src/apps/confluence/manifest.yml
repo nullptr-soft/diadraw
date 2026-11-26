@@ -1,0 +1,34 @@
+# DiaDraw for Confluence Cloud (Atlassian Forge). See README.md for building and deploying.
+# `forge register` replaces app.id with the id of your registration.
+modules:
+  macro:
+    - key: diadraw
+      title: DiaDraw diagram
+      description: Draw a diagram from DiaDraw text; it is drawn in the page and stays editable.
+      category: data-and-charts
+      layout: block
+      resource: macro
+      adfExport:
+        function: export
+      config:
+        resource: editor
+        title: DiaDraw diagram
+        viewportSize: max
+        openOnInsert: true
+  function:
+    - key: export
+      handler: index.adfExport
+resources:
+  - key: macro
+    path: dist/macro
+  - key: editor
+    path: dist/editor
+permissions:
+  content:
+    # The core is WebAssembly, which a page may compile only when its script policy allows it.
+    scripts:
+      - unsafe-eval
+app:
+  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+  runtime:
+    name: nodejs22.x

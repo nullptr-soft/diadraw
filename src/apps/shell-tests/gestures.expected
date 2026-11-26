@@ -1,0 +1,28 @@
+ok   select shop
+ok   drag db 300 0 option
+ok   connect shop db
+ok   rename db Order store
+ok   relabel user->shop buys from
+ok   add process
+ok   delete user
+ok   undo
+ok   type // typed line
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Order store"
+  user -> shop "buys from"
+  shop -> db
+  process1 = process "New process"
+}
+
+view main {
+  include *
+  layout layered direction down
+  align user db horizontally
+}
+// typed line
+--- status
+

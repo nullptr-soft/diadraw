@@ -1,0 +1,32 @@
+---
+title: Dokumentacja
+description: Język DiaDraw, jego gramatyka, biblioteki kształtów i przewodnik użytkownika.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Te strony pochodzą bezpośrednio z dokumentacji w repozytorium DiaDraw, więc ich treść zawsze
+odpowiada wersji silnika, z którą są publikowane.
+
+<CardGrid>
+  <LinkCard
+    title="DSL"
+    href="dsl/"
+    description="Wszystkie instrukcje języka: modele, widoki, układy, style i motywy, widoki sekwencji, notatki oraz sposób zapisu zmian na płótnie w postaci tekstu."
+  />
+  <LinkCard
+    title="Gramatyka"
+    href="grammar/"
+    description="Gramatyka w notacji Lezer wraz z nazwami węzłów, które tworzy parser."
+  />
+  <LinkCard
+    title="Biblioteki"
+    href="libraries/"
+    description="Biblioteki kształtów: kształty, rodzaje elementów, fragmenty i motywy oraz sposób korzystania z nich w dokumentach."
+  />
+  <LinkCard
+    title="Przewodnik użytkownika"
+    href="guide/"
+    description="Do czego służą poszczególne funkcje i kiedy ich używać: relacje, style linii, układy, inspektor, style, przesuwanie, zmiana rozmiaru i nie tylko."
+  />
+</CardGrid>

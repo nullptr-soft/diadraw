@@ -1,0 +1,32 @@
+---
+title: Reference
+description: The DiaDraw language, its grammar, shape libraries, and the user guide.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+These pages come straight from the documentation in DiaDraw's repository, so they always match the
+engine they ship with.
+
+<CardGrid>
+  <LinkCard
+    title="DSL"
+    href="dsl/"
+    description="Every statement of the language: models, views, layouts, styles and themes, sequence views, notes, and how canvas edits become text."
+  />
+  <LinkCard
+    title="Grammar"
+    href="grammar/"
+    description="The grammar in Lezer notation, with the node names the parser builds."
+  />
+  <LinkCard
+    title="Libraries"
+    href="libraries/"
+    description="Shape libraries: shapes, element kinds, fragments and themes, and how documents use them."
+  />
+  <LinkCard
+    title="User guide"
+    href="guide/"
+    description="What the features are for and when to use them: relationships, line styles, layouts, the inspector, styles, moving, resizing and more."
+  />
+</CardGrid>

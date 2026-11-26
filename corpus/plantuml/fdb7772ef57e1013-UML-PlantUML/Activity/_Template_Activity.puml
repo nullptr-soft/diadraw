@@ -1,0 +1,18 @@
+@startuml
+start
+:アクションはこう書く;
+if (条件は真か?) then (はい)
+  :分岐Aの処理;
+else (いいえ)
+  :分岐Bの処理;
+endif
+repeat
+  :くりかえす処理;
+repeat while (まだ続く?) is (はい) not (いいえ)
+fork
+  :並行処理1;
+fork again
+  :並行処理2;
+end fork
+stop
+@enduml

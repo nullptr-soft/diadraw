@@ -1,0 +1,29 @@
+{
+  "name": "@diadraw/wasm",
+  "version": "0.0.8",
+  "description": "The C++ core (src/) as WebAssembly, with a typed API: parse, print, patch, layout, render and an editing session.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0"
+  }
+}

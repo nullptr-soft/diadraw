@@ -1,0 +1,47 @@
+// UML sequence diagram: paying for an order, with activations, an alt frame, a loop, notes
+// and asynchronous messages. The messages live in the view; the model keeps who talks to whom.
+model {
+  shopper = person "Shopper" shape actor
+  web     = component "Web shop"
+  orders  = component "Order service"
+  pay     = system "Payment provider" tag "external"
+  stock   = database "Stock"
+  mail    = component "Mailer"
+
+  shopper -> web "checks out"
+  web -> orders "places order"
+  orders -> stock "reserves items"
+  orders -> pay "charges card"
+  orders -> mail "sends receipt"
+}
+
+view checkout {
+  include shopper web orders stock pay mail
+  layout sequence
+  sequence {
+    autonumber
+    shopper -> web "Pay now"
+    activate web
+    web -> orders "placeOrder(cart)"
+    activate orders
+    loop "for each line" {
+      orders -> stock "reserve(sku, qty)"
+      stock --> orders "reserved"
+    }
+    orders -> pay "charge(card, total)"
+    alt "authorised" {
+      pay --> orders "payment id"
+      orders ->> mail "sendReceipt(order)"
+      note right of mail "queued, sent within a minute"
+      orders --> web "order confirmed"
+      web --> shopper "Thank you page"
+    } else "declined" {
+      pay --> orders "declined"
+      orders -> stock "release(order)"
+      orders --> web "payment failed"
+      web --> shopper "Try another card"
+    }
+    deactivate orders
+    deactivate web
+  }
+}

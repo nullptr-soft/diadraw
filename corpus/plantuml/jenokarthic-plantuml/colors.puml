@@ -1,0 +1,7 @@
+@startuml
+
+!define BLUE_BG #BBDEFB
+!define BLUE_FONT #1A237E
+!define BLUE_BORDER #7AC0F8
+
+@enduml

@@ -1,0 +1,9 @@
+{
+  "diadraw.description": "Diagrams as text and on a canvas, on one model: a drawing and diagramming engine with a DSL, a WYSIWYG editor and strong auto-layout.",
+  "diadraw.version": "DiaDraw version",
+  "diadraw.feedback": "Give feedback",
+  "diadraw.feedbackTitle": "Send an idea, a wish or anything that could be easier (opens a form on GitHub)",
+  "diadraw.open": "Open DiaDraw",
+  "diadraw.openStep": "Open this step in DiaDraw",
+  "diadraw.viewAlt": "The {{view}} view of {{name}}.draw"
+}

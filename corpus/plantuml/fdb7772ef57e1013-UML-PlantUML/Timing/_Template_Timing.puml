@@ -1,0 +1,13 @@
+@startuml
+robust  "処理状態" as R
+concise "通信"     as C
+
+@0
+R is 待機
+C is 切断
+@30
+R is 処理中
+C is 接続
+@60
+R is 待機
+@enduml

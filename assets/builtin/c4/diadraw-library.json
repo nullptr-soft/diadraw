@@ -1,0 +1,243 @@
+{
+  "name": "c4",
+  "version": "1.0.0",
+  "description": "Shapes of the C4 model: people, software systems, containers, components, stores and queues, with the C4-PlantUML and Structurizr names mapped to them.",
+  "license": "MIT",
+  "author": "DiaDraw",
+  "source": {
+    "kind": "original"
+  },
+  "shapes": {
+    "person": {
+      "label": "Person",
+      "category": "People",
+      "kind": "person",
+      "svg": "shapes/person.svg",
+      "width": 64,
+      "height": 64,
+      "keywords": ["user", "actor"]
+    },
+    "person_ext": {
+      "label": "External person",
+      "category": "People",
+      "kind": "person",
+      "svg": "shapes/person_ext.svg",
+      "width": 64,
+      "height": 64,
+      "keywords": ["external"]
+    },
+    "software_system": {
+      "label": "Software system",
+      "category": "Systems",
+      "kind": "system",
+      "svg": "shapes/software_system.svg",
+      "width": 96,
+      "height": 66
+    },
+    "software_system_ext": {
+      "label": "External system",
+      "category": "Systems",
+      "kind": "system",
+      "svg": "shapes/software_system_ext.svg",
+      "width": 96,
+      "height": 66,
+      "keywords": ["external"]
+    },
+    "container": {
+      "label": "Container",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/container.svg",
+      "width": 96,
+      "height": 66
+    },
+    "container_ext": {
+      "label": "External container",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/container_ext.svg",
+      "width": 96,
+      "height": 66,
+      "keywords": ["external"]
+    },
+    "component": {
+      "label": "Component",
+      "category": "Components",
+      "kind": "component",
+      "svg": "shapes/component.svg",
+      "width": 96,
+      "height": 66
+    },
+    "component_ext": {
+      "label": "External component",
+      "category": "Components",
+      "kind": "component",
+      "svg": "shapes/component_ext.svg",
+      "width": 96,
+      "height": 66,
+      "keywords": ["external"]
+    },
+    "database": {
+      "label": "Database",
+      "category": "Containers",
+      "kind": "database",
+      "svg": "shapes/database.svg",
+      "width": 48,
+      "height": 60,
+      "keywords": ["store", "db"]
+    },
+    "database_ext": {
+      "label": "External database",
+      "category": "Containers",
+      "kind": "database",
+      "svg": "shapes/database_ext.svg",
+      "width": 48,
+      "height": 60,
+      "keywords": ["external", "db"]
+    },
+    "queue": {
+      "label": "Queue",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/queue.svg",
+      "width": 72,
+      "height": 40,
+      "keywords": ["topic", "stream", "message"]
+    },
+    "queue_ext": {
+      "label": "External queue",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/queue_ext.svg",
+      "width": 72,
+      "height": 40,
+      "keywords": ["external"]
+    },
+    "web_browser": {
+      "label": "Web browser",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/web_browser.svg",
+      "width": 64,
+      "height": 48,
+      "keywords": ["spa", "web"]
+    },
+    "mobile_app": {
+      "label": "Mobile app",
+      "category": "Containers",
+      "kind": "container",
+      "svg": "shapes/mobile_app.svg",
+      "width": 36,
+      "height": 60,
+      "keywords": ["phone", "ios", "android"]
+    }
+  },
+  "composites": {
+    "service_with_db": {
+      "label": "Service with database",
+      "category": "Containers",
+      "kind": "container",
+      "width": 160,
+      "height": 66,
+      "parts": [
+        {
+          "shape": "container",
+          "x": 0,
+          "y": 0,
+          "width": 96,
+          "height": 66
+        },
+        {
+          "shape": "database",
+          "x": 112,
+          "y": 6,
+          "width": 44,
+          "height": 55
+        }
+      ],
+      "keywords": ["api", "store"]
+    }
+  },
+  "fragments": {
+    "context": {
+      "label": "System context",
+      "category": "Fragments",
+      "description": "A user, the system and an external system it calls.",
+      "params": [
+        {
+          "name": "user",
+          "default": "user"
+        },
+        {
+          "name": "user_name",
+          "default": "User"
+        },
+        {
+          "name": "system",
+          "default": "system"
+        },
+        {
+          "name": "system_name",
+          "default": "System"
+        },
+        {
+          "name": "external",
+          "default": "external"
+        },
+        {
+          "name": "external_name",
+          "default": "External system"
+        }
+      ],
+      "text": "fragments/context.draw"
+    },
+    "containers": {
+      "label": "Web, API and database",
+      "category": "Fragments",
+      "description": "A system with a web front end, an API and a database.",
+      "params": [
+        {
+          "name": "system",
+          "default": "app"
+        },
+        {
+          "name": "system_name",
+          "default": "Application"
+        }
+      ],
+      "text": "fragments/containers.draw"
+    }
+  },
+  "mappings": {
+    "plantuml": {
+      "Person": "person",
+      "Person_Ext": "person_ext",
+      "System": "software_system",
+      "System_Ext": "software_system_ext",
+      "SystemDb": "database",
+      "SystemDb_Ext": "database_ext",
+      "SystemQueue": "queue",
+      "SystemQueue_Ext": "queue_ext",
+      "Container": "container",
+      "Container_Ext": "container_ext",
+      "ContainerDb": "database",
+      "ContainerDb_Ext": "database_ext",
+      "ContainerQueue": "queue",
+      "ContainerQueue_Ext": "queue_ext",
+      "Component": "component",
+      "Component_Ext": "component_ext",
+      "ComponentDb": "database",
+      "ComponentDb_Ext": "database_ext",
+      "ComponentQueue": "queue",
+      "ComponentQueue_Ext": "queue_ext"
+    },
+    "structurizr": {
+      "Person": "person",
+      "WebBrowser": "web_browser",
+      "MobileDevicePortrait": "mobile_app",
+      "MobileDeviceLandscape": "mobile_app",
+      "Cylinder": "database",
+      "Pipe": "queue"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+select shop
+drag db 300 0 option
+connect shop db
+rename db Order store
+relabel user->shop buys from
+add process
+delete user
+undo
+type // typed line

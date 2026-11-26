@@ -1,0 +1,54 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="p1" name="Order flow">
+    <mxGraphModel dx="1000" dy="600">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a" value="Start" style="ellipse;whiteSpace=wrap;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="b" value="Check &lt;b&gt;stock&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="200" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c" value="In stock?" style="rhombus;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="380" y="30" width="100" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="lane" value="Warehouse" style="swimlane;" vertex="1" parent="1">
+          <mxGeometry x="520" y="0" width="300" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="d" value="Ship" style="rounded=0;" vertex="1" parent="lane">
+          <mxGeometry x="40" y="40" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="Inventory" style="shape=cylinder3;whiteSpace=wrap;" vertex="1" parent="lane">
+          <mxGeometry x="160" y="40" width="80" height="80" as="geometry" />
+        </mxCell>
+        <object label="Backorder" id="e">
+          <mxCell style="rounded=1;" vertex="1" parent="1">
+            <mxGeometry x="380" y="200" width="100" height="50" as="geometry" />
+          </mxCell>
+        </object>
+        <mxCell id="e1" style="endArrow=classic;" edge="1" parent="1" source="a" target="b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="" edge="1" parent="1" source="b" target="c">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="yes" edge="1" parent="1" source="c" target="d">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="c" target="e" style="dashed=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4l" value="no" style="edgeLabel;" vertex="1" connectable="0" parent="e4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="d" target="db" style="startArrow=classic;endArrow=classic;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="d">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

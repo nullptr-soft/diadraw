@@ -1,0 +1,6 @@
+# Drag the shop's corner to make it bigger, then double-click a corner to fit it to its name again.
+resize shop 60 40
+fit shop
+# Undo brings the size back; fitting a box that already fits changes nothing.
+undo
+fit db

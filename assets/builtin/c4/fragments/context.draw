@@ -1,0 +1,5 @@
+${user} = person "${user_name}" shape ${alias}.person
+${system} = system "${system_name}" shape ${alias}.software_system
+${external} = system "${external_name}" shape ${alias}.software_system_ext
+${user} -> ${system} "Uses"
+${system} -> ${external} "Calls"

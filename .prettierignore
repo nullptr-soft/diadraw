@@ -1,0 +1,27 @@
+dist
+dist-dev
+node_modules
+.turbo
+coverage
+package-lock.json
+corpus
+*.grammar
+
+# The C++ tree (its own style, generated tables, build output) and the core as WebAssembly.
+src/*
+!src/apps/
+!src/wasm/
+!src/markdown/
+!src/node/
+src/wasm/src/core/diadraw.mjs
+src/apps/desktop/src-tauri/target/
+src/apps/desktop/src-tauri/gen/
+src/apps/confluence-drawio/vendor/
+
+# The website's generated pages (site/scripts/sync-docs.mjs, render-tutorial.mjs) and Astro's types.
+site/.astro/
+site/src/content/docs/reference/dsl.md
+site/src/content/docs/reference/grammar.md
+site/src/content/docs/reference/libraries.md
+site/src/content/docs/reference/guide/
+site/public/tutorial/

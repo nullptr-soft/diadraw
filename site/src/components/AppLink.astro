@@ -1,0 +1,12 @@
+---
+// A button that opens the DiaDraw web app, which the Pages build serves under <base>/app/.
+import { LinkButton } from '@astrojs/starlight/components';
+import { appUrl } from '../share';
+
+interface Props {
+  variant?: 'primary' | 'secondary' | 'minimal';
+}
+const { variant = 'primary' } = Astro.props;
+---
+
+<LinkButton href={appUrl()} variant={variant} icon="external"><slot>{Astro.locals.t('diadraw.open')}</slot></LinkButton>

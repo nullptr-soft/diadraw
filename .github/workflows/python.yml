@@ -1,0 +1,73 @@
+name: Python
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'CMakeLists.txt'
+      - 'VERSION'
+      - 'pyproject.toml'
+      - 'src/**'
+      - 'cmake/**'
+      - '.github/workflows/python.yml'
+  pull_request:
+    paths:
+      - 'CMakeLists.txt'
+      - 'VERSION'
+      - 'pyproject.toml'
+      - 'src/**'
+      - 'cmake/**'
+      - '.github/workflows/python.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: python-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Every change: build the package and run its tests on each platform, oldest and newest Python.
+  test:
+    name: ${{ matrix.os }}, Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2022]
+        python: ['3.10', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --upgrade pip
+      - run: pip install -v '.[test]'
+      - run: pytest src/python/tests
+
+  # Wheels for every platform (Linux x86_64 and arm64, macOS arm64 and
+  # x86_64, Windows x64), each one tested; see [tool.cibuildwheel] in pyproject.toml.
+  wheels:
+    name: Wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, macos-15-intel, windows-2022]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pypa/cibuildwheel@v3.4.1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
+  sdist:
+    name: Source distribution
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: pipx run build --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz

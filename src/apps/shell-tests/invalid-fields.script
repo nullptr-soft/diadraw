@@ -1,0 +1,36 @@
+# While a field is typed in, the inspector outlines the fields the edit would refuse and says why.
+# A refused commit keeps the field outlined; showing the item again clears it.
+select shop
+invalid
+enter id 2bad
+invalid
+enter id db
+invalid
+enter id store
+invalid
+enter kind web app
+enter shape round box
+invalid
+enter kind system
+enter shape
+invalid
+set id 2bad
+invalid
+select db
+invalid
+enter shared-styles database fill=red
+invalid
+enter shared-styles system: fill=red
+invalid
+enter shared-styles database: fill colour=red
+invalid
+enter shared-styles database: fill=red
+invalid
+select user->shop
+enter name 2nd
+invalid
+enter name buys
+invalid
+enter name 2nd
+styles
+invalid

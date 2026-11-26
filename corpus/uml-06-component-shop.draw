@@ -1,0 +1,39 @@
+// UML component diagram: components with provided interfaces (lollipops) and the dependencies
+// that require them, inside a deployment boundary.
+style relationship tag "requires" { dashed true endArrow open }
+style relationship tag "provides" { endArrow none }
+
+model {
+  spa = component "Storefront SPA"
+  platform = system "Shop platform" {
+    gateway  = component "API gateway"
+    catalog  = component "Catalog"
+    cart     = component "Cart"
+    checkout = component "Checkout"
+    rest     = component "REST API" shape interface style "verticalLabelPosition=bottom;fontStyle=0"
+    catalogApi = component "ICatalog" shape interface style "verticalLabelPosition=bottom;fontStyle=0"
+    db       = database "Shop DB"
+  }
+  psp = system "Payment provider" tag "external"
+  paymentApi = component "IPayment" shape interface style "verticalLabelPosition=bottom;fontStyle=0"
+
+  platform.gateway -> platform.rest tag "provides"
+  platform.catalog -> platform.catalogApi tag "provides"
+  psp -> paymentApi tag "provides"
+  spa -> platform.rest "HTTPS / JSON" tag "requires"
+  platform.gateway -> platform.catalogApi tag "requires"
+  platform.gateway -> platform.cart "routes"
+  platform.gateway -> platform.checkout "routes"
+  platform.checkout -> platform.cart "reads cart"
+  platform.checkout -> paymentApi tag "requires"
+  platform.catalog -> platform.db "SQL"
+  platform.cart -> platform.db "SQL"
+}
+
+view components {
+  include *
+  layout layered direction right
+  size platform.rest 24, 24          // lollipops: small circles, named below
+  size platform.catalogApi 24, 24
+  size paymentApi 24, 24
+}

@@ -1,0 +1,18 @@
+@startuml ClassDiagram
+!include colors.puml
+
+skinparam roundcorner 20
+skinparam class {
+    BackgroundColor BLUE_BG
+    ArrowColor BLUE_FONT
+    BorderColor BLUE_BORDER
+    FontColor BLUE_FONT
+    FontStyle bold
+    StereotypeFontColor BLUE_FONT
+}
+skinparam stereotypeCBackgroundColor BLUE_BORDER
+skinparam stereotypeIBackgroundColor BLUE_BORDER
+
+skinparam CircledCharacterFontColor BLUE_FONT
+
+@enduml

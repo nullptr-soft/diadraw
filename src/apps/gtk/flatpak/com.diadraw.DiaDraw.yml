@@ -1,0 +1,95 @@
+# Flatpak build of the gtkmm app. From the repository root:
+#   flatpak-builder --user --install --force-clean build-flatpak src/apps/gtk/flatpak/com.diadraw.DiaDraw.yml
+#   flatpak run com.diadraw.DiaDraw
+# or a single-file bundle to hand around:
+#   flatpak-builder --repo=repo --force-clean build-flatpak src/apps/gtk/flatpak/com.diadraw.DiaDraw.yml
+#   flatpak build-bundle repo DiaDraw.flatpak com.diadraw.DiaDraw
+#
+# The GNOME runtime has GTK 4 but not its C++ bindings, so they are built here. The C++ core's two
+# dependencies (miniz, lunasvg) are given to CMake as sources, since the build has no network.
+app-id: com.diadraw.DiaDraw
+runtime: org.gnome.Platform
+runtime-version: '47'
+sdk: org.gnome.Sdk
+command: diadraw-gtk
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # File › Cloud Storage talks to Google Drive and OneDrive, and signs in through a one-shot
+  # listener on 127.0.0.1 that the browser is sent back to.
+  - --share=network
+  # Diagrams include files next to them (PlantUML, Structurizr) and libraries from a lockfile
+  # beside them, so the app reads and writes where its documents are.
+  - --filesystem=home
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /lib/*.a
+  - /lib/*.la
+  - /share/doc
+  - /share/devhelp
+
+modules:
+  - name: libsigc++
+    buildsystem: meson
+    config-opts: [-Dbuild-documentation=false, -Dbuild-examples=false, -Dbuild-tests=false]
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libsigc++/3.6/libsigc++-3.6.0.tar.xz
+        sha256: c3d23b37dfd6e39f2e09f091b77b1541fbfa17c4f0b6bf5c89baef7229080e17
+
+  - name: glibmm
+    buildsystem: meson
+    config-opts: [-Dbuild-documentation=false, -Dbuild-examples=false]
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/glibmm/2.82/glibmm-2.82.0.tar.xz
+        sha256: 38684cff317273615c67b8fa9806f16299d51e5506d9b909bae15b589fa99cb6
+
+  - name: cairomm
+    buildsystem: meson
+    config-opts: [-Dbuild-documentation=false, -Dbuild-examples=false, -Dbuild-tests=false]
+    sources:
+      - type: archive
+        url: https://www.cairographics.org/releases/cairomm-1.18.1.tar.xz
+        sha256: e0e996a979ee52c840dca3ee74f5d005e3259b94ddce58f255d3b6f47c8cb41d
+
+  - name: pangomm
+    buildsystem: meson
+    config-opts: [-Dbuild-documentation=false]
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/pangomm/2.54/pangomm-2.54.0.tar.xz
+        sha256: 4a5b1fd1b7c47a1af45277ea82b5abeaca8e08fb10a27daa6394cf88d74e7acf
+
+  - name: gtkmm
+    buildsystem: meson
+    config-opts: [-Dbuild-documentation=false, -Dbuild-demos=false, -Dbuild-tests=false]
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/gtkmm/4.16/gtkmm-4.16.0.tar.xz
+        sha256: 3b23fd3abf8fb223b00e9983b6010af2db80e38c89ab6994b8b6230aa85d60f9
+
+  - name: diadraw
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DDIADRAW_BUILD_GTK=ON
+      - -DDIADRAW_BUILD_TESTS=OFF
+      - -DFETCHCONTENT_SOURCE_DIR_MINIZ=/run/build/diadraw/deps/miniz
+      - -DFETCHCONTENT_SOURCE_DIR_LUNASVG=/run/build/diadraw/deps/lunasvg
+    sources:
+      - type: dir
+        path: ../../../..
+        skip: [node_modules, src/build, .git, src/apps/desktop, src/apps/vscode, src/apps/web]
+      - type: archive
+        url: https://github.com/richgel999/miniz/archive/refs/tags/3.0.2.tar.gz
+        sha256: c4b4c25a4eb81883448ff8924e6dba95c800094a198dc9ce66a292ac2ef8e018
+        dest: deps/miniz
+      - type: archive
+        url: https://github.com/sammycage/lunasvg/archive/refs/tags/v3.5.0.tar.gz
+        sha256: 1abf1472ee6c4d19797916e8cc3c2e4b628e0d81178ffac60bdb0d457e32c690
+        dest: deps/lunasvg

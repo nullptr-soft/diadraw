@@ -1,0 +1,10 @@
+${start} = event "Request received" shape ${alias}.start_event_message
+${review} = task "Review request" shape ${alias}.user_task
+${decide} = gateway "Approved?" shape ${alias}.exclusive_gateway
+${notify} = task "Notify requester" shape ${alias}.send_task
+${done} = event "Done" shape ${alias}.end_event
+${start} -> ${review}
+${review} -> ${decide}
+${decide} -> ${notify} "yes"
+${decide} -> ${review} "no"
+${notify} -> ${done}

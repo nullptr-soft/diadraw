@@ -1,0 +1,63 @@
+---
+title: Premiers pas
+description: Ouvrez DiaDraw, dessinez votre premier diagramme et découvrez les commandes de l’application.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import AppLink from '../../../components/AppLink.astro';
+
+DiaDraw fonctionne dans votre navigateur. Rien à installer, aucun compte à créer : vos diagrammes restent sur votre ordinateur, sauf si vous les partagez.
+
+<AppLink>Ouvrir DiaDraw</AppLink>
+
+## Votre premier diagramme
+
+<Steps>
+
+1. Ouvrez l’application. L’éditeur de texte se trouve d’un côté et le canevas de l’autre. Tous deux affichent le même document.
+
+2. Remplacez le texte par ceci :
+
+   ```diadraw
+   model {
+     customer = person "Customer"
+     shop = system "Shop"
+     customer -> shop "buys from"
+   }
+
+   view context {
+     include *
+   }
+   ```
+
+   Le diagramme se dessine sur le canevas à mesure que vous tapez. Les erreurs sont soulignées dans le texte, avec leur ligne et leur colonne ; le reste du document continue de s’afficher.
+
+3. Faites glisser le bloc **Shop** sur le canevas. Une ligne telle que `pin shop at …` apparaît dans la vue : le canevas modifie le texte, et c’est ce texte que DiaDraw enregistre.
+
+4. Double-cliquez sur un bloc pour le renommer, ou sélectionnez-le et modifiez ses propriétés dans l’inspecteur. Chaque modification ne réécrit que la partie du texte concernée.
+
+</Steps>
+
+## Se repérer dans l’application
+
+- **Texte et canevas.** Les deux éditeurs modifient le même modèle et partagent le même historique : l’annulation fonctionne de la même façon des deux côtés.
+- **Vues.** Un document contient un bloc `model` et un ou plusieurs blocs `view`. Choisissez la vue à dessiner dans le sélecteur de vues de la barre d’outils.
+- **Palette.** Faites glisser sur le canevas des formes provenant des bibliothèques intégrées ou des collections de gabarits draw.io.
+- **Fichiers.** Ouvrez et enregistrez des fichiers `.draw`, ou partez d’un des exemples.
+- **Importation et exportation.** Importez des diagrammes Mermaid, PlantUML, Structurizr, draw.io et BPMN ; exportez-les aux formats SVG, PNG, draw.io et BPMN.
+- **Partage.** Un lien de partage contient tout le document dans son adresse. Quiconque l’ouvre voit votre diagramme sans passer par un serveur intermédiaire.
+
+<Aside type="tip">
+  Le [tutoriel](../tutorial/) vous guide pas à pas pour construire un diagramme complet. La [référence](../reference/) décrit chaque instruction du langage.
+</Aside>
+
+## Autres façons d’utiliser DiaDraw
+
+Le moteur est le même partout : un fichier `.draw` a donc le même aspect dans tous ces environnements :
+
+- **Applications de bureau** pour macOS, Windows et Linux, avec menus et gestion de fichiers natifs.
+- **VS Code** : une extension avec coloration syntaxique, serveur de langage du moteur et aperçu en direct.
+- **Ligne de commande** : `diadraw render`, `check`, `format` et `import` pour les scripts et l’intégration continue.
+- **Agents IA** : `diadraw mcp` permet à Claude Code, Claude Desktop et d’autres agents de vérifier et rendre des diagrammes et de voir le résultat ; voir [Dessiner avec des agents IA](../reference/guide/agents/).
+
+Pour le moment, ces outils se compilent à partir des sources. Le [README du dépôt](https://github.com/mykulyak/diadraw#readme) explique comment procéder.

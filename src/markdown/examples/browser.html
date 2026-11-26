@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>diadraw.js example</title>
+    <!--
+      A page as a Markdown renderer leaves it, with DiaDraw code blocks in the spellings renderers
+      use. Build the package (npm run build -w @diadraw/markdown), serve src/markdown over HTTP
+      (for example `npx serve src/markdown`) and open examples/browser.html.
+    -->
+    <style>
+      body {
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+        max-width: 48rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      pre {
+        background: #f4f4f5;
+        padding: 1rem;
+        overflow: auto;
+      }
+      figure.diadraw {
+        margin: 1rem 0;
+      }
+      .diadraw-error {
+        color: #b91c1c;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>diadraw.js</h1>
+
+    <h2>A block as markdown-it, marked and most renderers write it</h2>
+    <pre><code class="language-diadraw">model {
+  customer = person "Customer"
+  shop = system "Shop" {
+    web = container "Web app" tech "React"
+    db = container "Orders DB" tech "Postgres" shape cylinder
+  }
+  customer -&gt; shop.web "places order"
+  shop.web -&gt; shop.db "writes"
+}
+
+view checkout of shop {
+  include *
+  layout layered direction right
+}
+</code></pre>
+
+    <h2>The <code>lang-</code> spelling, with a view picked by <code>data-view</code></h2>
+    <pre data-view="people"><code class="lang-diadraw">model {
+  alice = person "Alice"
+  bob = person "Bob"
+  app = system "App"
+  alice -&gt; app "uses"
+  bob -&gt; app "runs"
+}
+view all {
+  include *
+}
+view people {
+  include alice bob
+}
+</code></pre>
+
+    <h2>A block with an error stays as code</h2>
+    <pre><code class="language-diadraw">model {
+  a = person "A"
+  a -&gt;
+}
+</code></pre>
+
+    <h2>Other languages are left alone</h2>
+    <pre><code class="language-js">console.log('not a diagram');</code></pre>
+
+    <h2>Content added later</h2>
+    <div id="later"></div>
+
+    <script type="module" src="../dist/embed/diadraw.js"></script>
+    <script type="module">
+      // A page that adds blocks after it loads calls diadraw.render() again.
+      const later = document.getElementById('later');
+      const pre = document.createElement('pre');
+      const code = document.createElement('code');
+      code.className = 'language-diadraw';
+      code.textContent = 'model {\n  a = system "Added later"\n  b = system "Also"\n  a -> b\n}\n';
+      pre.append(code);
+      later.append(pre);
+      window.diadraw.render().then((count) => {
+        document.body.dataset.later = String(count);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+${system} = system "${system_name}" {
+  web = container "Web application" shape ${alias}.web_browser
+  api = container "API" shape ${alias}.container
+  db = database "Database" shape ${alias}.database
+}
+${system}.web -> ${system}.api "Calls" tech "JSON/HTTPS"
+${system}.api -> ${system}.db "Reads and writes"

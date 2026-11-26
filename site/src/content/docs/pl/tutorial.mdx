@@ -1,0 +1,116 @@
+---
+title: Samouczek
+description: Zbuduj krok po kroku diagram sklepu internetowego. Zacznij od dwóch prostokątów, a następnie dodaj widoki, style i diagram sekwencji.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import TryIt from '../../../components/TryIt.astro';
+import step1 from '../../../tutorial/01-first-diagram.draw?raw';
+import step2 from '../../../tutorial/02-relationships.draw?raw';
+import step3 from '../../../tutorial/03-inside.draw?raw';
+import step4 from '../../../tutorial/04-layout.draw?raw';
+import step5 from '../../../tutorial/05-style.draw?raw';
+import step6 from '../../../tutorial/06-sequence.draw?raw';
+
+W tym samouczku opiszesz mały sklep internetowy: kto z niego korzysta, z czego sklep się składa
+oraz jak przebiega obsługa zamówienia. Po drodze poznasz wszystkie części dokumentu DiaDraw:
+model, widoki, wskazówki dotyczące układu, style i diagramy sekwencji.
+
+W każdym kroku zobaczysz cały dokument. Przycisk **Otwórz ten krok w DiaDraw** wczytuje dokument
+do aplikacji. Możesz więc śledzić przykład, wprowadzać zmiany i od razu oglądać ich efekty.
+
+## 1. Dwa prostokąty i linia
+
+Dokument zawiera model (`model`), który określa, co istnieje, i co najmniej jeden widok (`view`),
+który określa, co narysować.
+
+<TryIt code={step1} name="01-first-diagram" views={['context']} />
+
+- `customer = person "Customer"` deklaruje element: podaje jego identyfikator (`customer`), rodzaj
+  (`person`) i etykietę. Rodzaj decyduje o sposobie rysowania elementu.
+- `customer -> shop "buys from"` to relacja z etykietą.
+- `view context { include * }` rysuje wszystkie elementy modelu.
+
+## 2. Więcej o relacjach
+
+Elementom i relacjom możesz przypisać dodatkowe informacje: opis (`description`), technologię
+(`tech`) i znaczniki (`tag`), na podstawie których później nadasz im styl.
+
+<TryIt code={step2} name="02-relationships" views={['context']} />
+
+- `->` oznacza linię ciągłą, a `-->` przerywaną. Strzałka `<->` wskazuje oba kierunki.
+- `layout layered direction right` rozmieszcza elementy diagramu od lewej do prawej. Bez
+  instrukcji `layout` widok korzysta z układu `layered` z góry na dół.
+
+## 3. Zajrzyj do środka
+
+Sklep składa się z kilku części. Dodaj do jego definicji blok z elementami wewnętrznymi,
+a następnie drugi widok, który je pokaże.
+
+<TryIt code={step3} name="03-inside" views={['context', 'containers']} />
+
+- Elementy można zagnieżdżać. Wewnątrz `shop { … }` do aplikacji internetowej odwołujesz się po
+  prostu przez `web`; poza blokiem używasz `shop.web`.
+- Zakresem `view containers of shop` jest sklep: `include *` obejmuje jego bezpośrednie elementy
+  podrzędne, a `customer` i `payments` dodajesz po nazwie.
+- Widok `context` nadal pokazuje sklep jako jeden prostokąt. Linie prowadzące do `shop.web`
+  i `shop.api` łączą się w tym widoku z samym sklepem. Dzięki temu obraz całości pozostaje
+  poprawny, nawet gdy dodajesz szczegóły.
+
+Z listy widoków na pasku narzędzi aplikacji wybierz widok, który chcesz wyświetlić.
+
+<Aside type="tip">
+  Oba widoki powstają na podstawie tego samego modelu. Zmień nazwę **Web app** w jednym widoku,
+  a zmieni się również w drugim.
+</Aside>
+
+## 4. Dostosuj układ
+
+DiaDraw sam rozmieszcza prostokąty. Gdy chcesz przenieść element w inne miejsce, zamiast
+współrzędnych podajesz wskazówkę. Dzięki temu diagram pozostaje czytelny w miarę rozbudowy.
+
+<TryIt code={step4} name="04-layout" views={['containers']} />
+
+- `pin db below api` i `pin payments right of api` umieszczają jeden element obok drugiego:
+  odpowiednio poniżej niego lub po jego prawej stronie.
+- `spacing 60` zwiększa odstęp między warstwami.
+- Gdy przeciągasz prostokąt na płótnie, DiaDraw dodaje wiersz `pin … at`. Przytrzymaj Option
+  (Alt) podczas przeciągania, aby zamiast tego zapisać wskazówkę taką jak w przykładach powyżej.
+
+Do innych diagramów mogą lepiej pasować układy `tree`, `grid`, `radial`, `force` lub, w przypadku
+diagramów rysowanych ręcznie, `fixed`. W [rozdziale o układach](../reference/guide/layouts/)
+przeczytasz, kiedy użyć każdego z nich.
+
+## 5. Nadaj diagramowi własny styl
+
+Motywy i bloki stylów zmieniają wygląd całego dokumentu. Notatki, tekst i ramki pozwalają
+opatrzyć widok komentarzem bez dodawania czegokolwiek do modelu.
+
+<TryIt code={step5} name="05-style" views={['containers']} />
+
+- `theme dark` rysuje każdy widok na ciemnym tle. Do dyspozycji masz też wbudowane motywy
+  `default` i `mono`. Możesz również zadeklarować własny motyw.
+- `style container { … }` nadaje styl wszystkim elementom danego rodzaju, a `style tag "external" { … }`
+  wszystkiemu, co ma ten znacznik.
+- `text`, `note` i `box … around` należą do widoku, więc nie zaśmiecają widoku `context`.
+
+## 6. Pokaż przebieg zamówienia na diagramie sekwencji
+
+W widoku z układem `layout sequence` elementy są przedstawione jako linie życia, a komunikaty
+z bloku `sequence` biegną kolejno od góry do dołu.
+
+<TryIt code={step6} name="06-sequence" views={['checkout']} />
+
+- `->` oznacza wywołanie, `->>` komunikat asynchroniczny, a `-->` odpowiedź.
+- `activate` i `deactivate` rysują pasek aktywności. Ramki `alt`, `opt`, `loop`, `par` i inne
+  służą do grupowania komunikatów.
+- Komunikaty należą do widoku, a nie do modelu, więc ci sami uczestnicy mogą występować
+  w wielu widokach sekwencji.
+
+## Co dalej?
+
+- Za pomocą paska narzędzi udostępnij diagram jako link lub wyeksportuj go do formatu SVG,
+  PNG, draw.io lub BPMN.
+- W [przewodniku użytkownika](../reference/guide/) przeczytasz, do czego służy każda funkcja,
+  a w [dokumentacji DSL](../reference/dsl/) znajdziesz opis każdej instrukcji języka.
+- Napisz, co myślisz o DiaDraw, na stronie [Opinie i zgłoszenia](../feedback/).

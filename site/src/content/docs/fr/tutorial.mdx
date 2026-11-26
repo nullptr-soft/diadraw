@@ -1,0 +1,90 @@
+---
+title: Tutoriel
+description: Construisez pas à pas le diagramme d’une boutique en ligne, depuis deux blocs jusqu’à plusieurs vues, des styles et un diagramme de séquence.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import TryIt from '../../../components/TryIt.astro';
+import step1 from '../../../tutorial/01-first-diagram.draw?raw';
+import step2 from '../../../tutorial/02-relationships.draw?raw';
+import step3 from '../../../tutorial/03-inside.draw?raw';
+import step4 from '../../../tutorial/04-layout.draw?raw';
+import step5 from '../../../tutorial/05-style.draw?raw';
+import step6 from '../../../tutorial/06-sequence.draw?raw';
+
+Dans ce tutoriel, vous allez décrire une petite boutique en ligne : qui l’utilise, de quoi elle se compose et comment elle traite une commande. Vous découvrirez au fil des étapes tout ce qui constitue un document DiaDraw : le modèle, les vues, les indications de disposition, les styles et les diagrammes de séquence.
+
+Chaque étape présente le document complet. Le bouton **Ouvrir cette étape dans DiaDraw** l’ouvre dans l’application : vous pouvez suivre l’exemple, le modifier et observer le résultat.
+
+## 1. Deux blocs et une ligne
+
+Un document contient un bloc `model`, qui définit ce qui existe, et un ou plusieurs blocs `view`, qui précisent ce qu’il faut dessiner.
+
+<TryIt code={step1} name="01-first-diagram" views={['context']} />
+
+- `customer = person "Customer"` déclare un élément : un identifiant (`customer`), un type (`person`) et un libellé. Le type détermine son apparence.
+- `customer -> shop "buys from"` est une relation avec un libellé.
+- `view context { include * }` dessine tous les éléments du modèle.
+
+## 2. Préciser les relations
+
+Les éléments et les relations acceptent des précisions : une description (`description`), une technologie (`tech`) et des étiquettes (`tag`) auxquelles vous pourrez associer un style.
+
+<TryIt code={step2} name="02-relationships" views={['context']} />
+
+- `->` donne un trait continu et `-->` un trait en tirets ; `<->` pointe dans les deux sens.
+- `layout layered direction right` agence le diagramme de gauche à droite. Sans instruction `layout`, la vue utilise `layered`, de haut en bas.
+
+## 3. Explorer l’intérieur de la boutique
+
+La boutique est composée de plusieurs parties. Donnez-lui un bloc contenant ses éléments internes et ajoutez une deuxième vue qui les montre.
+
+<TryIt code={step3} name="03-inside" views={['context', 'containers']} />
+
+- Les éléments peuvent s’imbriquer. Dans `shop { … }`, l’application web s’appelle simplement `web` ; en dehors, son nom est `shop.web`.
+- La portée de `view containers of shop` est limitée à la boutique : `include *` sélectionne ses enfants, puis on ajoute `customer` et `payments` par leur nom.
+- La vue `context` représente toujours la boutique par un seul bloc. Les lignes qui rejoignent `shop.web` et `shop.api` sont rattachées à la boutique elle-même : la vue d’ensemble reste donc juste à mesure que vous ajoutez des détails.
+
+Choisissez la vue à dessiner dans le sélecteur de vues de la barre d’outils.
+
+<Aside type="tip">
+  Les deux vues reposent sur le même modèle. Renommez **Web app** dans l’une : son nom change aussi dans l’autre.
+</Aside>
+
+## 4. Guider la disposition
+
+DiaDraw place les blocs pour vous. Pour déplacer un élément, donnez une indication plutôt que des coordonnées : le diagramme restera bien ordonné en grandissant.
+
+<TryIt code={step4} name="04-layout" views={['containers']} />
+
+- `pin db below api` et `pin payments right of api` placent un élément à côté d’un autre.
+- `spacing 60` augmente l’espace entre les couches.
+- Faire glisser un bloc sur le canevas inscrit automatiquement une ligne `pin … at`. Maintenez Option (Alt) pendant le déplacement pour écrire plutôt une indication comme celles ci-dessus.
+
+D’autres dispositions conviennent à d’autres diagrammes : `tree`, `grid`, `radial`, `force`, ainsi que `fixed` pour le dessin à la main. Le [chapitre sur les dispositions](../reference/guide/layouts/) explique quand les employer.
+
+## 5. Personnaliser le diagramme
+
+Les thèmes et les blocs de style changent l’apparence de tout le document. Les notes, textes et cadres permettent d’annoter une vue sans rien ajouter au modèle.
+
+<TryIt code={step5} name="05-style" views={['containers']} />
+
+- `theme dark` dessine chaque vue sur fond sombre. Les thèmes `default` et `mono` sont aussi intégrés, et vous pouvez définir les vôtres.
+- `style container { … }` applique un style à tous les éléments d’un type ; `style tag "external" { … }` le fait pour tout ce qui porte cette étiquette.
+- `text`, `note` et `box … around` appartiennent à la vue : la vue `context` reste épurée.
+
+## 6. Raconter une histoire avec un diagramme de séquence
+
+Une vue avec `layout sequence` représente ses éléments par des lignes de vie et affiche les messages de son bloc `sequence` de haut en bas.
+
+<TryIt code={step6} name="06-sequence" views={['checkout']} />
+
+- `->` est un appel, `->>` un message asynchrone et `-->` une réponse.
+- `activate` et `deactivate` dessinent une barre d’activation ; `alt`, `opt`, `loop`, `par` et les autres cadres regroupent des messages.
+- Les messages appartiennent à la vue et non au modèle. Les mêmes participants peuvent donc figurer dans plusieurs vues de séquence.
+
+## Pour aller plus loin
+
+- Depuis la barre d’outils, partagez le diagramme avec un lien ou exportez-le aux formats SVG, PNG, draw.io ou BPMN.
+- Lisez le [guide d’utilisation](../reference/guide/) pour savoir à quoi sert chaque fonctionnalité et la [référence du DSL](../reference/dsl/) pour connaître toutes les instructions.
+- Donnez-nous votre avis sur la page [Vos retours](../feedback/).

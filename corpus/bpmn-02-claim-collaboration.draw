@@ -1,0 +1,88 @@
+// BPMN collaboration: an insurance claim between a customer and an insurer, in two pools of a
+// fixed view. Each pool has its own sequence flow; dashed message flows cross between the pools.
+// An event-based gateway waits for whichever comes first, the decision or a timeout, and a
+// business rule task reads a data store.
+use "bpmn@^1" as bpmn
+
+style relationship { endArrow block endFill 1 }
+style relationship tag "message" { dashed true startArrow oval startFill 0 endArrow block endFill 0 }
+style relationship tag "association" { dashed true dashPattern "2 3" endArrow none }
+
+model {
+  customer = pool "Customer" shape swimlane style "fillColor=#ffffff;horizontal=0" {
+    damage    = event "Damage noticed" shape bpmn.start_event
+    file      = task "File claim" shape bpmn.send_task
+    wait      = gateway "" shape bpmn.event_based_gateway
+    decision  = event "Decision" shape bpmn.intermediate_catch_event_message
+    closed    = event "Claim closed" shape bpmn.end_event
+    timeout   = event "30 days" shape bpmn.intermediate_catch_event_timer
+    complain  = task "Complain" shape bpmn.send_task
+    escalated = event "Escalated" shape bpmn.end_event_escalation
+
+    damage -> file
+    file -> wait
+    answered = wait -> decision
+    expired = wait -> timeout
+    decision -> closed
+    timeout -> complain
+    complain -> escalated
+  }
+  insurer = pool "Insurer" shape swimlane style "fillColor=#ffffff;horizontal=0" {
+    claim   = event "Claim received" shape bpmn.start_event_message
+    assess  = task "Assess claim" shape bpmn.user_task
+    rules   = task "Apply policy rules" shape bpmn.business_rule_task
+    covered = gateway "Covered?" shape bpmn.exclusive_gateway
+    payout  = task "Pay out" shape bpmn.service_task
+    decline = task "Decline" shape bpmn.task
+    notify  = task "Send decision" shape bpmn.send_task
+    done    = event "Claim handled" shape bpmn.end_event
+
+    claim -> assess
+    assess -> rules
+    rules -> covered
+    yes = covered -> payout "yes"
+    no = covered -> decline "no"
+    paid = payout -> notify
+    declined = decline -> notify
+    notify -> done
+  }
+  policies = data "Policies" shape bpmn.data_store
+  remark   = annotation "A second assessor reviews every decline" shape bpmn.text_annotation
+
+  form = customer.file -> insurer.claim "claim form" tag "message"
+  letter = insurer.notify -> customer.decision "decision letter" tag "message"
+  insurer.rules -> policies tag "association"
+  remark -> insurer.decline tag "association"
+}
+
+view collaboration {
+  include *
+  layout fixed
+  pin customer at 40, 40 size 1100, 200
+  pin customer.damage at 100, 122 size 36, 36
+  pin customer.file at 180, 110 size 110, 60
+  pin customer.wait at 340, 115 size 50, 50
+  pin customer.timeout at 800, 72 size 36, 36
+  pin customer.complain at 880, 60 size 110, 60
+  pin customer.escalated at 1050, 72 size 36, 36
+  pin customer.decision at 800, 172 size 36, 36
+  pin customer.closed at 900, 172 size 36, 36
+  pin insurer at 40, 320 size 1100, 240
+  pin insurer.claim at 217, 412 size 36, 36
+  pin insurer.assess at 300, 400 size 110, 60
+  pin insurer.rules at 460, 400 size 110, 60
+  pin insurer.covered at 620, 405 size 50, 50
+  pin insurer.payout at 720, 350 size 110, 60
+  pin insurer.decline at 720, 450 size 110, 60
+  pin insurer.notify at 880, 400 size 110, 60
+  pin insurer.done at 1060, 412 size 36, 36
+  pin policies at 495, 478 size 40, 40
+  pin remark at 870, 480 size 200, 40
+  route "answered" via 365, 190 from 0.5, 1 to 0, 0.5
+  route "expired" via 365, 90 from 0.5, 0 to 0, 0.5
+  route "yes" via 645, 380 from 0.5, 0 to 0, 0.5
+  route "no" via 645, 480 from 0.5, 1 to 0, 0.5
+  route "paid" via 855, 380 855, 420 from 1, 0.5 to 0, 0.33
+  route "declined" via 855, 480 855, 440 from 1, 0.5 to 0, 0.67
+  route "letter" via 935, 280 818, 280 from 0.5, 0 to 0.5, 1
+}

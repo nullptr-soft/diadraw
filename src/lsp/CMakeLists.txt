@@ -1,0 +1,5 @@
+target_sources(diadraw PRIVATE
+  src/features.cpp
+  src/server.cpp
+)
+target_include_directories(diadraw PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

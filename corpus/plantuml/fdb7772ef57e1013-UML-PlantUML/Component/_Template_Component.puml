@@ -1,0 +1,12 @@
+@startuml
+component [画面UI] as UI
+component [業務ロジック] as Logic
+interface "保存API" as Save
+
+' 提供インタフェース(○)
+Save - [データ層]
+' 要求(使う側)
+Logic ..> Save : 使う
+' 依存
+UI ..> Logic
+@enduml

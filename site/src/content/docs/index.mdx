@@ -1,0 +1,38 @@
+---
+title: DiaDraw
+description: Diagrams as text and on a canvas, on one model.
+template: splash
+hero:
+  tagline: Write diagrams as text, draw them on a canvas, and keep both in step. One model, many views, and a layout engine you can steer.
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Get started
+      link: getting-started/
+      icon: right-arrow
+    - text: Open the app
+      link: app/
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="One model, two editors" icon="pencil">
+    Define elements and relationships once, then edit them as text or on the canvas. Every canvas
+    edit is written back as a small change to the text, so the text stays the source of truth and
+    diffs cleanly in git.
+  </Card>
+  <Card title="Many views of one model" icon="seti:folder">
+    A system context, its containers, a sequence of calls: each diagram is a view that picks and
+    arranges parts of the same model.
+  </Card>
+  <Card title="Layout you can steer" icon="setting">
+    Layered, tree, grid, radial, force, fixed and sequence layouts. Dragging a box writes a hint
+    such as `pin db below api`, not coordinates, so the layout stays tidy as the model grows.
+  </Card>
+  <Card title="Bring your diagrams" icon="document">
+    Import PlantUML, Mermaid, Structurizr, draw.io and BPMN. Export SVG, PNG, PDF, draw.io and BPMN.
+  </Card>
+</CardGrid>

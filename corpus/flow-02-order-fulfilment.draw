@@ -1,0 +1,29 @@
+// Flowchart: order fulfilment with parallel branches and a merge.
+model {
+  received  = start "Order received"
+  payment   = decision "Payment OK?"
+  cancel    = process "Cancel order"
+  pick      = process "Pick items"
+  invoice   = process "Send invoice"
+  pack      = process "Pack parcel"
+  ship      = process "Ship"
+  notify    = process "Notify customer"
+  closed    = end "Closed"
+
+  received -> payment
+  payment -> cancel "no"
+  payment -> pick "yes"
+  payment -> invoice "yes"
+  pick -> pack
+  pack -> ship
+  invoice -> notify
+  ship -> notify
+  notify -> closed
+  cancel -> closed
+}
+
+view fulfilment {
+  include *
+  layout layered direction right spacing 40
+  align pick invoice vertically
+}

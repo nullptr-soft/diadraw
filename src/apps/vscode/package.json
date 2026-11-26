@@ -1,0 +1,86 @@
+{
+  "name": "diadraw-vscode",
+  "displayName": "DiaDraw",
+  "description": "DiaDraw diagrams as code: highlighting, diagnostics, outline, go to definition, completion and a live preview, all from the DiaDraw core compiled to WebAssembly.",
+  "version": "0.0.8",
+  "publisher": "diadraw",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [],
+  "contributes": {
+    "languages": [
+      {
+        "id": "diadraw",
+        "aliases": [
+          "DiaDraw",
+          "diadraw"
+        ],
+        "extensions": [
+          ".draw"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "diadraw",
+        "scopeName": "source.diadraw",
+        "path": "./syntaxes/diadraw.tmLanguage.json"
+      },
+      {
+        "scopeName": "markdown.diadraw.codeblock",
+        "path": "./syntaxes/diadraw.markdown.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.diadraw": "diadraw"
+        }
+      }
+    ],
+    "commands": [
+      {
+        "command": "diadraw.openPreview",
+        "title": "Open Preview to the Side",
+        "category": "DiaDraw",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "diadraw.exportSvg",
+        "title": "Export View as SVG",
+        "category": "DiaDraw"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "diadraw.openPreview",
+          "when": "editorLangId == diadraw",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@diadraw/wasm": "*",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "esbuild": "^0.28.0"
+  }
+}

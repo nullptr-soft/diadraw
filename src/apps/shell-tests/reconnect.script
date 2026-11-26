@@ -1,0 +1,4 @@
+reconnect user->shop target db
+relabel user->db buys from
+reconnect user->db source shop
+undo

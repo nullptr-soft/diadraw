@@ -1,0 +1,18 @@
+# Relationship properties from the inspector: each field becomes a part of the line, and a new
+# name keeps the line selected under its new id.
+select user->shop
+set label buys
+set technology HTTPS
+set arrow -->
+set tags public, web
+set props retries=3
+set name checkout
+set style stroke=#c00
+set tags web
+undo
+set name
+set arrow <->
+set label
+set name order_flow
+set tags
+set arrow sideways

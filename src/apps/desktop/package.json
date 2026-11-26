@@ -1,0 +1,16 @@
+{
+  "name": "@diadraw/desktop",
+  "version": "0.0.8",
+  "description": "DiaDraw desktop app: the web app in Tauri 2 with native files and a file watcher.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev:native": "tauri dev",
+    "build:native": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.5.0"
+  }
+}

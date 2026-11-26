@@ -1,0 +1,36 @@
+@startuml
+' 可視性:  + public  - private  # protected  ~ package
+class User {
+  - id : int
+  - name : String
+  --
+  + checkPassword(p : String) : boolean
+  + {static} count() : int
+}
+
+abstract class 抽象クラス
+interface UserRepository {
+  + findByName(name : String) : User
+}
+enum Color {
+  赤
+  青
+  緑
+}
+
+' 関係の線
+' <|.. 実装
+UserRepository <|.. DBUserRepository
+' <|-- 継承
+User <|-- AdminUser
+' *-- コンポジション(強い所有)
+Order *-- OrderLine
+' o-- 集約(弱い所有)
+User o-- Address
+' --> 関連(使う)
+User --> Order
+' ..> 依存(一時的に使う)
+User ..> Logger
+' 多重度と関係名
+Order "1" --> "0..*" OrderLine : 含む
+@enduml

@@ -1,0 +1,21 @@
+ok   grid 20
+ok   drag db 33 27
+ok   grid 0
+ok   drag shop 33 27
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+  pin db at 160, 40
+  pin shop at 45, 176
+}
+--- status
+

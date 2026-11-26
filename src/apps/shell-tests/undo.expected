@@ -1,0 +1,23 @@
+ok   drag db 300 0 option
+ok   rename db Order store
+ok   connect shop db
+ok   undo
+ok   undo
+ok   undo
+ok   redo
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+  align user db horizontally
+}
+--- status
+

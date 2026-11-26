@@ -1,0 +1,12 @@
+{
+  "name": "diadraw",
+  "version": "0.0.8",
+  "description": "Draw diagrams with DiaDraw: write the .draw DSL, check it, render it to SVG or PNG and look at the result",
+  "author": {
+    "name": "DiaDraw"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/mykulyak/diadraw",
+  "repository": "https://github.com/mykulyak/diadraw",
+  "keywords": ["diagrams", "architecture", "c4", "uml", "bpmn", "sequence", "flowchart"]
+}

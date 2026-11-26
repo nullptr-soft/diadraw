@@ -1,0 +1,40 @@
+// UML activity diagram: fulfilling an order, with an initial and a final node, a decision and
+// its merge, and a fork and join (bars) for work done in parallel.
+model {
+  begin   = start "" shape circle style "fill=#1e293b;stroke=#1e293b"
+  receive = process "Receive order"
+  check   = decision "In stock?"
+  backord = process "Back-order items"
+  arrived = process "Wait for delivery"
+  merge   = decision "" shape rhombus
+  fork    = process "" shape bar style "fill=#1e293b;stroke=#1e293b"
+  pack    = process "Pack parcel"
+  invoice = process "Send invoice"
+  join    = process "" shape bar style "fill=#1e293b;stroke=#1e293b"
+  ship    = process "Ship parcel"
+  done    = end "" shape circle style "fill=#ffffff;stroke=#1e293b;strokeWidth=4"
+
+  begin -> receive
+  receive -> check
+  check -> merge "[yes]"
+  check -> backord "[no]"
+  backord -> arrived
+  arrived -> merge
+  merge -> fork
+  fork -> pack
+  fork -> invoice
+  pack -> join
+  invoice -> join
+  join -> ship
+  ship -> done
+}
+
+view activity {
+  include *
+  layout layered direction down
+  size begin 28, 28
+  size done 32, 32
+  size merge 40, 40
+  size fork 220, 8
+  size join 220, 8
+}

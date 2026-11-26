@@ -1,0 +1,32 @@
+// UML class diagram: a lending library, with an interface, an abstract class, inheritance,
+// realization, composition, aggregation and associations with multiplicities.
+style relationship tag "inherits" { endArrow block endFill 0 }
+style relationship tag "realizes" { dashed true endArrow block endFill 0 }
+style relationship tag "composes" { startArrow diamond startFill 1 endArrow none }
+style relationship tag "aggregates" { startArrow diamond startFill 0 endArrow none }
+style relationship tag "uses" { dashed true endArrow open }
+
+model {
+  loanable = class "Loanable" prop "stereotype" "interface" prop "uml.methods" "+ lend(member: Member): Loan\n+ isAvailable(): bool"
+  item = class "Item" prop "stereotype" "abstract" prop "uml.attributes" "# id: ItemId\n# title: String\n# year: int" prop "uml.methods" "+ isAvailable(): bool"
+  book = class "Book" prop "uml.attributes" "- isbn: String\n- pages: int" prop "uml.methods" "+ lend(member: Member): Loan"
+  dvd = class "Dvd" prop "uml.attributes" "- minutes: int" prop "uml.methods" "+ lend(member: Member): Loan"
+  library = class "Library" prop "uml.attributes" "- name: String" prop "uml.methods" "+ search(query: String): Item[*]\n+ register(member: Member)"
+  member = class "Member" prop "uml.attributes" "- name: String\n- email: String" prop "uml.methods" "+ activeLoans(): Loan[*]"
+  loan = class "Loan" prop "uml.attributes" "- due: Date\n- returned: Date [0..1]" prop "uml.methods" "+ isOverdue(): bool"
+  clock = class "Clock" prop "stereotype" "utility" prop "uml.methods" "+ today(): Date"
+
+  book -> item tag "inherits"
+  dvd -> item tag "inherits"
+  item -> loanable tag "realizes"
+  library -> item "catalogue" tag "composes" prop "uml.sourceMultiplicity" "1" prop "uml.targetMultiplicity" "0..*"
+  library -> member "members" tag "aggregates" prop "uml.sourceMultiplicity" "0..*" prop "uml.targetMultiplicity" "0..*"
+  member -> loan "borrows" prop "uml.sourceMultiplicity" "1" prop "uml.targetMultiplicity" "0..*"
+  loan -> item "of" prop "uml.sourceMultiplicity" "0..*"
+  loan -> clock "«use»" tag "uses"
+}
+
+view classes {
+  include *
+  layout layered direction up   // superclasses above their subclasses
+}

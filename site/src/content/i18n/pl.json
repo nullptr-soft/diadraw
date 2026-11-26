@@ -1,0 +1,9 @@
+{
+  "diadraw.description": "Twórz diagramy w formie tekstu i na płótnie, korzystając z jednego modelu. DiaDraw oferuje język DSL, edytor WYSIWYG i automatyczny układ diagramów.",
+  "diadraw.version": "Wersja DiaDraw",
+  "diadraw.feedback": "Prześlij opinię",
+  "diadraw.feedbackTitle": "Podziel się pomysłem lub napisz, co można ułatwić (otwiera formularz w serwisie GitHub)",
+  "diadraw.open": "Otwórz DiaDraw",
+  "diadraw.openStep": "Otwórz ten krok w DiaDraw",
+  "diadraw.viewAlt": "Widok {{view}} z pliku {{name}}.draw"
+}

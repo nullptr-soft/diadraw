@@ -1,0 +1,12 @@
+[package]
+name = "diadraw"
+description = "Safe Rust bindings to libdiadraw: parse, check, format, lay out, render and import DiaDraw diagrams"
+publish = false
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+diadraw-sys = { path = "../diadraw-sys" }

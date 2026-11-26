@@ -1,0 +1,20 @@
+ok   resize shop 60 40
+ok   fit shop
+ok   undo
+ok   fit db
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+  size shop 180, 92
+}
+--- status
+

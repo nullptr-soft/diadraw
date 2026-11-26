@@ -1,0 +1,14 @@
+model {
+  customer = person "Customer"
+  shop = system "Shop" description "Sells things online"
+  payments = system "Payment provider" tag "external"
+
+  customer -> shop "buys from"
+  shop -> payments "charges cards" tech "HTTPS"
+  payments --> shop "confirms payment"
+}
+
+view context {
+  include *
+  layout layered direction right
+}

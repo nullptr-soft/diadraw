@@ -1,0 +1,42 @@
+ok   select db
+ok   set shared-styles database: fill=#dae8fc;stroke=#6c8ebf
+ok   set shared-styles database: fill=#ffe6cc;stroke=#6c8ebf
+ok   styles
+ok   set theme dark
+ok   set view-theme mono
+ok   set styles database: fill=#ffe6cc;stroke=#6c8ebf\nrelationship: dashed=1
+ok   undo
+ok   set theme night
+FAIL set theme-keys background=#000000
+ok   set view-theme
+ok   set theme-keys background=#101418
+ok   set theme-nodes person: fill=#08427b
+--- text
+theme night extends dark {
+  background "#101418"
+  node person {
+    fill "#08427b"
+  }
+}
+
+theme night
+
+style database {
+  fill "#ffe6cc"
+  stroke "#6c8ebf"
+}
+
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

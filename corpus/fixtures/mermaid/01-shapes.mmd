@@ -1,0 +1,6 @@
+flowchart LR
+  start([Begin]) --> a[Plain box] --> b(Round) --> c{Choice?}
+  c -->|yes| d[(Store)]
+  c -- no --> e[[Subroutine]]
+  e --> f((Circle)) --> g{{Hex}} --> h[/In/] --> i[\Out\] --> j>Flag]
+  j --> done([Finish])

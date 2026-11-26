@@ -1,0 +1,169 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/../diadraw-build/${presetName}"
+    },
+    {
+      "name": "dev",
+      "displayName": "Debug with sanitizers, with this platform's app (AppKit on macOS, gtkmm on Linux)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "DIADRAW_SANITIZE": "ON"
+      }
+    },
+    {
+      "name": "core",
+      "displayName": "Debug with sanitizers: core, CLI and tests only, no native app",
+      "inherits": "dev",
+      "cacheVariables": {
+        "DIADRAW_BUILD_MACOS": "OFF",
+        "DIADRAW_BUILD_GTK": "OFF",
+        "DIADRAW_BUILD_WINUI": "OFF"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release, with this platform's app",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
+      }
+    },
+    {
+      "name": "windows",
+      "displayName": "Windows: MSVC Release with the WinUI app (run from a VS developer prompt)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "DIADRAW_BUILD_WINUI": "ON"
+      },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "wasm",
+      "displayName": "WebAssembly (needs emsdk on PATH)",
+      "inherits": "base",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "MinSizeRel"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev", "configurePreset": "dev" },
+    { "name": "core", "configurePreset": "core" },
+    { "name": "release", "configurePreset": "release" },
+    { "name": "windows", "configurePreset": "windows" },
+    { "name": "wasm", "configurePreset": "wasm" }
+  ],
+  "packagePresets": [
+    { "name": "release", "configurePreset": "release" },
+    { "name": "windows", "configurePreset": "windows" }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    {
+      "name": "headless",
+      "description": "Leave out the app's gesture tests (label gui), which open a window",
+      "hidden": true,
+      "filter": { "exclude": { "label": "gui" } }
+    },
+    {
+      "name": "gui-only",
+      "description": "Only the app's gesture tests (label gui), which open a window",
+      "hidden": true,
+      "filter": { "include": { "label": "gui" } }
+    },
+    { "name": "dev", "inherits": "test-base", "configurePreset": "dev" },
+    { "name": "dev-headless", "inherits": ["test-base", "headless"], "configurePreset": "dev" },
+    { "name": "dev-gui", "inherits": ["test-base", "gui-only"], "configurePreset": "dev" },
+    { "name": "core", "inherits": "test-base", "configurePreset": "core" },
+    { "name": "release", "inherits": ["test-base", "headless"], "configurePreset": "release" },
+    { "name": "windows", "inherits": "test-base", "configurePreset": "windows" },
+    {
+      "name": "windows-headless",
+      "inherits": ["test-base", "headless"],
+      "configurePreset": "windows"
+    },
+    { "name": "windows-gui", "inherits": ["test-base", "gui-only"], "configurePreset": "windows" }
+  ],
+  "workflowPresets": [
+    {
+      "name": "dev",
+      "displayName": "Configure, build and test (all tests, the app's gesture tests too)",
+      "steps": [
+        { "type": "configure", "name": "dev" },
+        { "type": "build", "name": "dev" },
+        { "type": "test", "name": "dev" }
+      ]
+    },
+    {
+      "name": "dev-headless",
+      "displayName": "Configure, build and test without the gesture tests that open a window",
+      "steps": [
+        { "type": "configure", "name": "dev" },
+        { "type": "build", "name": "dev" },
+        { "type": "test", "name": "dev-headless" }
+      ]
+    },
+    {
+      "name": "core",
+      "displayName": "Configure, build and test the core and CLI only (no GUI toolkit needed)",
+      "steps": [
+        { "type": "configure", "name": "core" },
+        { "type": "build", "name": "core" },
+        { "type": "test", "name": "core" }
+      ]
+    },
+    {
+      "name": "release",
+      "displayName": "Configure, build, test (without gesture tests) and package the native app",
+      "steps": [
+        { "type": "configure", "name": "release" },
+        { "type": "build", "name": "release" },
+        { "type": "test", "name": "release" },
+        { "type": "package", "name": "release" }
+      ]
+    },
+    {
+      "name": "windows",
+      "displayName": "Windows: configure, build, test and package the WinUI app",
+      "steps": [
+        { "type": "configure", "name": "windows" },
+        { "type": "build", "name": "windows" },
+        { "type": "test", "name": "windows" },
+        { "type": "package", "name": "windows" }
+      ]
+    },
+    {
+      "name": "windows-headless",
+      "displayName": "Windows: configure, build and test without the gesture tests that open a window",
+      "steps": [
+        { "type": "configure", "name": "windows" },
+        { "type": "build", "name": "windows" },
+        { "type": "test", "name": "windows-headless" }
+      ]
+    },
+    {
+      "name": "wasm",
+      "displayName": "WebAssembly: configure and build (its tests run with npm test)",
+      "steps": [
+        { "type": "configure", "name": "wasm" },
+        { "type": "build", "name": "wasm" }
+      ]
+    }
+  ]
+}

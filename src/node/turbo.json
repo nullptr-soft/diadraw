@@ -1,0 +1,33 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/CMakeLists.txt",
+        "$TURBO_ROOT$/CMakePresets.json",
+        "$TURBO_ROOT$/VERSION",
+        "$TURBO_ROOT$/cmake/**",
+        "$TURBO_ROOT$/src/CMakeLists.txt",
+        "$TURBO_ROOT$/src/base/**",
+        "$TURBO_ROOT$/src/canvas/**",
+        "$TURBO_ROOT$/src/capi/**",
+        "$TURBO_ROOT$/src/dsl/**",
+        "$TURBO_ROOT$/src/editor/**",
+        "$TURBO_ROOT$/src/export/**",
+        "$TURBO_ROOT$/src/host/**",
+        "$TURBO_ROOT$/src/io/**",
+        "$TURBO_ROOT$/src/layout/**",
+        "$TURBO_ROOT$/src/library/**",
+        "$TURBO_ROOT$/src/lsp/**",
+        "$TURBO_ROOT$/src/model/**",
+        "$TURBO_ROOT$/src/render/**"
+      ],
+      "outputs": ["dist/**", "src/diadraw.node"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    }
+  }
+}

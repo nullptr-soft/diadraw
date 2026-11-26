@@ -1,0 +1,46 @@
+---
+title: Feedback
+description: Melde einen Fehler oder sag uns, was DiaDraw als Nächstes können sollte.
+---
+
+import { LinkButton, Aside } from '@astrojs/starlight/components';
+
+DiaDraw ist noch jung. Deine Erfahrungen helfen uns zu entscheiden, was als Nächstes kommt. Du kannst uns auf zwei Wegen erreichen. Beide öffnen ein kurzes Formular im GitHub-Issue-Tracker von DiaDraw.
+
+## Fehler melden
+
+Etwas funktioniert nicht wie erwartet: Ein Diagramm wird falsch gezeichnet, eine Änderung landet an der falschen Stelle oder die App reagiert nicht mehr.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=bug_report.yml"
+  icon="external"
+>
+  Fehler melden
+</LinkButton>
+
+## Feedback geben
+
+Eine Idee, ein Wunsch, ein Diagramm, das du nicht zeichnen konntest, oder etwas, das einfacher sein könnte.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=feedback.yml"
+  icon="external"
+  variant="secondary"
+>
+  Feedback geben
+</LinkButton>
+
+## Direkt aus der App
+
+In jeder DiaDraw-App erreichst du **Give Feedback** mit einem Klick in der Symbolleiste, und auch **Report a Bug…** ist in der Nähe. Beide öffnen dieselben Formulare. App, DiaDraw-Version und Betriebssystem sind bereits eingetragen:
+
+| App | Give Feedback | Report a Bug |
+| --- | --- | --- |
+| Web und Desktop (Tauri) | rechts in der Symbolleiste | neben Give Feedback |
+| macOS | rechts in der Symbolleiste | im Hilfemenü |
+| Windows | rechts in der Symbolleiste | im Hilfemenü |
+| Linux (GTK) | in der Kopfleiste neben dem Hauptmenü | im Hauptmenü (☰) oben rechts |
+
+<Aside>
+  Zum Absenden brauchst du ein GitHub-Konto. Erst wenn du auf GitHub auf **Create** klickst, werden Daten übermittelt. Dein Diagramm wird nie angehängt. Wenn der Fehler vom Diagramm abhängt, füge den kürzesten `.draw`-Text, mit dem er auftritt, in das Formular ein. Lass alles weg, was du nicht teilen möchtest.
+</Aside>

@@ -1,0 +1,31 @@
+ok   select user->shop
+ok   set label buys
+ok   set technology HTTPS
+ok   set arrow -->
+ok   set tags public, web
+ok   set props retries=3
+ok   set name checkout
+ok   set style stroke=#c00
+ok   set tags web
+ok   undo
+ok   set name
+ok   set arrow <->
+ok   set label
+ok   set name order_flow
+ok   set tags
+FAIL set arrow sideways
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  order_flow = user <-> shop tech "HTTPS" prop "retries" "3" style "stroke=#c00"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

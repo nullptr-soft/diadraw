@@ -1,0 +1,79 @@
+// BPMN process: handling an order in one pool with two lanes, drawn with the built-in BPMN
+// shapes in a fixed view, as BPMN tools lay it out. An exclusive gateway decides, a parallel
+// gateway splits and joins, a timer on the shipping task escalates, and the process ends in two
+// ways. The timer sits on the edge of its task, where its pin puts it; named flows carry
+// `route`s with their bend points. Flows between lanes name the lane: `sales.confirm -> …`.
+use "bpmn@^1" as bpmn
+
+style relationship { endArrow block endFill 1 }
+
+model {
+  shop = pool "Web shop" shape swimlane style "fillColor=#ffffff;horizontal=0" {
+    sales = lane "Sales" shape swimlane style "fillColor=#ffffff;horizontal=0" {
+      received = event "Order received" shape bpmn.start_event_message
+      check    = task "Check order" shape bpmn.user_task
+      valid    = gateway "Valid?" shape bpmn.exclusive_gateway
+      reject   = task "Reject order" shape bpmn.send_task
+      rejected = event "Rejected" shape bpmn.end_event
+      confirm  = task "Confirm order" shape bpmn.send_task
+    }
+    warehouse = lane "Warehouse" shape swimlane style "fillColor=#ffffff;horizontal=0" {
+      split    = gateway "" shape bpmn.parallel_gateway
+      pack     = task "Pack goods" shape bpmn.manual_task
+      invoice  = task "Create invoice" shape bpmn.service_task
+      join     = gateway "" shape bpmn.parallel_gateway
+      ship     = task "Ship parcel" shape bpmn.task
+      late     = event "2 days" shape bpmn.intermediate_catch_event_timer prop "bpmn.attachedTo" "shop.warehouse.ship"
+      shipped  = event "Shipped" shape bpmn.end_event_message
+      escalate = task "Chase carrier" shape bpmn.user_task
+    }
+
+    sales.received -> sales.check
+    sales.check -> sales.valid
+    no = sales.valid -> sales.reject "no"
+    sales.reject -> sales.rejected
+    yes = sales.valid -> sales.confirm "yes"
+    handover = sales.confirm -> warehouse.split
+    toPack = warehouse.split -> warehouse.pack
+    toInvoice = warehouse.split -> warehouse.invoice
+    packed = warehouse.pack -> warehouse.join
+    invoiced = warehouse.invoice -> warehouse.join
+    warehouse.join -> warehouse.ship
+    warehouse.ship -> warehouse.shipped
+    overdue = warehouse.late -> warehouse.escalate
+  }
+  bill = data "Invoice" shape bpmn.data_output
+
+  shop.warehouse.invoice --> bill style "endArrow=open;endFill=0"   // data association
+}
+
+view process {
+  include *
+  layout fixed
+  pin shop at 40, 40 size 1240, 440
+  pin shop.sales at 70, 40 size 1210, 200
+  pin shop.warehouse at 70, 240 size 1210, 240
+  pin shop.sales.received at 110, 122 size 36, 36
+  pin shop.sales.check at 190, 110 size 110, 60
+  pin shop.sales.valid at 350, 115 size 50, 50
+  pin shop.sales.reject at 460, 60 size 110, 60
+  pin shop.sales.rejected at 640, 72 size 36, 36
+  pin shop.sales.confirm at 460, 160 size 110, 60
+  pin shop.warehouse.split at 620, 305 size 50, 50
+  pin shop.warehouse.pack at 720, 245 size 110, 60
+  pin shop.warehouse.invoice at 720, 355 size 110, 60
+  pin shop.warehouse.join at 880, 305 size 50, 50
+  pin shop.warehouse.ship at 980, 300 size 110, 60
+  pin shop.warehouse.late at 1044, 344 size 32, 32   // a boundary event, on the task's lower edge
+  pin shop.warehouse.shipped at 1160, 312 size 36, 36
+  pin shop.warehouse.escalate at 1130, 400 size 110, 60
+  pin bill at 630, 395 size 40, 50
+  route "no" via 375, 90 from 0.5, 0 to 0, 0.5
+  route "yes" via 425, 140 425, 190 from 1, 0.5 to 0, 0.5
+  route "handover" via 515, 330 from 0.5, 1 to 0, 0.5
+  route "toPack" via 645, 275 from 0.5, 0 to 0, 0.5
+  route "toInvoice" via 645, 385 from 0.5, 1 to 0, 0.5
+  route "packed" via 905, 275 from 1, 0.5 to 0.5, 0
+  route "invoiced" via 905, 385 from 1, 0.5 to 0.5, 1
+  route "overdue" via 1100, 360 1100, 430 from 1, 0.5 to 0, 0.5
+}

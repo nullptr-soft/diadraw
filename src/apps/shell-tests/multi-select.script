@@ -1,0 +1,19 @@
+# Command-click (Ctrl-click) adds to the selection; dragging one of the selected boxes moves them
+# all, each pinned where it lands, as one change that one Undo takes back.
+select user
+add-select db
+selection
+drag db 40 60
+drag db 10 0
+undo
+# A band around the whole diagram takes every box and line.
+band -1000 -1000 5000 5000
+selection
+# Select All, then Delete removes everything as one change; Undo brings it back.
+select-all
+selection
+delete-selection
+selection
+undo
+add-select shop
+selection

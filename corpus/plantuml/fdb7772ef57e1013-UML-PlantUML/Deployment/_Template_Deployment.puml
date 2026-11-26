@@ -1,0 +1,10 @@
+@startuml
+node "Webサーバ" {
+  artifact "app.war"
+}
+database "DBサーバ" as db
+cloud "外部API" as ext
+
+[app.war] --> db : SQL
+[app.war] --> ext : HTTPS
+@enduml

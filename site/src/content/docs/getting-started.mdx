@@ -1,0 +1,76 @@
+---
+title: Getting started
+description: Open DiaDraw, draw your first diagram, and find your way around the app.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import AppLink from '../../components/AppLink.astro';
+
+DiaDraw runs in your browser. There is nothing to install and nothing to sign up for: your
+diagrams stay on your computer unless you share them.
+
+<AppLink />
+
+## Your first diagram
+
+<Steps>
+
+1. Open the app. The text editor is on one side and the canvas on the other, both showing the
+   same document.
+
+2. Replace the text with this:
+
+   ```diadraw
+   model {
+     customer = person "Customer"
+     shop = system "Shop"
+     customer -> shop "buys from"
+   }
+
+   view context {
+     include *
+   }
+   ```
+
+   The canvas draws the diagram as you type. Errors are underlined in the text, with the line and
+   column, and the rest of the document keeps drawing.
+
+3. Drag the **Shop** box on the canvas. A line such as `pin shop at …` appears in the view: the
+   canvas edits the text, and the text is what DiaDraw saves.
+
+4. Double-click a box to rename it (Enter starts a new line of the name, Ctrl+Enter or ⌘+Enter
+   finishes), or select it and change its properties in the inspector.
+   Each change rewrites only the part of the text it touches.
+
+</Steps>
+
+## Finding your way around
+
+- **Text and canvas.** Both edit the same model and share one undo history, so undo works the
+  same whichever side you changed.
+- **Views.** A document has a `model` and one or more `view`s. Pick the view to draw from the
+  view picker in the toolbar.
+- **Palette.** Drag shapes from the built-in libraries and draw.io's stencil sets onto the canvas.
+- **Files.** Open and save `.draw` files, or start from one of the examples.
+- **Import and export.** Import Mermaid, PlantUML, Structurizr, draw.io and BPMN; export SVG,
+  PNG, draw.io and BPMN.
+- **Share.** A share link carries the whole document in the address, so whoever opens it sees
+  your diagram without any server in between.
+
+<Aside type="tip">
+  The [tutorial](../tutorial/) builds a complete diagram step by step, and the
+  [reference](../reference/) has every statement of the language.
+</Aside>
+
+## Other ways to use DiaDraw
+
+The same engine runs everywhere, so a `.draw` file looks the same in each of these:
+
+- **Desktop apps** for macOS, Windows and Linux, with native menus and files.
+- **VS Code**: an extension with highlighting, the engine's language server and a live preview.
+- **The command line**: `diadraw render`, `check`, `format` and `import` for scripts and CI.
+- **AI agents**: `diadraw mcp` lets Claude Code, Claude Desktop and other agents check and
+  render diagrams and look at the result; see [Drawing with AI agents](../reference/guide/agents/).
+
+These are built from source for now; the
+[repository's README](https://github.com/mykulyak/diadraw#readme) explains how.

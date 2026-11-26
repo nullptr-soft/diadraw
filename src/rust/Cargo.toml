@@ -1,0 +1,11 @@
+# Rust bindings to libdiadraw over its C ABI (src/capi/include/diadraw/diadraw.h).
+[workspace]
+members = ["diadraw-sys", "diadraw"]
+resolver = "2"
+
+[workspace.package]
+version = "0.0.8"
+edition = "2021"
+rust-version = "1.77"
+license = "MIT"
+repository = "https://github.com/mykulyak/diadraw"

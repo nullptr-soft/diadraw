@@ -1,0 +1,21 @@
+%% a comment
+flowchart TB
+  subgraph one [The "first" one]
+    a1 --> a2
+    subgraph inner
+      a3
+    end
+  end
+  subgraph "Second group"
+    direction LR
+    b1 --> b2
+  end
+  subgraph Third with spaces
+    c1
+  end
+  a2 --> b1 --> c1
+  end
+  classDef hot fill:#f96
+  class a1 hot
+  style a2 fill:#bbf
+  click a1 callback

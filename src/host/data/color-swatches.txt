@@ -1,0 +1,50 @@
+// The preset colours every colour picker offers, so diagrams can keep to one set of colours.
+// Every app reads this one file: the native shells through dd::host::color_swatches() (compiled
+// into the core), the web app through src/apps/web/src/swatches.ts.
+//
+// One swatch per line, `#rrggbb Name`; the name is the swatch's tooltip and accessible label.
+// A blank line starts the next row of the picker. Lines starting with `//` are comments.
+
+#ffffff White
+#f3f4f6 Lightest grey
+#e5e7eb Lighter grey
+#d1d5db Light grey
+#9ca3af Grey
+#6b7280 Medium grey
+#4b5563 Dark grey
+#374151 Darker grey
+#1f2937 Darkest grey
+#000000 Black
+
+#fee2e2 Light red
+#ffedd5 Light orange
+#fef9c3 Light yellow
+#dcfce7 Light green
+#ccfbf1 Light teal
+#e0f2fe Light sky blue
+#dbeafe Light blue
+#e0e7ff Light indigo
+#f3e8ff Light purple
+#fce7f3 Light pink
+
+#ef4444 Red
+#f97316 Orange
+#eab308 Yellow
+#22c55e Green
+#14b8a6 Teal
+#0ea5e9 Sky blue
+#3b82f6 Blue
+#6366f1 Indigo
+#a855f7 Purple
+#ec4899 Pink
+
+#b91c1c Dark red
+#c2410c Dark orange
+#a16207 Dark yellow
+#15803d Dark green
+#0f766e Dark teal
+#0369a1 Dark sky blue
+#1d4ed8 Dark blue
+#4338ca Dark indigo
+#7e22ce Dark purple
+#be185d Dark pink

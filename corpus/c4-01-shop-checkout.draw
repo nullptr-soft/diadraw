@@ -1,0 +1,16 @@
+// C4 container view: the example from the plan.
+model {
+  customer = person "Customer"
+  shop = system "Shop" {
+    web = container "Web app" tech "React"
+    db  = container "Orders DB" tech "Postgres" shape cylinder
+  }
+  customer -> shop.web "places order"
+  shop.web -> shop.db "writes"
+}
+
+view checkout of shop {
+  include *
+  layout layered direction right
+  pin shop.db below shop.web    // written by a canvas drag
+}

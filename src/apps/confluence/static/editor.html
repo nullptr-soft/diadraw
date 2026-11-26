@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DiaDraw editor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="editor loading">
+    <header>
+      <strong class="brand">DiaDraw</strong>
+      <label
+        >View
+        <select id="view"></select
+      ></label>
+      <label
+        >Theme
+        <select id="theme"></select
+      ></label>
+      <button type="button" id="import">Import…</button>
+      <span class="spacer"></span>
+      <button type="button" id="cancel">Cancel</button>
+      <button type="button" id="save" class="primary">Save</button>
+    </header>
+    <main>
+      <section class="text">
+        <textarea
+          id="source"
+          spellcheck="false"
+          autocapitalize="off"
+          autocomplete="off"
+          aria-label="DiaDraw text"
+        ></textarea>
+        <ul id="problems" aria-live="polite"></ul>
+      </section>
+      <section id="preview" class="preview" aria-label="Preview"></section>
+    </main>
+    <footer>
+      <p id="status" aria-live="polite"></p>
+    </footer>
+    <dialog id="import-dialog">
+      <form method="dialog">
+        <h2>Import a diagram</h2>
+        <p>
+          Paste a diagram or pick a file. It replaces the text in the editor; Ctrl+Z brings the old
+          text back.
+        </p>
+        <label
+          >Format
+          <select id="import-format"></select
+        ></label>
+        <label
+          >File
+          <input
+            type="file"
+            id="import-file"
+            accept=".mmd,.mermaid,.puml,.plantuml,.pu,.iuml,.dsl,.drawio,.xml,.bpmn,.txt"
+        /></label>
+        <textarea id="import-source" spellcheck="false" aria-label="Diagram to import"></textarea>
+        <p id="import-notes" class="error" aria-live="polite"></p>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button id="import-apply" class="primary">Import</button>
+        </menu>
+      </form>
+    </dialog>
+    <script type="module" src="editor.js"></script>
+  </body>
+</html>

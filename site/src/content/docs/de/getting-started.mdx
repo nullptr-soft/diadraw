@@ -1,0 +1,63 @@
+---
+title: Erste Schritte
+description: Öffne DiaDraw, zeichne dein erstes Diagramm und lerne dich in der App zurechtzufinden.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import AppLink from '../../../components/AppLink.astro';
+
+DiaDraw läuft im Browser. Du musst nichts installieren und dich nirgends anmelden. Deine Diagramme bleiben auf deinem Computer, solange du sie nicht teilst.
+
+<AppLink>DiaDraw öffnen</AppLink>
+
+## Dein erstes Diagramm
+
+<Steps>
+
+1. Öffne die App. Auf einer Seite siehst du den Texteditor, auf der anderen die Zeichenfläche. Beide zeigen dasselbe Dokument.
+
+2. Ersetze den Text durch diesen:
+
+   ```diadraw
+   model {
+     customer = person "Customer"
+     shop = system "Shop"
+     customer -> shop "buys from"
+   }
+
+   view context {
+     include *
+   }
+   ```
+
+   Während du tippst, erscheint das Diagramm auf der Zeichenfläche. Fehler werden im Text unterstrichen, mit Angabe von Zeile und Spalte. Der Rest des Dokuments wird weiterhin gezeichnet.
+
+3. Ziehe den Kasten **Shop** auf der Zeichenfläche. In der Ansicht erscheint eine Zeile wie `pin shop at …`: Die Zeichenfläche ändert den Text, und diesen Text speichert DiaDraw.
+
+4. Doppelklicke auf einen Kasten, um ihn umzubenennen, oder wähle ihn aus und ändere seine Eigenschaften im Inspektor. Dabei wird jeweils nur der betroffene Teil des Textes neu geschrieben.
+
+</Steps>
+
+## Orientierung in der App
+
+- **Text und Zeichenfläche.** Beide bearbeiten dasselbe Modell und teilen sich einen Änderungsverlauf. Rückgängig machen funktioniert also auf beiden Seiten gleich.
+- **Ansichten.** Ein Dokument enthält ein `model` und mindestens eine `view`. Mit der Ansichtsauswahl in der Symbolleiste bestimmst du, welche Ansicht gezeichnet wird.
+- **Palette.** Ziehe Formen aus den eingebauten Bibliotheken und den Schablonensätzen von draw.io auf die Zeichenfläche.
+- **Dateien.** Öffne und speichere `.draw`-Dateien oder beginne mit einem der Beispiele.
+- **Import und Export.** Importiere Mermaid, PlantUML, Structurizr, draw.io und BPMN; exportiere SVG, PNG, draw.io und BPMN.
+- **Teilen.** Beim Teilen steckt das ganze Dokument in der Linkadresse. Wer den Link öffnet, sieht dein Diagramm, ganz ohne vermittelnden Server.
+
+<Aside type="tip">
+  Im [Tutorial](../tutorial/) erstellst du Schritt für Schritt ein vollständiges Diagramm. Die [Referenz](../reference/) erklärt jede Anweisung der Sprache.
+</Aside>
+
+## Weitere Möglichkeiten, DiaDraw zu nutzen
+
+Überall läuft dieselbe Engine. Deshalb sieht eine `.draw`-Datei in allen diesen Umgebungen gleich aus:
+
+- **Desktop-Apps** für macOS, Windows und Linux mit nativen Menüs und Dateizugriff.
+- **VS Code**: eine Erweiterung mit Syntaxhervorhebung, dem Sprachserver der Engine und einer Live-Vorschau.
+- **Kommandozeile**: `diadraw render`, `check`, `format` und `import` für Skripte und CI.
+- **KI-Agenten**: Mit `diadraw mcp` können Claude Code, Claude Desktop und andere Agenten Diagramme prüfen und rendern und das Ergebnis ansehen; siehe [Zeichnen mit KI-Agenten](../reference/guide/agents/).
+
+Diese Varianten musst du derzeit aus dem Quellcode bauen. Wie das geht, erklärt die [README des Repositorys](https://github.com/mykulyak/diadraw#readme).

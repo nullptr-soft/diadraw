@@ -1,0 +1,39 @@
+// Flowchart: a CI pipeline with groups for stages.
+model {
+  push = start "Push"
+
+  group "Build" {
+    install  = process "Install"
+    compile  = process "Compile"
+  }
+
+  group "Verify" {
+    lint     = process "Lint"
+    unit     = process "Unit tests"
+    e2e      = process "E2E tests"
+  }
+
+  green   = decision "All green?"
+  deploy  = process "Deploy to staging"
+  alert   = process "Alert author"
+  finish  = end "Done"
+
+  push -> install
+  install -> compile
+  compile -> lint
+  compile -> unit
+  compile -> e2e
+  lint -> green
+  unit -> green
+  e2e -> green
+  green -> deploy "yes"
+  green -> alert "no"
+  deploy -> finish
+  alert -> finish
+}
+
+view pipeline {
+  include *
+  layout layered direction right
+  order lint unit e2e
+}

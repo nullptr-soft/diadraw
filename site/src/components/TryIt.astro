@@ -1,0 +1,49 @@
+---
+// A DiaDraw document as a highlighted code block, with a link that opens it in the web app and,
+// when the Pages build has rendered it (scripts/render-tutorial.mjs), the diagram itself.
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { Code, LinkButton } from '@astrojs/starlight/components';
+import { appUrl, shareToken } from '../share';
+
+interface Props {
+  /** The document's text. */
+  code: string;
+  /** The file's name without `.draw`; it names the rendered SVGs too. */
+  name: string;
+  /** The views to show, in order. */
+  views?: string[];
+}
+
+const { code, name, views = [] } = Astro.props;
+const href = appUrl(`#${await shareToken(code)}`);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const images = views
+  .map((view) => ({ file: `tutorial/${name}.${view}.svg`, view }))
+  .filter(({ file }) => existsSync(resolve('public', file)));
+---
+
+<Code code={code} lang="diadraw" title={`${name}.draw`} />
+{
+  images.map(({ file, view }) => (
+    <figure class="dd-diagram">
+      <img src={base + file} alt={Astro.locals.t('diadraw.viewAlt', { view, name })} loading="lazy" />
+    </figure>
+  ))
+}
+<LinkButton href={href} variant="secondary" icon="external">{Astro.locals.t('diadraw.openStep')}</LinkButton>
+
+<style>
+  .dd-diagram {
+    margin-block: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    background: #ffffff;
+    overflow-x: auto;
+  }
+  .dd-diagram img {
+    max-width: 100%;
+    height: auto;
+  }
+</style>

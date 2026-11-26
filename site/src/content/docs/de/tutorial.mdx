@@ -1,0 +1,90 @@
+---
+title: Tutorial
+description: Erstelle Schritt für Schritt ein Diagramm eines Onlineshops – von zwei Kästen bis zu mehreren Ansichten, Stilen und einem Sequenzdiagramm.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import TryIt from '../../../components/TryIt.astro';
+import step1 from '../../../tutorial/01-first-diagram.draw?raw';
+import step2 from '../../../tutorial/02-relationships.draw?raw';
+import step3 from '../../../tutorial/03-inside.draw?raw';
+import step4 from '../../../tutorial/04-layout.draw?raw';
+import step5 from '../../../tutorial/05-style.draw?raw';
+import step6 from '../../../tutorial/06-sequence.draw?raw';
+
+In diesem Tutorial beschreibst du einen kleinen Onlineshop: Wer nutzt ihn, aus welchen Teilen besteht er und wie läuft eine Bestellung ab? Dabei lernst du alle Bausteine eines DiaDraw-Dokuments kennen: Modell, Ansichten, Layout-Hinweise, Stile und Sequenzdiagramme.
+
+Jeder Schritt zeigt das vollständige Dokument. Mit **Diesen Schritt in DiaDraw öffnen** lädst du es in die App. Dort kannst du mitmachen, etwas ändern und die Auswirkungen beobachten.
+
+## 1. Zwei Kästen und eine Linie
+
+Ein Dokument enthält ein `model`, das festlegt, was existiert, und mindestens eine `view`, die festlegt, was gezeichnet wird.
+
+<TryIt code={step1} name="01-first-diagram" views={['context']} />
+
+- `customer = person "Customer"` deklariert ein Element: mit Bezeichner (`customer`), Art (`person`) und Beschriftung. Die Art bestimmt, wie es gezeichnet wird.
+- `customer -> shop "buys from"` ist eine Beziehung mit Beschriftung.
+- `view context { include * }` zeichnet jedes Element des Modells.
+
+## 2. Mehr über Beziehungen
+
+Elemente und Beziehungen lassen sich genauer beschreiben: mit einer Beschreibung (`description`), einer Technologie (`tech`) und Tags (`tag`), über die du später Stile zuweisen kannst.
+
+<TryIt code={step2} name="02-relationships" views={['context']} />
+
+- `->` zeichnet eine durchgezogene Linie, `-->` eine gestrichelte; `<->` zeigt in beide Richtungen.
+- `layout layered direction right` ordnet das Diagramm von links nach rechts an. Ohne `layout`-Zeile verwendet die Ansicht `layered` von oben nach unten.
+
+## 3. Ein Blick ins Innere
+
+Der Shop besteht aus mehreren Teilen. Gib ihm einen Block mit seinen inneren Elementen und füge eine zweite Ansicht hinzu, die sie zeigt.
+
+<TryIt code={step3} name="03-inside" views={['context', 'containers']} />
+
+- Elemente lassen sich verschachteln. Innerhalb von `shop { … }` heißt die Web-App einfach `web`, außerhalb `shop.web`.
+- `view containers of shop` beschränkt die Ansicht auf den Shop: `include *` nimmt dessen Kindelemente auf; `customer` und `payments` werden namentlich hinzugefügt.
+- Die Ansicht `context` zeigt den Shop weiterhin als einen Kasten. Die Linien zu `shop.web` und `shop.api` werden zum Shop selbst geführt. So bleibt die Übersicht richtig, wenn du Details ergänzt.
+
+In der Ansichtsauswahl in der Symbolleiste der App bestimmst du, welche Ansicht gezeichnet wird.
+
+<Aside type="tip">
+  Beide Ansichten beruhen auf demselben Modell. Benennst du **Web app** in einer um, ändert sich der Name auch in der anderen.
+</Aside>
+
+## 4. Das Layout steuern
+
+DiaDraw platziert die Kästen für dich. Soll etwas woanders stehen, gibst du einen Hinweis statt Koordinaten an. So bleibt das Diagramm übersichtlich, wenn es wächst.
+
+<TryIt code={step4} name="04-layout" views={['containers']} />
+
+- `pin db below api` und `pin payments right of api` platzieren ein Element neben oder unter einem anderen.
+- `spacing 60` vergrößert den Abstand zwischen den Schichten.
+- Ziehst du einen Kasten auf der Zeichenfläche, schreibt DiaDraw eine `pin … at`-Zeile. Halte beim Ziehen die Wahltaste (Alt) gedrückt, um stattdessen einen relativen Hinweis wie oben einzutragen.
+
+Für andere Diagramme eignen sich andere Layouts: `tree`, `grid`, `radial`, `force` sowie `fixed` für von Hand gezeichnete Diagramme. Das [Kapitel über Layouts](../reference/guide/layouts/) erklärt, wann welches passt.
+
+## 5. Das Aussehen anpassen
+
+Designs und Stilblöcke ändern das Aussehen des gesamten Dokuments. Mit Notizen, Texten und Rahmen kannst du eine Ansicht erläutern, ohne dem Modell etwas hinzuzufügen.
+
+<TryIt code={step5} name="05-style" views={['containers']} />
+
+- `theme dark` zeichnet jede Ansicht auf dunklem Hintergrund. Auch `default` und `mono` sind eingebaut, und du kannst eigene Designs deklarieren.
+- `style container { … }` gestaltet alle Elemente einer Art, `style tag "external" { … }` alles mit diesem Tag.
+- `text`, `note` und `box … around` gehören zur Ansicht, sodass die Ansicht `context` aufgeräumt bleibt.
+
+## 6. Mit einem Sequenzdiagramm einen Ablauf erzählen
+
+Eine Ansicht mit `layout sequence` zeichnet ihre Elemente als Lebenslinien und die Nachrichten ihres `sequence`-Blocks von oben nach unten.
+
+<TryIt code={step6} name="06-sequence" views={['checkout']} />
+
+- `->` ist ein Aufruf, `->>` eine asynchrone Nachricht und `-->` eine Antwort.
+- `activate` und `deactivate` zeichnen einen Aktivierungsbalken; `alt`, `opt`, `loop`, `par` und die übrigen Rahmen gruppieren Nachrichten.
+- Nachrichten gehören zur Ansicht, nicht zum Modell. Dieselben Beteiligten können also in vielen Sequenzansichten vorkommen.
+
+## Wie geht es weiter?
+
+- Teile das Diagramm über einen Link oder exportiere es über die Symbolleiste als SVG, PNG, draw.io oder BPMN.
+- Im [Benutzerhandbuch](../reference/guide/) erfährst du, wofür die einzelnen Funktionen gedacht sind. Die [DSL-Referenz](../reference/dsl/) erklärt jede Anweisung.
+- Sag uns auf der [Feedbackseite](../feedback/), was du denkst.

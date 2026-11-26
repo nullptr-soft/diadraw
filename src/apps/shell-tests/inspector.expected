@@ -1,0 +1,28 @@
+ok   select db
+ok   set technology Postgres 16
+ok   set tags orders, pii
+ok   set shape cylinder
+ok   set style fill=#dae8fc;stroke=#6c8ebf
+ok   set props owner=Ann\ntier=1
+ok   set kind container
+ok   set description Every order, ever
+ok   set tags pii
+ok   undo
+ok   select user
+ok   set name Buyer
+ok   set props
+--- text
+// a comment that must survive
+model {
+  user = person "Buyer"
+  shop = system "Shop"
+  db = container "Orders" tech "Postgres 16" tag "orders" tag "pii" shape cylinder style "fill=#dae8fc;stroke=#6c8ebf" prop "owner" "Ann" prop "tier" "1" description "Every order, ever"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

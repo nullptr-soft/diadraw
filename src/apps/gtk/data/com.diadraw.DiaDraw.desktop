@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=DiaDraw
+GenericName=Diagram Editor
+Comment=Diagrams as text, with a canvas that writes the text back
+Exec=diadraw-gtk %F
+Icon=com.diadraw.DiaDraw
+Terminal=false
+Categories=Graphics;GTK;
+MimeType=text/x-diadraw;
+Keywords=diagram;architecture;flowchart;C4;UML;drawio;
+StartupNotify=true

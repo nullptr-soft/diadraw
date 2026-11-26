@@ -1,0 +1,19 @@
+ok   reconnect user->shop target db
+ok   relabel user->db buys from
+ok   reconnect user->db source shop
+ok   undo
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> db "buys from"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

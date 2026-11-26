@@ -1,0 +1,32 @@
+// UML state machine: the life of an order. Transitions read "event [guard] / action"; a
+// composite state groups the states of fulfilment.
+model {
+  initial = start "" shape circle style "fill=#1e293b;stroke=#1e293b"
+  created = process "Created" shape rounded
+  paid    = process "Paid" shape rounded description "entry / reserve stock"
+  fulfil  = group "Fulfilment" {
+    packing = process "Packing" shape rounded
+    shipped = process "Shipped" shape rounded
+    packing -> shipped "handed to carrier"
+  }
+  delivered = process "Delivered" shape rounded
+  cancelled = process "Cancelled" shape rounded
+  final     = end "" shape circle style "fill=#ffffff;stroke=#1e293b;strokeWidth=4"
+
+  initial -> created
+  created -> paid "pay [amount ok] / send receipt"
+  created -> cancelled "cancel"
+  created -> cancelled "after 24 h"
+  paid -> fulfil.packing "picked"
+  paid -> cancelled "cancel / refund"
+  fulfil.shipped -> delivered "signed for"
+  delivered -> final
+  cancelled -> final
+}
+
+view lifecycle {
+  include *
+  layout layered direction right
+  size initial 28, 28
+  size final 32, 32
+}

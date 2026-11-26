@@ -1,0 +1,6 @@
+# LF everywhere, Windows included: Prettier checks for LF, and the scripts run under sh.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+# Third-party test inputs stay byte for byte as they were committed.
+corpus/** -text

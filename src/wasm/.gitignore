@@ -1,0 +1,3 @@
+dist/
+src/core/diadraw.mjs
+src/core/diadraw.wasm

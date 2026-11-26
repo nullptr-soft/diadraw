@@ -1,0 +1,24 @@
+name: Send feedback
+description: An idea, a wish, or something that could be easier.
+labels: [feedback]
+body:
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your feedback
+      description: What would you like DiaDraw to do, or do differently? What are you trying to draw?
+    validations:
+      required: true
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      options: [macOS, Linux (GTK), Windows, Web, Desktop (Tauri), VS Code, CLI]
+  - type: input
+    id: version
+    attributes:
+      label: DiaDraw version
+  - type: input
+    id: os
+    attributes:
+      label: Operating system

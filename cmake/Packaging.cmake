@@ -1,0 +1,46 @@
+# Packages of the native apps, with CPack (`cpack --preset <name>` from the root, after a build):
+#   macOS    a DMG holding DiaDraw.app (drag it to Applications)
+#   Linux    a tarball of the installed tree (the Flatpak manifest in src/apps/gtk/flatpak builds the
+#            app store package), plus DEB and RPM where their tools are present
+#   Windows  a portable ZIP of DiaDraw.exe and what it needs (the MSIX is made by
+#            src/apps/winui/msix/pack.ps1)
+
+set(CPACK_PACKAGE_NAME "DiaDraw")
+set(CPACK_PACKAGE_VENDOR "DiaDraw")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Diagrams as text, with a canvas that writes the text back")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/mykulyak/diadraw")
+set(CPACK_PACKAGE_FILE_NAME "DiaDraw-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_CHECKSUM SHA256)
+set(CPACK_STRIP_FILES ON)
+
+if(APPLE)
+  set(CPACK_GENERATOR DragNDrop)
+  set(CPACK_DMG_VOLUME_NAME "DiaDraw ${PROJECT_VERSION}")
+  set(CPACK_DMG_FORMAT UDZO)
+  # The app is signed when it is built; stripping would break the signature.
+  set(CPACK_STRIP_FILES OFF)
+elseif(WIN32)
+  set(CPACK_GENERATOR ZIP)
+  set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+else()
+  set(CPACK_GENERATOR TGZ)
+  find_program(DPKG_DEB dpkg-deb)
+  if(DPKG_DEB)
+    list(APPEND CPACK_GENERATOR DEB)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "DiaDraw")
+    set(CPACK_DEBIAN_PACKAGE_SECTION graphics)
+    set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+    set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+  endif()
+  find_program(RPMBUILD rpmbuild)
+  if(RPMBUILD)
+    list(APPEND CPACK_GENERATOR RPM)
+    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+    set(CPACK_RPM_PACKAGE_GROUP "Applications/Graphics")
+    set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
+  endif()
+  set(CPACK_PACKAGING_INSTALL_PREFIX /usr)
+endif()
+
+include(CPack)

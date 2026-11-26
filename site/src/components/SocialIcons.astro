@@ -1,0 +1,28 @@
+---
+// Starlight's header links, with Give feedback in front: one click from every page opens the
+// feedback form on GitHub (the same form as the apps' Give Feedback button).
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+
+const feedbackForm = 'https://github.com/mykulyak/diadraw/issues/new?template=feedback.yml';
+---
+
+<a class="feedback" href={feedbackForm} title={Astro.locals.t('diadraw.feedbackTitle')}>
+  {Astro.locals.t('diadraw.feedback')}
+</a>
+<Default />
+
+<style>
+  .feedback {
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    background: var(--sl-color-text-accent);
+    color: var(--sl-color-black);
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .feedback:hover {
+    background: var(--sl-color-white);
+  }
+</style>

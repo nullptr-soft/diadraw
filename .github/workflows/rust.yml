@@ -1,0 +1,46 @@
+name: Rust bindings
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'src/**'
+      - 'assets/builtin/**'
+      - '.github/workflows/rust.yml'
+  pull_request:
+    paths:
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'src/**'
+      - 'assets/builtin/**'
+      - '.github/workflows/rust.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Cargo's build script runs CMake with the platform's default generator and compiler:
+        # Unix Makefiles on Linux and macOS, Visual Studio 2022 (MSVC) on Windows.
+        os: [ubuntu-24.04, macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: src/rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo test
+      - run: cargo run --example diadraw -- render ../../corpus/c4-02-banking.draw banking.png containers

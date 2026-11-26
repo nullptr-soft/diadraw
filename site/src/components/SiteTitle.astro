@@ -1,0 +1,27 @@
+---
+// Starlight's site title with DiaDraw's version beside it. The version comes from the repository's
+// VERSION file, which astro.config.mjs reads at build time.
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+
+declare const __DIADRAW_VERSION__: string;
+const version = __DIADRAW_VERSION__;
+---
+
+<div class="site-title-version">
+  <Default />
+  <span class="version" title={Astro.locals.t('diadraw.version')}>v{version}</span>
+</div>
+
+<style>
+  .site-title-version {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .version {
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,73 @@
+# The `diadraw` Python package: the C++ core as a nanobind extension module, built from this
+# repository's CMake tree by scikit-build-core. `pip install .` builds it; see src/python/README.md.
+
+[build-system]
+requires = ["scikit-build-core>=0.10", "nanobind>=2.4"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "diadraw"
+dynamic = ["version"]
+description = "Parse, check, format, render and import DiaDraw diagrams from Python"
+readme = "src/python/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  # Not published yet; PyPI refuses packages with this classifier. Drop it to publish.
+  "Private :: Do Not Upload",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/mykulyak/diadraw"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+build-dir = "build/python/{wheel_tag}"
+cmake.build-type = "Release"
+wheel.packages = ["src/python/diadraw"]
+# Python 3.12 and later share one stable-ABI wheel.
+wheel.py-api = "cp312"
+install.components = ["python"]
+build.targets = ["diadraw_python"]
+sdist.exclude = ["site", "plugins", "node_modules", "corpus/local-only", "build"]
+
+[tool.scikit-build.cmake.define]
+DIADRAW_BUILD_PYTHON = "ON"
+DIADRAW_BUILD_TESTS = "OFF"
+DIADRAW_BUILD_CLI = "OFF"
+DIADRAW_BUILD_GTK = "OFF"
+DIADRAW_BUILD_MACOS = "OFF"
+DIADRAW_BUILD_WINUI = "OFF"
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "VERSION"
+regex = "(?P<value>\\d+\\.\\d+\\.\\d+)"
+
+[tool.pytest.ini_options]
+testpaths = ["src/python/tests"]
+
+[tool.cibuildwheel]
+build = ["cp310-*", "cp311-*", "cp312-*"]
+skip = ["*-win32", "*_i686", "*-musllinux_*"]
+test-extras = ["test"]
+test-command = "pytest {project}/src/python/tests"
+build-verbosity = 1
+
+[tool.cibuildwheel.linux]
+# GCC 12+ for C++20.
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+
+[tool.cibuildwheel.macos]
+# libc++'s std::to_chars for doubles (src/base/src/json.cpp) needs macOS 13.3.
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.3" }

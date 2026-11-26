@@ -1,0 +1,19 @@
+// Component diagram with an absolute position (freeform opt-in) and a bidirectional link.
+model {
+  editor = component "Editor"
+  store  = component "Model store"
+  worker = component "Layout worker"
+  render = component "Renderer"
+  memo   = note "Text and canvas never talk to each other directly"
+
+  editor <-> store "operations"
+  store -> worker "view + hints"
+  worker -> render "geometry"
+  store -> render "styles"
+}
+
+view pipeline {
+  include *
+  layout layered direction right
+  pin memo at 40, -80
+}

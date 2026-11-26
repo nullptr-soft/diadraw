@@ -1,0 +1,57 @@
+// DiaDraw's own architecture, drawn with DiaDraw.
+// Regenerate the pictures with: npm run docs:diagrams
+model {
+  author = person "Author"
+
+  diadraw = system "DiaDraw" {
+    group "Apps and integrations" {
+      web = container "Web app" tech "Web Components, CodeMirror 6"
+      desktop = container "Desktop app" tech "Tauri 2"
+      vscode = container "VS Code extension" tech "LSP client, webview"
+      native = container "Native shells" tech "AppKit, gtkmm, WinUI"
+      cli = container "CLI" tech "C++"
+    }
+    group "Engine" {
+      wasm = container "WebAssembly module" tech "@diadraw/wasm" description "the core for JavaScript hosts"
+      dsl = container "DSL" tech "C++, hand-written parser" description "parse, print, text patches"
+      editor = container "Editor logic" description "gestures to operations"
+      core = container "Core model" description "elements, views, typed operations"
+      layout = container "Layout" tech "C++, layered engine"
+      render = container "Renderer" tech "SVG"
+    }
+    lsp = container "Language server" tech "C++, dd::lsp"
+    importers = container "Importers" description "Mermaid, PlantUML, Structurizr, draw.io, BPMN"
+    export = container "Export" tech "lunasvg, PDF writer"
+  }
+
+  author -> diadraw.web "edits text and canvas"
+  author -> diadraw.vscode "edits .draw files"
+  author -> diadraw.cli "renders in CI"
+
+  diadraw.desktop -> diadraw.web "wraps"
+  diadraw.web -> diadraw.wasm "calls"
+  diadraw.vscode -> diadraw.wasm "LSP, previews"
+  diadraw.wasm -> diadraw.editor "gestures"
+  diadraw.wasm -> diadraw.importers "import"
+  diadraw.wasm -> diadraw.lsp "LSP messages"
+  diadraw.native -> diadraw.editor "gestures, C ABI"
+  diadraw.editor -> diadraw.dsl "operations"
+  diadraw.lsp -> diadraw.dsl "parse"
+  diadraw.cli -> diadraw.dsl "parse"
+  diadraw.cli -> diadraw.importers "import"
+  diadraw.cli -> diadraw.export "PNG, PDF"
+  diadraw.dsl -> diadraw.core "operations"
+  diadraw.importers -> diadraw.core "builds models"
+  diadraw.core -> diadraw.layout "views and hints"
+  diadraw.layout -> diadraw.render "geometry"
+}
+
+view containers of diadraw {
+  include * author
+  layout layered direction down
+}
+
+view engine of diadraw {
+  include dsl editor core diadraw.layout render   // bare `layout` would start a layout statement
+  layout layered direction right
+}

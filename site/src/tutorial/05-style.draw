@@ -1,0 +1,39 @@
+theme dark
+
+style container {
+  fill "#438dd5"
+  stroke "#3c7fc0"
+}
+style tag "external" { fill "#999999" dashed true }
+
+model {
+  customer = person "Customer"
+  shop = system "Shop" description "Sells things online" {
+    web = container "Web app" tech "React"
+    api = container "API" tech "Go"
+    db  = container "Orders DB" tech "Postgres" shape cylinder
+
+    web -> api "calls" tech "JSON/HTTPS"
+    api -> db "reads and writes"
+  }
+  payments = system "Payment provider" tag "external"
+
+  customer -> shop.web "places orders"
+  shop.api -> payments "charges cards" tech "HTTPS"
+  payments --> shop.api "confirms payment"
+}
+
+view context {
+  include customer shop payments
+  layout layered direction right
+}
+
+view containers of shop {
+  include * customer payments
+  layout layered direction down spacing 60
+  pin db below api
+  pin payments right of api
+  text "Shop, container level" style "fontSize=18;fontStyle=1"
+  note "Owned by the web team" left of web
+  box pci "PCI scope" around api db
+}

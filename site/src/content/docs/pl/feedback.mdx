@@ -1,0 +1,55 @@
+---
+title: Opinie i zgłoszenia
+description: Zgłoś błąd lub napisz, co warto dodać w kolejnej wersji DiaDraw.
+---
+
+import { LinkButton, Aside } from '@astrojs/starlight/components';
+
+DiaDraw to młody projekt. Twoje doświadczenia pomagają nam zdecydować, nad czym pracować dalej.
+Możesz skontaktować się z nami na dwa sposoby. Każdy z poniższych przycisków otwiera krótki
+formularz w systemie zgłoszeń DiaDraw w serwisie GitHub.
+
+## Zgłoś błąd
+
+Coś nie działa tak, jak powinno: diagram wyświetla się niepoprawnie, zmiana pojawia się
+w niewłaściwym miejscu lub aplikacja przestaje odpowiadać.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=bug_report.yml"
+  icon="external"
+>
+  Zgłoś błąd
+</LinkButton>
+
+## Podziel się opinią
+
+Masz pomysł lub życzenie? Jakiego diagramu nie udało Ci się narysować? Co mogłoby być łatwiejsze?
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=feedback.yml"
+  icon="external"
+  variant="secondary"
+>
+  Podziel się opinią
+</LinkButton>
+
+## Z poziomu aplikacji
+
+W każdej aplikacji DiaDraw do przesłania opinii wystarczy jedno kliknięcie przycisku **Give Feedback**
+na pasku narzędzi. Niedaleko znajdziesz też polecenie **Report a Bug…** do zgłaszania błędów.
+Oba otwierają te same formularze co powyżej. Nazwa aplikacji, wersja DiaDraw i informacje
+o Twoim systemie są już wpisane:
+
+| Aplikacja                      | Prześlij opinię (Give Feedback)       | Zgłoś błąd (Report a Bug)                    |
+| ------------------------------ | ------------------------------------ | --------------------------------------------- |
+| Przeglądarkowa i desktopowa (Tauri) | Na prawym końcu paska narzędzi  | Obok przycisku Give Feedback                  |
+| macOS                          | Na prawym końcu paska narzędzi       | W menu pomocy                                 |
+| Windows                        | Na prawym końcu paska narzędzi       | W menu pomocy                                 |
+| Linux (GTK)                    | Na pasku nagłówka, obok menu głównego | W menu głównym (☰) w prawym górnym rogu       |
+
+<Aside>
+  Do wysłania formularza potrzebujesz konta w serwisie GitHub. Dopóki nie klikniesz **Create**
+  w serwisie GitHub, aplikacja niczego nie wysyła. Twój diagram nigdy nie jest dołączany do
+  zgłoszenia. Jeśli problem zależy od diagramu, wklej do formularza najkrótszy fragment tekstu
+  `.draw`, na którym widać problem. Pomiń wszystko, czego nie chcesz udostępniać.
+</Aside>

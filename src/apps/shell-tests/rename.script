@@ -1,0 +1,13 @@
+# Rename Element… from the text (the element named at the cursor) and from the canvas (the one
+# selected): its id and every reference to it change, comments and layout stay.
+caret 6 4
+rename-at buyer
+caret 6 15
+rename-at store
+undo
+select db
+rename-selected orders
+rename-selected 9bad
+rename-selected shop
+caret 2 1
+rename-at nothing

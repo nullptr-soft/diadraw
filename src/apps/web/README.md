@@ -1,0 +1,25 @@
+# @diadraw/web
+
+The DiaDraw web app: Web Components on the C++ core (`@diadraw/wasm`). The desktop app
+(`src/apps/desktop`, Tauri) wraps it too.
+
+```bash
+npm run dev:web         # or: npm run dev -w @diadraw/web
+npx turbo run build --filter=@diadraw/web...
+```
+
+Building needs Emscripten for the core (`EMSDK` pointing at an emsdk checkout); see
+`src/wasm`.
+
+| Element            | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<dd-app>`         | The shell: toolbar, files (with reload on change in the desktop app), examples, view picker, import, share links, SVG/PNG/draw.io/BPMN export. Owns the core `Session`.                                                                                                                                                                                                                                                                                                                                        |
+| `<dd-text>`        | CodeMirror 6 with DiaDraw highlighting and the core's diagnostics. Canvas edits arrive as transactions, so one undo history covers both panes.                                                                                                                                                                                                                                                                                                                                                                 |
+| `<dd-canvas>`      | The rendered view as an editor: select, drag to move (writes `pin … at`, Alt for `pin`/`align`), connect from the handle, drag an end of a selected line to reconnect it, double-click to rename, Delete, ⌘Z / ⇧⌘Z. It reports gestures as events; the app turns them into core calls.                                                                                                                                                                                                                         |
+| `<dd-palette>`     | Shapes and fragments from the built-in libraries and draw.io's stencil sets.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `<dd-inspector>`   | The selected element's or relationship's properties as fields. A committed field fires `dd-update` (an element, applied as `updateElement`) or `dd-update-relationship` (a line and its own name, for `session.updateRelationship`); only what changed is rewritten. An element's Shared styles field lists the `style` blocks that apply to it; editing it adds `addStyleRule`, `updateStyleRule` or `removeStyleRule` to the same edit.                                                                      |
+| `<dd-storage>`     | The Storage dialog: one tab each for this browser's IndexedDB (`library.ts`), Google Drive and OneDrive (`cloud.ts`, signing in through `public/oauth.html`), behind one interface (`storage.ts`): save the current diagram under a name, open, rename and delete. A diagram opened from one saves back there with ⌘S. The app also keeps the working copy in IndexedDB, so a reload or a closed tab picks up where it left off (a share link still wins). See docs/guide/cloud-storage.md for the client IDs. |
+| `<dd-style-panel>` | With nothing selected: the document's and the view's theme, every style block, and the keys and node colours of the declared theme the view uses. Committing a field fires `dd-document-update`; the app turns it into `setTheme`, `addTheme`, `updateTheme` and style block operations (see `style-fields.ts`).                                                                                                                                                                                               |
+
+Every gesture goes to the C++ session, which returns a minimal text patch; the text stays the
+source of truth.

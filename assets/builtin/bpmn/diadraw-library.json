@@ -1,0 +1,1508 @@
+{
+  "name": "bpmn",
+  "version": "1.0.0",
+  "description": "BPMN 2.0 shapes: events with every marker, activities with type icons and loop/multi-instance/compensation markers, gateways, data, artifacts, conversations and choreographies.",
+  "license": "MIT",
+  "author": "DiaDraw",
+  "source": {
+    "kind": "original"
+  },
+  "shapes": {
+    "start_event": {
+      "label": "Start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event"],
+      "svg": "shapes/start_event.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_message": {
+      "label": "Message start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/start_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_timer": {
+      "label": "Timer start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "timer"],
+      "svg": "shapes/start_event_timer.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_conditional": {
+      "label": "Conditional start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "conditional"],
+      "svg": "shapes/start_event_conditional.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_signal": {
+      "label": "Signal start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/start_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_multiple": {
+      "label": "Multiple start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/start_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_parallel_multiple": {
+      "label": "Parallel multiple start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "parallel_multiple"],
+      "svg": "shapes/start_event_parallel_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_message": {
+      "label": "Message non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/start_non_interrupting_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_timer": {
+      "label": "Timer non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "timer"],
+      "svg": "shapes/start_non_interrupting_event_timer.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_escalation": {
+      "label": "Escalation non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/start_non_interrupting_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_conditional": {
+      "label": "Conditional non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "conditional"],
+      "svg": "shapes/start_non_interrupting_event_conditional.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_signal": {
+      "label": "Signal non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/start_non_interrupting_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_multiple": {
+      "label": "Multiple non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/start_non_interrupting_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_non_interrupting_event_parallel_multiple": {
+      "label": "Parallel multiple non-interrupting start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "parallel_multiple"],
+      "svg": "shapes/start_non_interrupting_event_parallel_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_subprocess_event_error": {
+      "label": "Error event sub-process start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "error"],
+      "svg": "shapes/start_event_subprocess_event_error.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_subprocess_event_escalation": {
+      "label": "Escalation event sub-process start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/start_event_subprocess_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "start_event_subprocess_event_compensation": {
+      "label": "Compensation event sub-process start event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "compensation"],
+      "svg": "shapes/start_event_subprocess_event_compensation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event": {
+      "label": "Intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event"],
+      "svg": "shapes/intermediate_catch_event.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_message": {
+      "label": "Message intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/intermediate_catch_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_timer": {
+      "label": "Timer intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "timer"],
+      "svg": "shapes/intermediate_catch_event_timer.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_error": {
+      "label": "Error intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "error"],
+      "svg": "shapes/intermediate_catch_event_error.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_escalation": {
+      "label": "Escalation intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/intermediate_catch_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_cancel": {
+      "label": "Cancel intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "cancel"],
+      "svg": "shapes/intermediate_catch_event_cancel.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_compensation": {
+      "label": "Compensation intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "compensation"],
+      "svg": "shapes/intermediate_catch_event_compensation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_conditional": {
+      "label": "Conditional intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "conditional"],
+      "svg": "shapes/intermediate_catch_event_conditional.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_link": {
+      "label": "Link intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "link"],
+      "svg": "shapes/intermediate_catch_event_link.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_signal": {
+      "label": "Signal intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/intermediate_catch_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_multiple": {
+      "label": "Multiple intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/intermediate_catch_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_event_parallel_multiple": {
+      "label": "Parallel multiple intermediate catch event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "parallel_multiple"],
+      "svg": "shapes/intermediate_catch_event_parallel_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_message": {
+      "label": "Message non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_timer": {
+      "label": "Timer non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "timer"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_timer.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_escalation": {
+      "label": "Escalation non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_conditional": {
+      "label": "Conditional non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "conditional"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_conditional.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_signal": {
+      "label": "Signal non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_multiple": {
+      "label": "Multiple non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_catch_non_interrupting_event_parallel_multiple": {
+      "label": "Parallel multiple non-interrupting boundary event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "parallel_multiple"],
+      "svg": "shapes/intermediate_catch_non_interrupting_event_parallel_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event": {
+      "label": "Intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event"],
+      "svg": "shapes/intermediate_throw_event.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_message": {
+      "label": "Message intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/intermediate_throw_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_escalation": {
+      "label": "Escalation intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/intermediate_throw_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_compensation": {
+      "label": "Compensation intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "compensation"],
+      "svg": "shapes/intermediate_throw_event_compensation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_link": {
+      "label": "Link intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "link"],
+      "svg": "shapes/intermediate_throw_event_link.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_signal": {
+      "label": "Signal intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/intermediate_throw_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "intermediate_throw_event_multiple": {
+      "label": "Multiple intermediate throw event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/intermediate_throw_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event": {
+      "label": "End event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event"],
+      "svg": "shapes/end_event.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_message": {
+      "label": "Message end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "message"],
+      "svg": "shapes/end_event_message.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_error": {
+      "label": "Error end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "error"],
+      "svg": "shapes/end_event_error.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_escalation": {
+      "label": "Escalation end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "escalation"],
+      "svg": "shapes/end_event_escalation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_cancel": {
+      "label": "Cancel end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "cancel"],
+      "svg": "shapes/end_event_cancel.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_compensation": {
+      "label": "Compensation end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "compensation"],
+      "svg": "shapes/end_event_compensation.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_signal": {
+      "label": "Signal end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "signal"],
+      "svg": "shapes/end_event_signal.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_terminate": {
+      "label": "Terminate end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "terminate"],
+      "svg": "shapes/end_event_terminate.svg",
+      "width": 40,
+      "height": 40
+    },
+    "end_event_multiple": {
+      "label": "Multiple end event",
+      "category": "Events",
+      "kind": "event",
+      "keywords": ["event", "multiple"],
+      "svg": "shapes/end_event_multiple.svg",
+      "width": 40,
+      "height": 40
+    },
+    "task": {
+      "label": "Task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "task_loop": {
+      "label": "Task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "task_mi_parallel": {
+      "label": "Task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "task_mi_sequential": {
+      "label": "Task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "task_compensation": {
+      "label": "Task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "user_task": {
+      "label": "User task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/user_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "user_task_loop": {
+      "label": "User task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/user_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "user_task_mi_parallel": {
+      "label": "User task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/user_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "user_task_mi_sequential": {
+      "label": "User task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/user_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "user_task_compensation": {
+      "label": "User task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/user_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "service_task": {
+      "label": "Service task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/service_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "service_task_loop": {
+      "label": "Service task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/service_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "service_task_mi_parallel": {
+      "label": "Service task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/service_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "service_task_mi_sequential": {
+      "label": "Service task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/service_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "service_task_compensation": {
+      "label": "Service task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/service_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "send_task": {
+      "label": "Send task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/send_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "send_task_loop": {
+      "label": "Send task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/send_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "send_task_mi_parallel": {
+      "label": "Send task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/send_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "send_task_mi_sequential": {
+      "label": "Send task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/send_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "send_task_compensation": {
+      "label": "Send task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/send_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "receive_task": {
+      "label": "Receive task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/receive_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "receive_task_loop": {
+      "label": "Receive task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/receive_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "receive_task_mi_parallel": {
+      "label": "Receive task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/receive_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "receive_task_mi_sequential": {
+      "label": "Receive task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/receive_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "receive_task_compensation": {
+      "label": "Receive task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/receive_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "manual_task": {
+      "label": "Manual task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/manual_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "manual_task_loop": {
+      "label": "Manual task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/manual_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "manual_task_mi_parallel": {
+      "label": "Manual task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/manual_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "manual_task_mi_sequential": {
+      "label": "Manual task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/manual_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "manual_task_compensation": {
+      "label": "Manual task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/manual_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "business_rule_task": {
+      "label": "Business rule task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/business_rule_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "business_rule_task_loop": {
+      "label": "Business rule task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/business_rule_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "business_rule_task_mi_parallel": {
+      "label": "Business rule task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/business_rule_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "business_rule_task_mi_sequential": {
+      "label": "Business rule task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/business_rule_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "business_rule_task_compensation": {
+      "label": "Business rule task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/business_rule_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "script_task": {
+      "label": "Script task",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/script_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "script_task_loop": {
+      "label": "Script task (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/script_task_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "script_task_mi_parallel": {
+      "label": "Script task (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/script_task_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "script_task_mi_sequential": {
+      "label": "Script task (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/script_task_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "script_task_compensation": {
+      "label": "Script task (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/script_task_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_activity": {
+      "label": "Call activity",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/call_activity.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_activity_loop": {
+      "label": "Call activity (loop)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/call_activity_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_activity_mi_parallel": {
+      "label": "Call activity (multi-instance parallel)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/call_activity_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_activity_mi_sequential": {
+      "label": "Call activity (multi-instance sequential)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/call_activity_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_activity_compensation": {
+      "label": "Call activity (compensation)",
+      "category": "Activities",
+      "kind": "task",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/call_activity_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "subprocess": {
+      "label": "Sub-process",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/subprocess.svg",
+      "width": 100,
+      "height": 80
+    },
+    "subprocess_loop": {
+      "label": "Sub-process (loop)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/subprocess_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "subprocess_mi_parallel": {
+      "label": "Sub-process (multi-instance parallel)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/subprocess_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "subprocess_mi_sequential": {
+      "label": "Sub-process (multi-instance sequential)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/subprocess_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "subprocess_compensation": {
+      "label": "Sub-process (compensation)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/subprocess_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "event_subprocess": {
+      "label": "Event sub-process",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/event_subprocess.svg",
+      "width": 100,
+      "height": 80
+    },
+    "event_subprocess_loop": {
+      "label": "Event sub-process (loop)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/event_subprocess_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "event_subprocess_mi_parallel": {
+      "label": "Event sub-process (multi-instance parallel)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/event_subprocess_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "event_subprocess_mi_sequential": {
+      "label": "Event sub-process (multi-instance sequential)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/event_subprocess_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "event_subprocess_compensation": {
+      "label": "Event sub-process (compensation)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/event_subprocess_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "transaction": {
+      "label": "Transaction",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/transaction.svg",
+      "width": 100,
+      "height": 80
+    },
+    "transaction_loop": {
+      "label": "Transaction (loop)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/transaction_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "transaction_mi_parallel": {
+      "label": "Transaction (multi-instance parallel)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/transaction_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "transaction_mi_sequential": {
+      "label": "Transaction (multi-instance sequential)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/transaction_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "transaction_compensation": {
+      "label": "Transaction (compensation)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/transaction_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "ad_hoc_subprocess": {
+      "label": "Ad hoc sub-process",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/ad_hoc_subprocess.svg",
+      "width": 100,
+      "height": 80
+    },
+    "ad_hoc_subprocess_loop": {
+      "label": "Ad hoc sub-process (loop)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/ad_hoc_subprocess_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "ad_hoc_subprocess_mi_parallel": {
+      "label": "Ad hoc sub-process (multi-instance parallel)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/ad_hoc_subprocess_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "ad_hoc_subprocess_mi_sequential": {
+      "label": "Ad hoc sub-process (multi-instance sequential)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/ad_hoc_subprocess_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "ad_hoc_subprocess_compensation": {
+      "label": "Ad hoc sub-process (compensation)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/ad_hoc_subprocess_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_subprocess": {
+      "label": "Call activity (sub-process)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity"],
+      "svg": "shapes/call_subprocess.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_subprocess_loop": {
+      "label": "Call activity (sub-process) (loop)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "loop"],
+      "svg": "shapes/call_subprocess_loop.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_subprocess_mi_parallel": {
+      "label": "Call activity (sub-process) (multi-instance parallel)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_parallel"],
+      "svg": "shapes/call_subprocess_mi_parallel.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_subprocess_mi_sequential": {
+      "label": "Call activity (sub-process) (multi-instance sequential)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "mi_sequential"],
+      "svg": "shapes/call_subprocess_mi_sequential.svg",
+      "width": 100,
+      "height": 80
+    },
+    "call_subprocess_compensation": {
+      "label": "Call activity (sub-process) (compensation)",
+      "category": "Sub-processes",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "keywords": ["activity", "compensation"],
+      "svg": "shapes/call_subprocess_compensation.svg",
+      "width": 100,
+      "height": 80
+    },
+    "exclusive_gateway": {
+      "label": "Exclusive gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/exclusive_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "exclusive_gateway_plain": {
+      "label": "Exclusive gateway (no marker)",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/exclusive_gateway_plain.svg",
+      "width": 50,
+      "height": 50
+    },
+    "inclusive_gateway": {
+      "label": "Inclusive gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/inclusive_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "parallel_gateway": {
+      "label": "Parallel gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/parallel_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "complex_gateway": {
+      "label": "Complex gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/complex_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "event_based_gateway": {
+      "label": "Event-based gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/event_based_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "event_based_gateway_start": {
+      "label": "Exclusive event-based start gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/event_based_gateway_start.svg",
+      "width": 50,
+      "height": 50
+    },
+    "parallel_event_based_gateway": {
+      "label": "Parallel event-based start gateway",
+      "category": "Gateways",
+      "kind": "gateway",
+      "keywords": ["gateway", "decision"],
+      "svg": "shapes/parallel_event_based_gateway.svg",
+      "width": 50,
+      "height": 50
+    },
+    "data_object": {
+      "label": "Data object",
+      "category": "Data",
+      "kind": "data",
+      "keywords": ["data"],
+      "svg": "shapes/data_object.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_object_collection": {
+      "label": "Data collection",
+      "category": "Data",
+      "kind": "data",
+      "keywords": ["data", "list"],
+      "svg": "shapes/data_object_collection.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_input": {
+      "label": "Data input",
+      "category": "Data",
+      "kind": "data",
+      "keywords": ["data"],
+      "svg": "shapes/data_input.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_input_collection": {
+      "label": "Data input collection",
+      "category": "Data",
+      "kind": "data",
+      "svg": "shapes/data_input_collection.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_output": {
+      "label": "Data output",
+      "category": "Data",
+      "kind": "data",
+      "keywords": ["data"],
+      "svg": "shapes/data_output.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_output_collection": {
+      "label": "Data output collection",
+      "category": "Data",
+      "kind": "data",
+      "svg": "shapes/data_output_collection.svg",
+      "width": 36,
+      "height": 50
+    },
+    "data_store": {
+      "label": "Data store",
+      "category": "Data",
+      "kind": "database",
+      "keywords": ["database", "store"],
+      "svg": "shapes/data_store.svg",
+      "width": 50,
+      "height": 50
+    },
+    "message": {
+      "label": "Message",
+      "category": "Data",
+      "kind": "data",
+      "keywords": ["envelope"],
+      "svg": "shapes/message.svg",
+      "width": 36,
+      "height": 24
+    },
+    "text_annotation": {
+      "label": "Text annotation",
+      "category": "Artifacts",
+      "kind": "annotation",
+      "labelPosition": "inside",
+      "keywords": ["note", "comment"],
+      "svg": "shapes/text_annotation.svg",
+      "width": 100,
+      "height": 30
+    },
+    "group": {
+      "label": "Group",
+      "category": "Artifacts",
+      "kind": "group",
+      "labelPosition": "inside",
+      "keywords": ["category"],
+      "svg": "shapes/group.svg",
+      "width": 200,
+      "height": 120
+    },
+    "conversation": {
+      "label": "Conversation",
+      "category": "Conversations",
+      "kind": "conversation",
+      "svg": "shapes/conversation.svg",
+      "width": 40,
+      "height": 36
+    },
+    "call_conversation": {
+      "label": "Call conversation",
+      "category": "Conversations",
+      "kind": "conversation",
+      "svg": "shapes/call_conversation.svg",
+      "width": 40,
+      "height": 36
+    },
+    "sub_conversation": {
+      "label": "Sub-conversation",
+      "category": "Conversations",
+      "kind": "conversation",
+      "svg": "shapes/sub_conversation.svg",
+      "width": 40,
+      "height": 36
+    },
+    "choreography_task": {
+      "label": "Choreography task",
+      "category": "Choreographies",
+      "kind": "task",
+      "labelPosition": "inside",
+      "svg": "shapes/choreography_task.svg",
+      "width": 100,
+      "height": 80
+    },
+    "sub_choreography": {
+      "label": "Sub-choreography",
+      "category": "Choreographies",
+      "kind": "subprocess",
+      "labelPosition": "inside",
+      "svg": "shapes/sub_choreography.svg",
+      "width": 100,
+      "height": 80
+    }
+  },
+  "composites": {
+    "task_with_timer": {
+      "label": "Task with a timer boundary event",
+      "category": "Activities",
+      "kind": "task",
+      "width": 110,
+      "height": 96,
+      "parts": [
+        {
+          "shape": "user_task",
+          "x": 0,
+          "y": 0,
+          "width": 100,
+          "height": 80
+        },
+        {
+          "shape": "intermediate_catch_event_timer",
+          "x": 64,
+          "y": 62,
+          "width": 32,
+          "height": 32
+        }
+      ]
+    }
+  },
+  "fragments": {
+    "approval": {
+      "label": "Approval loop",
+      "category": "Fragments",
+      "description": "A message start, a review task and an exclusive gateway that loops back.",
+      "params": [
+        {
+          "name": "start",
+          "default": "start"
+        },
+        {
+          "name": "review",
+          "default": "review"
+        },
+        {
+          "name": "decide",
+          "default": "decide"
+        },
+        {
+          "name": "notify",
+          "default": "notify"
+        },
+        {
+          "name": "done",
+          "default": "done"
+        }
+      ],
+      "text": "fragments/approval.draw"
+    },
+    "timeout": {
+      "label": "Task with a timeout",
+      "category": "Fragments",
+      "description": "A user task with a timer boundary event leading to an escalation task.",
+      "params": [
+        {
+          "name": "task",
+          "default": "work"
+        },
+        {
+          "name": "task_name",
+          "default": "Do the work"
+        },
+        {
+          "name": "timer",
+          "default": "late"
+        },
+        {
+          "name": "timeout",
+          "default": "2 days"
+        },
+        {
+          "name": "escalate",
+          "default": "escalate"
+        }
+      ],
+      "text": "fragments/timeout.draw"
+    }
+  },
+  "mappings": {
+    "bpmn": {
+      "startEvent": "start_event",
+      "endEvent": "end_event",
+      "intermediateCatchEvent": "intermediate_catch_event",
+      "intermediateThrowEvent": "intermediate_throw_event",
+      "boundaryEvent": "intermediate_catch_event",
+      "task": "task",
+      "userTask": "user_task",
+      "serviceTask": "service_task",
+      "sendTask": "send_task",
+      "receiveTask": "receive_task",
+      "manualTask": "manual_task",
+      "businessRuleTask": "business_rule_task",
+      "scriptTask": "script_task",
+      "callActivity": "call_activity",
+      "subProcess": "subprocess",
+      "transaction": "transaction",
+      "adHocSubProcess": "ad_hoc_subprocess",
+      "exclusiveGateway": "exclusive_gateway",
+      "inclusiveGateway": "inclusive_gateway",
+      "parallelGateway": "parallel_gateway",
+      "complexGateway": "complex_gateway",
+      "eventBasedGateway": "event_based_gateway",
+      "dataObject": "data_object",
+      "dataObjectReference": "data_object",
+      "dataInput": "data_input",
+      "dataOutput": "data_output",
+      "dataStoreReference": "data_store",
+      "dataStore": "data_store",
+      "message": "message",
+      "textAnnotation": "text_annotation",
+      "group": "group",
+      "conversation": "conversation",
+      "callConversation": "call_conversation",
+      "subConversation": "sub_conversation",
+      "choreographyTask": "choreography_task",
+      "subChoreography": "sub_choreography",
+      "callChoreography": "choreography_task"
+    }
+  }
+}

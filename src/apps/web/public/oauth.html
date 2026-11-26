@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Signing in to DiaDraw…</title>
+    <meta name="referrer" content="no-referrer" />
+  </head>
+  <body
+    style="
+      font:
+        15px system-ui,
+        sans-serif;
+      padding: 2rem;
+    "
+  >
+    <p>Signing in… You can close this window if it stays open.</p>
+    <script>
+      // Where Google or Microsoft sends the sign-in popup back: hand the answer to the DiaDraw tab
+      // that opened it (src/cloud.ts) and close. Both ways, because the provider's
+      // Cross-Origin-Opener-Policy can cut the popup off from its opener.
+      (function () {
+        var message = { type: 'diadraw-oauth', url: location.href };
+        try {
+          if (window.opener) window.opener.postMessage(message, location.origin);
+        } catch (e) {}
+        try {
+          var channel = new BroadcastChannel('diadraw-oauth');
+          channel.postMessage(message);
+          channel.close();
+        } catch (e) {}
+        // Keep the token out of this window's history.
+        history.replaceState(null, '', location.pathname);
+        setTimeout(function () {
+          window.close();
+        }, 100);
+      })();
+    </script>
+  </body>
+</html>

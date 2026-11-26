@@ -1,0 +1,23 @@
+@startuml
+actor       利用者   as A
+participant Service  as B
+database    DB       as C
+
+' -> 同期
+A -> B : 依頼
+activate B
+  B -> C : 問い合わせ
+  ' --> 戻り値
+  C --> B : 結果
+  alt 成功
+    B --> A : OK
+  else 失敗
+    B --> A : NG
+  end
+deactivate B
+
+loop 3回
+  A -> B : 反復
+end
+note right of B : 補足メモはこう貼る
+@enduml

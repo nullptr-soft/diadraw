@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.diadraw.DiaDraw</id>
+  <name>DiaDraw</name>
+  <summary>Diagrams as text, with a canvas that writes the text back</summary>
+  <developer id="com.diadraw">
+    <name>DiaDraw</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <description>
+    <p>
+      DiaDraw keeps a diagram as plain text: a model of people, systems and their relationships,
+      and views of it. The canvas beside the text draws each view; moving, connecting, renaming or
+      deleting on the canvas edits the text, so both always agree.
+    </p>
+    <p>
+      It imports Mermaid, PlantUML, Structurizr, draw.io and BPMN, and exports SVG, PNG, PDF,
+      draw.io and BPMN.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.diadraw.DiaDraw.desktop</launchable>
+  <url type="homepage">https://github.com/mykulyak/diadraw</url>
+  <provides>
+    <binary>diadraw-gtk</binary>
+    <mediatype>text/x-diadraw</mediatype>
+  </provides>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.0.8" date="2026-11-26"/>
+    <release version="0.0.7" date="2026-11-25"/>
+    <release version="0.0.6" date="2026-11-24"/>
+    <release version="0.0.5" date="2026-11-23"/>
+    <release version="0.0.4" date="2026-11-23"/>
+    <release version="0.0.3" date="2026-11-23"/>
+    <release version="0.0.2" date="2026-11-23"/>
+    <release version="0.0.1" date="2026-11-22"/>
+  </releases>
+</component>

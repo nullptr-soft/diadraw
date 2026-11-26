@@ -1,0 +1,39 @@
+// C4 system context and container views for an internet banking system.
+model {
+  client = person "Personal banking customer" description "A customer of the bank"
+  staff  = person "Back office staff"
+
+  bank = system "Internet banking" {
+    spa     = container "Single-page app" tech "React"
+    mobile  = container "Mobile app" tech "Swift / Kotlin"
+    api     = container "API application" tech "Node.js" {
+      port https north
+      port jdbc south
+    }
+    db      = container "Database" tech "Postgres" shape cylinder
+  }
+
+  mainframe = system "Mainframe banking" tag "external"
+  mail      = system "E-mail system" tag "external"
+
+  client -> bank.spa "views accounts"
+  client -> bank.mobile "views accounts"
+  bank.spa -> bank.api "calls" tech "JSON/HTTPS"
+  bank.mobile -> bank.api "calls" tech "JSON/HTTPS"
+  bank.api -> bank.db "reads and writes" tech "SQL"
+  bank.api -> mainframe "gets account data" tech "XML/HTTPS"
+  bank.api -> mail "sends e-mail" tech "SMTP"
+  mail --> client "delivers e-mail"
+  staff -> mainframe "uses"
+}
+
+view context {
+  include client staff bank mainframe mail
+  layout layered direction down
+}
+
+view containers of bank {
+  include *
+  layout layered direction down spacing 60
+  align bank.spa bank.mobile horizontally
+}

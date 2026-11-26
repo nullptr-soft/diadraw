@@ -1,0 +1,73 @@
+ok   select shop
+invalid:
+ok   invalid
+ok   enter id 2bad
+invalid: id
+  id: "2bad" is not a name: use letters, digits and _, not starting with a digit
+ok   invalid
+ok   enter id db
+invalid: id
+  id: There is already an element "db"
+ok   invalid
+ok   enter id store
+invalid:
+ok   invalid
+ok   enter kind web app
+ok   enter shape round box
+invalid: kind shape
+  kind: "web app" is not a kind: use letters, digits and _, or alias.name from a library
+  shape: "round box" is not a shape: use letters, digits and _, or alias.name from a library
+ok   invalid
+ok   enter kind system
+ok   enter shape
+invalid:
+ok   invalid
+ok   set id 2bad
+invalid: id
+  id: "2bad" is not a name: use letters, digits and _, not starting with a digit
+ok   invalid
+ok   select db
+invalid:
+ok   invalid
+ok   enter shared-styles database fill=red
+invalid: shared-styles
+  shared-styles: Line 1: write a selector, a colon and the keys: container: fill=#438dd5
+ok   invalid
+ok   enter shared-styles system: fill=red
+invalid: shared-styles
+  shared-styles: style system does not apply to db; edit it with nothing selected
+ok   invalid
+ok   enter shared-styles database: fill colour=red
+invalid: shared-styles
+  shared-styles: Line 1: Key "fill colour" of a style block is not a name
+ok   invalid
+ok   enter shared-styles database: fill=red
+invalid:
+ok   invalid
+ok   select user->shop
+ok   enter name 2nd
+invalid: name
+  name: "2nd" is not a name: use letters, digits and _, not starting with a digit
+ok   invalid
+ok   enter name buys
+invalid:
+ok   invalid
+ok   enter name 2nd
+ok   styles
+invalid:
+ok   invalid
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+"2bad" is not a name: use letters, digits and _, not starting with a digit

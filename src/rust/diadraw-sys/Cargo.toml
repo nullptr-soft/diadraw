@@ -1,0 +1,13 @@
+[package]
+name = "diadraw-sys"
+description = "Raw FFI bindings to libdiadraw, the DiaDraw C++ core, built from source with CMake"
+links = "diadraw"
+build = "build.rs"
+publish = false
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]

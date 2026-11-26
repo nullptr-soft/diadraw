@@ -1,0 +1,6 @@
+# With a 20-unit grid, a plain drag lands the box's top-left corner on a grid point.
+grid 20
+drag db 33 27
+# Hidden again, a drag goes exactly where it is let go.
+grid 0
+drag shop 33 27

@@ -1,0 +1,33 @@
+{
+  "name": "@diadraw/node",
+  "version": "0.0.8",
+  "description": "The C++ core (src/) as a native Node.js addon: parse, check, format, patch, render to SVG, PNG and PDF, import and export.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@diadraw/wasm": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "cmake-js": "^8.0.0",
+    "node-addon-api": "^8.5.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "diadraw.description": "Créez des diagrammes sous forme de texte ou sur un canevas à partir d’un même modèle. DiaDraw propose un DSL, un éditeur WYSIWYG et une mise en page automatique.",
+  "diadraw.version": "Version de DiaDraw",
+  "diadraw.feedback": "Donner un avis",
+  "diadraw.feedbackTitle": "Proposez une idée, exprimez un souhait ou signalez une difficulté (ouvre un formulaire sur GitHub)",
+  "diadraw.open": "Ouvrir DiaDraw",
+  "diadraw.openStep": "Ouvrir cette étape dans DiaDraw",
+  "diadraw.viewAlt": "Vue {{view}} du fichier {{name}}.draw"
+}

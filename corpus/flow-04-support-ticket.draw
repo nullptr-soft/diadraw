@@ -1,0 +1,31 @@
+/* Flowchart: support ticket triage.
+   Several decisions and a loop back to the queue. */
+model {
+  opened    = start "Ticket opened"
+  queue     = process "Triage queue"
+  known     = decision "Known issue?"
+  link      = process "Link to KB article"
+  severity  = decision "Severity high?"
+  page      = process "Page on-call"
+  assign    = process "Assign to team"
+  fixed     = decision "Resolved?"
+  closed    = end "Closed"
+
+  opened -> queue
+  queue -> known
+  known -> link "yes"
+  known -> severity "no"
+  severity -> page "yes"
+  severity -> assign "no"
+  page -> assign
+  assign -> fixed
+  link -> fixed
+  fixed -> closed "yes"
+  fixed -> queue "no"
+}
+
+view triage {
+  include *
+  layout layered direction down
+  pin page right of assign
+}

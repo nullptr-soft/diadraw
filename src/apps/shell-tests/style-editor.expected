@@ -1,0 +1,37 @@
+ok   select db
+ok   set style.fill #DAE8FC
+ok   set style.stroke #6c8ebf
+ok   set style.lineStyle dashed
+ok   set style.fontStyle 3
+ok   set style.align left
+ok   set style.other shadow=1
+ok   set style.lineStyle
+ok   set style.fill
+ok   select user->shop
+ok   set style.endArrow open
+ok   set style.endFill 0
+ok   set style.strokeWidth 2
+ok   set style.edgeStyle orthogonalEdgeStyle
+ok   set style.endFill 1
+ok   set style.startArrow ERmandOne
+ok   set style.endArrow ERzeroToMany
+ok   set style.lineStyle 1 3
+ok   set style.double 1
+ok   set style.curved 1
+ok   set style.double 0
+FAIL set style.nothing 1
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders" style "stroke=#6c8ebf;fontStyle=3;align=left;shadow=1"
+  user -> shop "browses" style "endArrow=ERzeroToMany;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;startArrow=ERmandOne;dashed=1;dashPattern=1 3;curved=1"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+

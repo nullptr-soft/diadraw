@@ -1,0 +1,82 @@
+name: Website and web app (GitHub Pages)
+
+# Builds the website (site/) and the web app (src/apps/web) into one folder with
+# tools/pages/build.mjs and deploys it to GitHub Pages: the site at the root, the app under app/.
+# Pushes to main deploy; pull requests that touch either only build, as a check.
+# Needs Settings → Pages → Source: GitHub Actions, once.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'docs/**'
+      - 'tools/pages/**'
+      - 'src/apps/web/**'
+      - 'src/apps/vscode/syntaxes/**'
+      - 'src/wasm/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'turbo.json'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  # A deploy in progress finishes; a newer push queues behind it.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            site/package-lock.json
+      # The web app runs on the C++ core, compiled to WebAssembly.
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 6.0.10
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - run: npm ci
+      - run: npm ci --prefix site
+      # Where Pages serves the repository (a custom domain included); pull requests, which do not
+      # deploy, build for the default address.
+      - id: pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Build the site and the app
+        run: npm run pages:build -- --url "$PAGES_URL" --out "$RUNNER_TEMP/pages"
+        env:
+          PAGES_URL: ${{ steps.pages.outputs.base_url || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+          # OAuth clients for Google Drive and OneDrive (docs/guide/cloud-storage.md): repository
+          # variables, not secrets, since client IDs are public. Unset, those tabs say so.
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.DIADRAW_GOOGLE_CLIENT_ID }}
+          VITE_ONEDRIVE_CLIENT_ID: ${{ vars.DIADRAW_ONEDRIVE_CLIENT_ID }}
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

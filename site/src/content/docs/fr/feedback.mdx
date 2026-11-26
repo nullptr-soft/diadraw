@@ -1,0 +1,46 @@
+---
+title: Vos retours
+description: Signalez un bogue ou dites-nous ce que vous aimeriez pouvoir faire avec DiaDraw.
+---
+
+import { LinkButton, Aside } from '@astrojs/starlight/components';
+
+DiaDraw est un projet jeune. Vos expériences orientent la suite de son développement. Vous pouvez nous joindre de deux façons : chacune ouvre un court formulaire dans l’outil de suivi de DiaDraw sur GitHub.
+
+## Signaler un bogue
+
+Quelque chose ne fonctionne pas comme prévu : un diagramme s’affiche mal, une modification apparaît au mauvais endroit ou l’application cesse de répondre.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=bug_report.yml"
+  icon="external"
+>
+  Signaler un bogue
+</LinkButton>
+
+## Donner votre avis
+
+Une idée, un souhait, un diagramme que vous n’avez pas réussi à dessiner ou une manipulation qui pourrait être plus simple.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=feedback.yml"
+  icon="external"
+  variant="secondary"
+>
+  Donner votre avis
+</LinkButton>
+
+## Depuis l’application
+
+Dans chaque application DiaDraw, le bouton **Give Feedback** de la barre d’outils permet de donner votre avis en un clic. La commande **Report a Bug…** se trouve à proximité. Ils ouvrent les mêmes formulaires, en préremplissant le nom de l’application, la version de DiaDraw et votre système :
+
+| Application | Give Feedback | Report a Bug |
+| --- | --- | --- |
+| Web et bureau (Tauri) | à droite de la barre d’outils | à côté de Give Feedback |
+| macOS | à droite de la barre d’outils | menu Aide |
+| Windows | à droite de la barre d’outils | menu Aide |
+| Linux (GTK) | barre d’en-tête, à côté du menu principal | menu principal (☰), en haut à droite |
+
+<Aside>
+  Un compte GitHub est nécessaire pour envoyer le formulaire. Rien n’est transmis tant que vous n’avez pas cliqué sur **Create** sur GitHub et votre diagramme n’est jamais joint. Si le problème dépend du diagramme, collez dans le formulaire le plus petit extrait `.draw` qui le reproduit, sans rien inclure que vous ne souhaitiez partager.
+</Aside>

@@ -1,0 +1,18 @@
+@startuml
+left to right direction
+actor 利用者 as U
+actor 管理者 as A
+
+rectangle 予約システム {
+  usecase "予約する" as UC1
+  usecase "空き確認" as UC2
+  usecase "通知を送る" as UC3
+}
+
+U --> UC1
+A --> UC1
+' 必ず呼ぶ
+UC1 ..> UC2 : <<include>>
+' 条件付きで追加
+UC1 ..> UC3 : <<extend>>
+@enduml

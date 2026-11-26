@@ -1,0 +1,25 @@
+@startuml
+' Shop components
+left to right direction
+skinparam componentStyle rectangle
+actor Customer as user
+package "Front end" {
+  component [Web App] as web
+  [Mobile App] as mobile
+}
+node "Backend" {
+  component "Order Service" as orders
+  database "Orders DB" as db
+  () "REST API" as api
+}
+queue "Events" as bus
+user --> web : browses
+user --> mobile
+web ..> api : HTTPS
+mobile ..> api
+api - orders
+orders --> db : SQL
+orders -> bus : publishes
+bus <-- [Billing] : consumes
+note right of web : React SPA
+@enduml

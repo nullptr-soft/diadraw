@@ -1,0 +1,4 @@
+${task} = task "${task_name}" shape ${alias}.user_task
+${timer} = event "${timeout}" shape ${alias}.intermediate_catch_event_timer prop "bpmn.attachedTo" "${task}"
+${escalate} = task "Escalate" shape ${alias}.task
+${timer} -> ${escalate}

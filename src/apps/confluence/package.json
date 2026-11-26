@@ -1,0 +1,28 @@
+{
+  "name": "@diadraw/confluence",
+  "version": "0.0.8",
+  "description": "DiaDraw for Confluence Cloud: an Atlassian Forge app with a DiaDraw diagram macro, drawn in the page by the core as WebAssembly.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "bin": {
+    "diadraw-confluence": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --dev && node scripts/serve.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "forge:lint": "forge lint",
+    "forge:deploy": "npm run build && forge deploy",
+    "forge:install": "forge install --product confluence"
+  },
+  "dependencies": {
+    "@diadraw/markdown": "*",
+    "@diadraw/wasm": "*",
+    "@forge/bridge": "^7.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

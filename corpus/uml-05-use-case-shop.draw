@@ -1,0 +1,42 @@
+// UML use case diagram: actors outside the system boundary, use cases inside it, «include» and
+// «extend» dependencies, and an actor that specialises another.
+style relationship { endArrow none }   // associations between actors and use cases
+style relationship tag "dependency" { dashed true endArrow open }
+style relationship tag "generalization" { endArrow block endFill 0 }
+style person { fill "#ffffff" fontColor "#1e293b" }   // stick figures, named below
+
+model {
+  customer = person "Customer" shape actor
+  member   = person "Member" shape actor
+  clerk    = person "Warehouse clerk" shape actor
+  bank     = person "Payment provider" shape actor tag "external"
+
+  shop = system "Online shop" {
+    browse   = process "Browse catalogue" shape ellipse
+    order    = process "Place order" shape ellipse
+    pay      = process "Pay" shape ellipse
+    coupon   = process "Apply coupon" shape ellipse
+    track    = process "Track order" shape ellipse
+    history  = process "View order history" shape ellipse
+    dispatch = process "Dispatch order" shape ellipse
+  }
+
+  member -> customer tag "generalization"
+  customer -> shop.browse
+  customer -> shop.order
+  customer -> shop.track
+  member -> shop.history
+  clerk -> shop.dispatch
+  shop.order -> shop.pay "«include»" tag "dependency"
+  shop.coupon -> shop.order "«extend»" tag "dependency"
+  shop.pay -> bank
+}
+
+view usecases {
+  include *
+  layout layered direction right spacing 60   // room for the actors' names
+  size customer 48, 64
+  size member 48, 64
+  size clerk 48, 64
+  size bank 48, 64
+}

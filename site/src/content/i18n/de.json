@@ -1,0 +1,9 @@
+{
+  "diadraw.description": "Erstellen Sie Diagramme als Text und auf der Zeichenfläche mit einem gemeinsamen Modell. DiaDraw bietet eine DSL, einen WYSIWYG-Editor und automatisches Layout.",
+  "diadraw.version": "DiaDraw-Version",
+  "diadraw.feedback": "Feedback geben",
+  "diadraw.feedbackTitle": "Teilen Sie Ideen, Wünsche oder Verbesserungsvorschläge mit (öffnet ein Formular auf GitHub)",
+  "diadraw.open": "DiaDraw öffnen",
+  "diadraw.openStep": "Diesen Schritt in DiaDraw öffnen",
+  "diadraw.viewAlt": "Ansicht {{view}} aus der Datei {{name}}.draw"
+}

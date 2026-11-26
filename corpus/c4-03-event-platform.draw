@@ -1,0 +1,36 @@
+// Component view: an event-driven order platform with a message bus.
+model {
+  platform = system "Order platform" {
+    gateway   = container "API gateway" tech "Envoy"
+    orders    = container "Order service" tech "Go"
+    billing   = container "Billing service" tech "Kotlin"
+    stock     = container "Inventory service" tech "Rust"
+    bus       = container "Event bus" tech "Kafka" shape queue
+    ordersDb  = container "Orders DB" tech "Postgres" shape cylinder
+    stockDb   = container "Inventory DB" tech "Redis" shape cylinder
+    reporting = container "Reporting" tech "dbt"
+  }
+
+  platform.gateway -> platform.orders "routes"
+  platform.orders -> platform.ordersDb "writes"
+  platform.orders -> platform.bus "OrderPlaced"
+  platform.bus -> platform.billing "OrderPlaced"
+  platform.bus -> platform.stock "OrderPlaced"
+  platform.stock -> platform.stockDb "reserves"
+  platform.billing -> platform.bus "PaymentCaptured"
+  platform.bus -> platform.orders "PaymentCaptured"
+  platform.bus --> platform.reporting "all events"
+}
+
+view services of platform {
+  include *
+  exclude platform.reporting
+  layout layered direction right
+  pin platform.ordersDb below platform.orders
+  pin platform.stockDb below platform.stock
+}
+
+view everything of platform {
+  include *
+  layout layered direction right
+}

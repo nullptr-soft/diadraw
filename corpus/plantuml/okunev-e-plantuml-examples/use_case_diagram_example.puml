@@ -1,0 +1,140 @@
+@startuml certificate_signing_example
+'Версия: 1.0
+'Автор: Окунев Е.Е. (okunev.evgeni@gmail.com)
+
+skin rose
+
+left to right direction
+
+skinparam BackgroundColor AliceBlue
+
+skinparam rectangle {
+    RoundCorner 10
+    BackgroundColor LightSkyBlue
+    FontColor DarkBlue
+    BorderColor DarkBlue
+    FontSize 22
+}
+
+skinparam title {
+    FontSize 24
+}
+
+skinparam ArrowFontColor DarkBlue
+
+'Включить классический строгий стиль UML
+'skinparam Style strictuml
+
+<style> 
+usecase {
+	MaximumWidth 60
+}
+</style>
+
+title Пример диаграммы вариантов использования для процесса "Подписание справок работодателем"
+
+rectangle "Кадровые сервисы" {
+    (Настроить полномочия в роли) as RolePerms
+    usecase TakeRole as "Выдать роль
+    --
+    <b>Точки расширения</b>
+    Полномочия
+    "
+    (Удалить роль) as DelRole
+    (Настроить подпись справок в сервисе) as SetSignInServices
+    (Включить подпись справок в сервисе) as FLAGES
+    (Выключить подпись справок в сервисе) as FLAGR
+    usecase SignCerts as "[[https://github.com/okunev-e/plantuml_examples/tree/main Подписать справки УКЭП]]
+    --
+    <b>Точки расширения</b>
+    Выбор
+    "
+    Note right of SignCerts
+    <b>Условние:</b> пользователь открыл список УКЭП
+    <b>Точка расширения:</b> Выбор
+    end Note
+    ([[https://github.com/okunev-e/plantuml_examples/tree/main Создать заявку на справку с подписью]]) as CreareReq
+    usecase ReqCallback as "Отозвать заявку
+    --
+    <b>Точки расширения</b>
+    Комментарий
+    "
+    (Отклонить заявку)
+    ([[https://github.com/okunev-e/plantuml_examples/tree/main Отправить заявку на подпись ЭЦП]]) as SendToSigner
+    (Выбрать Подписанта справок) as SetSigner
+    (Вложить файлы для подписи) as AddFiles
+    (Удалить файлы для подписи) as DelFiles
+    (Скачать zip с файлами+подписи) as DownloadZIP
+    (Посмотреть архив заявок)
+    usecase LookAtCard as "Посмотреть карточку заявки
+    --
+    <b>Точки расширения</b>
+    Скачать файлы
+    "
+    usecase "[[https://github.com/okunev-e/plantuml_examples/tree/main Вернуть заявку на доработку (отклонить)]]" as ReturnRequestToHR
+    (Добавить комментарий) as AddComment
+}
+
+rectangle "Сервис ЭП" {
+    usecase "Установить [[https://taxcom.ru/baza-znaniy/kadrovaya-otchetnost/stati/kakie-elektronnye-podpisi-primenyayutsyadlya-vedeniya-elektronnogo-kadrovogo-dokumentooborota/ УКЭП]]" as SetEQES
+    usecase "Удалить [[https://taxcom.ru/baza-znaniy/kadrovaya-otchetnost/stati/kakie-elektronnye-podpisi-primenyayutsyadlya-vedeniya-elektronnogo-kadrovogo-dokumentooborota/ УКЭП]]" as DelEQES
+    (Выбрать УКЭП) as SelectEQES
+}
+
+'Список основных участников
+:Администратор: as admin #text:Purple
+:Технический администратор: as techadm #text:DimGrey
+:Работник: as worker #text:SeaGreen
+:HR: as hr #text:Red
+:Работодатель: as signer #text:DarkBlue
+:Пользователь портала: as webportal_user
+
+'Связи участников
+webportal_user <|-- admin
+webportal_user <|-- worker
+webportal_user <|-- hr
+webportal_user <|-- signer
+
+'Сценарии для технического админа
+techadm -- SetSignInServices
+SetSignInServices <|-- FLAGES 
+SetSignInServices <|-- FLAGR
+
+'Сценарии для Работодателя
+signer -- SignCerts
+signer -- (Посмотреть архив заявок)
+signer -- LookAtCard
+signer -- SetEQES
+signer -- DelEQES
+signer -- ReturnRequestToHR
+
+'Сценарии для Администратора
+admin -- TakeRole
+admin -- DelRole
+TakeRole <.down. RolePerms: <<дополнить>>
+
+'Сценарии для Работника
+worker -- CreareReq
+worker -- ReqCallback
+worker -- (Посмотреть архив заявок)
+worker -- LookAtCard
+
+'Сценарии для HR
+hr --- (Отклонить заявку)
+hr -- SendToSigner
+hr -- (Посмотреть архив заявок)
+hr -- LookAtCard
+
+'Связи между сценариями
+SendToSigner .down.> SetSigner: <<включить>>
+SendToSigner .down.> AddFiles: <<включить>>
+SendToSigner .down.> DelFiles: <<включить>>
+SignCerts ..> SelectEQES: <<включить>>
+LookAtCard <.down. DownloadZIP:  <<дополнить>>
+DelEQES .down.> SelectEQES: <<включить>>
+ReqCallback <.down.. AddComment: <<дополнить>>
+(Отклонить заявку) ..down.> AddComment: <<включить>>
+ReturnRequestToHR ..down.> AddComment: <<включить>>
+
+
+@enduml

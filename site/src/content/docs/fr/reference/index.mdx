@@ -1,0 +1,31 @@
+---
+title: Référence
+description: Le langage DiaDraw, sa grammaire, les bibliothèques de formes et le guide d’utilisation.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Ces pages proviennent directement de la documentation du dépôt DiaDraw : elles correspondent donc toujours à la version du moteur qu’elles accompagnent.
+
+<CardGrid>
+  <LinkCard
+    title="DSL"
+    href="dsl/"
+    description="Toutes les instructions du langage : modèles, vues, dispositions, styles et thèmes, vues de séquence, notes et transcription des modifications du canevas en texte."
+  />
+  <LinkCard
+    title="Grammaire"
+    href="grammar/"
+    description="La grammaire en notation Lezer, avec les noms des nœuds construits par l’analyseur."
+  />
+  <LinkCard
+    title="Bibliothèques"
+    href="libraries/"
+    description="Les bibliothèques de formes : formes, types d’éléments, fragments et thèmes, et leur utilisation dans un document."
+  />
+  <LinkCard
+    title="Guide d’utilisation"
+    href="guide/"
+    description="À quoi servent les fonctionnalités et quand les utiliser : relations, styles de trait, dispositions, inspecteur, styles, déplacement, redimensionnement et plus encore."
+  />
+</CardGrid>

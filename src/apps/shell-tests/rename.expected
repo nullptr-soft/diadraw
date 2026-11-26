@@ -1,0 +1,26 @@
+ok   caret 6 4
+ok   rename-at buyer
+ok   caret 6 15
+ok   rename-at store
+ok   undo
+ok   select db
+ok   rename-selected orders
+ok   rename-selected 9bad
+ok   rename-selected shop
+ok   caret 2 1
+FAIL rename-at nothing
+--- text
+// a comment that must survive
+model {
+  buyer = person "Customer"
+  shop = system "Shop"
+  orders = database "Orders"
+  buyer -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+--- status
+There is already an element "shop"

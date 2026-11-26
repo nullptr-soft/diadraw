@@ -1,0 +1,9 @@
+{
+  "diadraw.description": "Створюйте діаграми як текст і на полотні на основі однієї моделі. DiaDraw пропонує мову DSL, редактор WYSIWYG та автоматичне компонування діаграм.",
+  "diadraw.version": "Версія DiaDraw",
+  "diadraw.feedback": "Залишити відгук",
+  "diadraw.feedbackTitle": "Поділіться ідеєю, побажанням або підкажіть, що можна спростити (відкриється форма на GitHub)",
+  "diadraw.open": "Відкрити DiaDraw",
+  "diadraw.openStep": "Відкрити цей крок у DiaDraw",
+  "diadraw.viewAlt": "Подання {{view}} з файлу {{name}}.draw"
+}

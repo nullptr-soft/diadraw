@@ -1,0 +1,23 @@
+// Flowchart: a login flow with one decision and a retry loop.
+model {
+  begin   = start "Start"
+  form    = process "Show login form"
+  submit  = process "Submit credentials"
+  valid   = decision "Credentials valid?"
+  home    = process "Open dashboard"
+  failed  = process "Show error"
+  done    = end "End"
+
+  begin -> form
+  form -> submit
+  submit -> valid
+  valid -> home "yes"
+  valid -> failed "no"
+  failed -> form "retry"
+  home -> done
+}
+
+view login {
+  include *
+  layout layered direction down
+}

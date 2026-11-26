@@ -1,0 +1,50 @@
+name: Report a bug
+description: Something in DiaDraw does not work the way it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. **Help ▸ Report a Bug…** in the app fills in
+        the app, version and system for you.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw instead. Screenshots help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Drag …
+        3. See …
+  - type: textarea
+    id: diagram
+    attributes:
+      label: Diagram
+      description: >-
+        If the problem depends on the diagram, paste the smallest `.draw` text that shows it.
+        Leave out anything you would not want to share: issues are visible to everyone who can
+        see this repository.
+      render: text
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      options: [macOS, Linux (GTK), Windows, Web, Desktop (Tauri), VS Code, CLI]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: DiaDraw version
+      placeholder: '0.0.8'
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15.1, Ubuntu 24.04, Windows 11 …

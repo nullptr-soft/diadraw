@@ -1,0 +1,53 @@
+---
+title: Feedback
+description: Report a bug or tell us what DiaDraw should do next.
+---
+
+import { LinkButton, Aside } from '@astrojs/starlight/components';
+
+DiaDraw is young, and what you run into shapes what comes next. There are two ways to reach us,
+and both open a short form on DiaDraw's GitHub issue tracker.
+
+## Report a bug
+
+Something does not work the way it should: a diagram draws wrong, an edit lands in the wrong
+place, or the app stops responding.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=bug_report.yml"
+  icon="external"
+>
+  Report a bug
+</LinkButton>
+
+## Give feedback
+
+An idea, a wish, a diagram you could not draw, or anything that could be easier.
+
+<LinkButton
+  href="https://github.com/mykulyak/diadraw/issues/new?template=feedback.yml"
+  icon="external"
+  variant="secondary"
+>
+  Give feedback
+</LinkButton>
+
+## From inside the app
+
+Every DiaDraw app has a **Give Feedback** button in its toolbar, one click away, and **Report a
+Bug…** close by. They open the same forms with the app, the DiaDraw version and your system already
+filled in:
+
+| App                     | Give Feedback                    | Report a Bug                        |
+| ----------------------- | -------------------------------- | ----------------------------------- |
+| Web and desktop (Tauri) | right end of the toolbar         | beside Give feedback                |
+| macOS                   | right end of the toolbar         | Help menu                           |
+| Windows                 | right end of the toolbar         | Help menu                           |
+| Linux (GTK)             | header bar, beside the main menu | the main menu (☰) at the top right |
+
+<Aside>
+  You need a GitHub account to send the form. Nothing leaves the app until you press **Create** on
+  GitHub, and your diagram is never attached. If the problem depends on the diagram, paste the
+  smallest `.draw` text that shows it into the form, leaving out anything you would not want to
+  share.
+</Aside>
