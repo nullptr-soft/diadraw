@@ -90,6 +90,7 @@ pip install --no-build-isolation -e . -C editable.rebuild=true   # rebuilds the 
 pytest
 ```
 
-The bindings are in `src/python/src/module.cpp`, the package in `src/python/diadraw` (with type
-stubs, `_core.pyi`), the tests in `src/python/tests`. The build is the root `CMakeLists.txt` with
-`DIADRAW_BUILD_PYTHON=ON` and the apps, CLI and C++ tests off (see `pyproject.toml`).
+The bindings are in `bindings/python/src/module.cpp`, the package in `bindings/python/diadraw`
+(with type stubs, `_core.pyi`), the tests in `bindings/python/tests`. The build is the root
+`CMakeLists.txt` with `DIADRAW_BUILD_PYTHON=ON` and the apps, CLI and C++ tests off (see
+`pyproject.toml`).

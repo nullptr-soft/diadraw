@@ -15,4 +15,12 @@ namespace dd::host::detail {
   return s;
 }
 
+/// The next field of `s` up to `sep` (the rest when there is none), taken off `s`.
+[[nodiscard]] inline std::string_view take(std::string_view& s, char sep) {
+  auto end = s.find(sep);
+  std::string_view field = s.substr(0, end);
+  s = end == std::string_view::npos ? std::string_view() : s.substr(end + 1);
+  return field;
+}
+
 }  // namespace dd::host::detail

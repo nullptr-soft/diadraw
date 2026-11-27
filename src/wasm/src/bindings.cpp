@@ -15,6 +15,7 @@
 #include "diadraw/base/result.hpp"
 #include "diadraw/base/text.hpp"
 #include "diadraw/diadraw.h"
+#include "diadraw/dsl/format.hpp"
 #include "diadraw/dsl/json.hpp"
 #include "diadraw/dsl/print.hpp"
 #include "diadraw/editor/editor.hpp"
@@ -250,9 +251,18 @@ std::string library_list() {
   return dd::Json(std::move(out)).dump();
 }
 
+/// `foldRanges(text)`: the blocks a text pane can fold, `[{ from, to, startLine, endLine }]`, the
+/// hidden text in UTF-16 offsets.
+std::string fold_ranges(const std::string& text) { return dd::dsl::fold_ranges_json(text).dump(); }
+
 /// `highlight(text)`: the syntax tokens as `[from, to, tag]` triples, with UTF-16 offsets and
 /// CodeMirror tag names.
 std::string highlight(const std::string& text) { return dd::dsl::highlight_json(text).dump(); }
+
+/// `formatSource(text, indentSize)`: the text reindented and respaced (dsl::format_source).
+std::string format_source(const std::string& text, int indent_size) {
+  return dd::dsl::format_source(text, dd::dsl::FormatOptions{indent_size});
+}
 
 /// `renderView(modelJson, viewId)`: `{ svg }` for a fixed or sequence view, else `{ error }`.
 /// Lays the view out with the renderer's measure and the default theme, as the CLI does, drawing
@@ -785,7 +795,9 @@ EMSCRIPTEN_BINDINGS(diadraw) {
   emscripten::function("libraryPalette", &library_palette);
   emscripten::function("expandFragment", &expand_fragment);
   emscripten::function("buildLibrary", &build_library);
+  emscripten::function("foldRanges", &fold_ranges);
   emscripten::function("highlight", &highlight);
+  emscripten::function("formatSource", &format_source);
   emscripten::function("importDiagram", &import_diagram);
   emscripten::function("loadDrawioIndex", &load_drawio_index);
   emscripten::function("readStencilSets", &read_stencil_sets);

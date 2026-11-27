@@ -1,5 +1,6 @@
 #include "diadraw/io/codec.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <cstring>
@@ -47,34 +48,66 @@ std::optional<std::string> base64_decode(std::string_view text) {
 
 namespace {
 
-std::optional<std::string> tinfl(std::string_view bytes, int flags) {
-  std::size_t out_len = 0;
-  void* out = tinfl_decompress_mem_to_heap(bytes.data(), bytes.size(), &out_len, flags);
-  if (!out) {
-    // An empty stream decompresses to nothing (tinfl reports that as a null block too).
-    return std::nullopt;
+constexpr std::string_view kTooLarge = "The decompressed data is larger than ";
+
+std::string too_large_message(std::size_t limit) { return std::string(kTooLarge) + describe_size(limit); }
+
+Result<std::string> tinfl(std::string_view bytes, int flags, std::size_t limit) {
+  // tinfl_decompress_mem_to_heap, with the output capped: the buffer grows by doubling up to
+  // `limit`, and a stream that still has output once the buffer holds `limit` bytes is refused.
+  // The whole output stays in one buffer, as deflate refers back up to 32 KiB into it.
+  tinfl_decompressor decomp;
+  tinfl_init(&decomp);
+  // A first guess that fits most text without regrowing; it never passes the limit.
+  // Large inputs start smaller, so a 20 MiB page does not zero-fill the whole limit up front.
+  std::size_t guess = bytes.size() < limit / 4   ? std::max<std::size_t>(1024, bytes.size() * 4)
+                      : bytes.size() < limit / 2 ? bytes.size() * 2
+                                                 : limit;
+  std::string out(std::min(limit, guess), '\0');
+  std::size_t in_at = 0, out_len = 0;
+  for (;;) {
+    std::size_t in_size = bytes.size() - in_at, out_size = out.size() - out_len;
+    auto* base = reinterpret_cast<mz_uint8*>(out.data());
+    tinfl_status status = tinfl_decompress(&decomp, reinterpret_cast<const mz_uint8*>(bytes.data()) + in_at, &in_size,
+                                           base, base + out_len, &out_size,
+                                           flags | TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
+    in_at += in_size;
+    out_len += out_size;
+    if (status == TINFL_STATUS_DONE) break;
+    if (status != TINFL_STATUS_HAS_MORE_OUTPUT) return fail("The data is not valid deflate data");
+    if (out.size() >= limit) return fail(too_large_message(limit));
+    out.resize(out.size() > limit / 2 ? limit : out.size() * 2);
   }
-  std::string result(static_cast<const char*>(out), out_len);
-  std::free(out);  // tinfl allocates with malloc (MZ_MALLOC)
-  return result;
+  // An empty stream decompresses to nothing, which no importer can use.
+  if (out_len == 0) return fail("The data decompresses to nothing");
+  out.resize(out_len);
+  return out;
 }
 
 }  // namespace
 
-std::optional<std::string> inflate_raw(std::string_view bytes) { return tinfl(bytes, 0); }
-
-std::optional<std::string> inflate_zlib(std::string_view bytes) {
-  return tinfl(bytes, TINFL_FLAG_PARSE_ZLIB_HEADER);
+std::string describe_size(std::size_t bytes) {
+  constexpr std::size_t kMiB = std::size_t{1} << 20;
+  return bytes % kMiB == 0 && bytes > 0 ? std::to_string(bytes / kMiB) + " MiB" : std::to_string(bytes) + " bytes";
 }
 
-std::optional<std::string> gunzip(std::string_view bytes) {
+bool is_too_large(const Error& error) { return error.message.starts_with(kTooLarge); }
+
+Result<std::string> inflate_raw(std::string_view bytes, std::size_t limit) { return tinfl(bytes, 0, limit); }
+
+Result<std::string> inflate_zlib(std::string_view bytes, std::size_t limit) {
+  return tinfl(bytes, TINFL_FLAG_PARSE_ZLIB_HEADER, limit);
+}
+
+Result<std::string> gunzip(std::string_view bytes, std::size_t limit) {
   if (bytes.size() < 2 || static_cast<unsigned char>(bytes[0]) != 0x1F || static_cast<unsigned char>(bytes[1]) != 0x8B)
     return std::string(bytes);
-  if (bytes.size() < 18) return std::nullopt;
+  auto truncated = [] { return fail("The gzip data is truncated"); };
+  if (bytes.size() < 18) return truncated();
   auto flags = static_cast<unsigned char>(bytes[3]);
   std::size_t at = 10;
   if (flags & 0x04) {  // FEXTRA
-    if (at + 2 > bytes.size()) return std::nullopt;
+    if (at + 2 > bytes.size()) return truncated();
     at += 2 + (static_cast<unsigned char>(bytes[at]) | (static_cast<unsigned char>(bytes[at + 1]) << 8));
   }
   auto skip_zero = [&] {
@@ -84,8 +117,8 @@ std::optional<std::string> gunzip(std::string_view bytes) {
   if (flags & 0x08) skip_zero();  // FNAME
   if (flags & 0x10) skip_zero();  // FCOMMENT
   if (flags & 0x02) at += 2;      // FHCRC
-  if (at + 8 > bytes.size()) return std::nullopt;
-  return inflate_raw(bytes.substr(at, bytes.size() - at - 8));
+  if (at + 8 > bytes.size()) return truncated();
+  return inflate_raw(bytes.substr(at, bytes.size() - at - 8), limit);
 }
 
 std::uint32_t crc32(std::string_view bytes, std::uint32_t crc) {

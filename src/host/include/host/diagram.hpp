@@ -2,8 +2,8 @@
 
 // Checking and rendering a document the way the `diadraw` command line does, for every host that
 // works on files outside an editor: the CLI's `check` and `render`, its MCP server
-// (host/mcp.hpp), the C ABI, the Python package (src/python) and the Node.js addon (src/node).
-// Libraries resolve offline, as in host/libraries.hpp.
+// (host/mcp.hpp), the C ABI, the Python package (bindings/python) and the Node.js addon
+// (bindings/node). Libraries resolve offline, as in host/libraries.hpp.
 
 #include <optional>
 #include <string>

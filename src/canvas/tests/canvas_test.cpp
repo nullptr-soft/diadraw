@@ -604,8 +604,8 @@ TEST(TurnedCanvas, HitsResizesAndHandlesFollowTheTurn) {
   EXPECT_NEAR(hu.x, 50, 1e-6);
   EXPECT_NEAR(hu.y, 85, 1e-6);
   auto tu = canvas.to_user(turn->x, turn->y);
-  for (const auto& c : canvas.resize_points()) {
-    auto cu = canvas.to_user(c.x, c.y);
+  for (const auto& grip : canvas.resize_points()) {
+    auto cu = canvas.to_user(grip.x, grip.y);
     EXPECT_GT(std::hypot(cu.x - hu.x, cu.y - hu.y), 20);
     EXPECT_GT(std::hypot(cu.x - tu.x, cu.y - tu.y), 15);
   }

@@ -135,7 +135,7 @@ Der Quellordner einer Bibliothek enthält `diadraw-library.json`:
 | `fragments` | DiaDraw-Quelltext (`.draw`-Datei oder inline) für das Innere von `model { … }`; `${param}` übernimmt einen Parameter, `${alias}` den Alias, unter dem die Bibliothek verwendet wird |
 | `open` | beliebige Formnamen akzeptieren und als `base` zeichnen (für Symbolsätze ohne Namensliste) |
 | `mappings` | je Format (`plantuml`, `plantuml-include`, `plantuml-local`, `structurizr`, `drawio`, `bpmn`): Fremdname → Form-ID |
-| `themes` | ID → Design wie in `theme … { … }` ([dsl.md](dsl.md#eigene-designs)): `extends` (eingebautes Design, Design dieser Bibliothek oder `dep.theme`), Designschlüssel, `nodes` |
+| `themes` | ID → Design wie in `theme … { … }` ([dsl.md](dsl.md#eigene-designs)): `extends` (Design dieser Bibliothek, eingebautes Design oder `dep.theme`; ein Design dieser Bibliothek hat Vorrang vor einem gleichnamigen eingebauten, außer ein Design erweitert seinen eigenen Namen), Designschlüssel, `nodes` |
 | `dependencies` | Bibliotheken, auf denen zusammengesetzte Formen aufbauen: `name` → Versionsbereich |
 
 `kind` einer einfachen oder zusammengesetzten Form (die Art des von der Palette dafür eingefügten Elements) bezeichnet eine bibliothekseigene Art, wenn es dort eine dieses Namens gibt, andernfalls eine eingebaute Art.

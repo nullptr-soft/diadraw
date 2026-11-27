@@ -4,13 +4,19 @@
 
 #include <algorithm>
 #include <cmath>
+#include <mutex>
+#include <optional>
+#include <string_view>
 #include <set>
+#include <utility>
+#include <unordered_map>
 
 #include "diadraw/base/js_regex.hpp"
 #include "diadraw/base/text.hpp"
 #include "diadraw/dsl/parse.hpp"
 #include "diadraw/library/builtin.hpp"
 #include "diadraw/model/json.hpp"
+#include "svg_sanitize.hpp"
 
 namespace dd::library {
 
@@ -504,22 +510,138 @@ LicenseCheck check_license(const Json& m) {
   return {LicenseStatus::Unknown, expr + " is not on the allow-list"};
 }
 
+// ── drawings ──────────────────────────────────────────────────────────────────────────────────
+
+namespace {
+
+/// Drawings already sanitised, by id prefix and source text, in two generations: when the young
+/// one fills it becomes the old one, and a drawing found in the old one moves to the young. A
+/// working set up to the budget then stays cached however often a palette cycles through it.
+class DrawingCache {
+ public:
+  using Key = std::pair<std::string_view, std::string_view>;  ///< prefix, source
+
+  std::optional<std::string> find(Key key) {
+    std::lock_guard lock(mutex_);
+    if (auto it = young_.find(key); it != young_.end()) return value(it->first, it->second);
+    auto it = old_.find(key);
+    if (it == old_.end()) return std::nullopt;
+    auto node = old_.extract(it);
+    std::string clean = value(node.key(), node.mapped());
+    make_room(cost(node.key(), node.mapped()));
+    bytes_ += cost(node.key(), node.mapped());
+    young_.insert(std::move(node));
+    return clean;
+  }
+  void add(Key key, const std::string& clean) {
+    std::lock_guard lock(mutex_);
+    // Most drawings (every one without ids) come out as they went in: those keep no copy.
+    std::optional<std::string> stored;
+    if (clean != key.second) stored = clean;
+    Owned owned(key.first, key.second);
+    std::size_t size = cost(owned, stored);
+    make_room(size);
+    if (young_.try_emplace(std::move(owned), std::move(stored)).second) bytes_ += size;
+  }
+
+ private:
+  /// Bytes of keys and results per generation: room for the drawings of every library a
+  /// document is likely to use at once (the largest draw.io set is about 2 MB).
+  static constexpr std::size_t kBudget = 16u << 20;
+  using Owned = std::pair<std::string, std::string>;
+  /// The sanitised drawing; nullopt when it is the source itself.
+  using Stored = std::optional<std::string>;
+  struct Hash {
+    using is_transparent = void;
+    std::size_t operator()(Key k) const {
+      std::size_t h = std::hash<std::string_view>{}(k.first);
+      std::size_t g = std::hash<std::string_view>{}(k.second);
+      return h ^ (g + static_cast<std::size_t>(0x9e3779b97f4a7c15ull) + (h << 6) + (h >> 2));
+    }
+    std::size_t operator()(const Owned& k) const { return (*this)(Key(k.first, k.second)); }
+  };
+  struct Equal {
+    using is_transparent = void;
+    static Key view(const Owned& k) { return {k.first, k.second}; }
+    static Key view(Key k) { return k; }
+    template <class A, class B>
+    bool operator()(const A& a, const B& b) const {
+      return view(a) == view(b);
+    }
+  };
+  using Map = std::unordered_map<Owned, Stored, Hash, Equal>;
+
+  static std::string value(const Owned& key, const Stored& stored) { return stored ? *stored : key.second; }
+  static std::size_t cost(const Owned& key, const Stored& stored) {
+    return key.first.size() + key.second.size() + (stored ? stored->size() : 0);
+  }
+  void make_room(std::size_t size) {
+    if (bytes_ + size <= kBudget) return;
+    old_ = std::move(young_);
+    young_ = Map();
+    bytes_ = 0;
+  }
+
+  std::mutex mutex_;
+  Map young_, old_;
+  std::size_t bytes_ = 0;
+};
+
+/// A shape's drawing as it may be inlined into a page. `lib build` sanitises drawings, but a
+/// bundle from disk, `lib add` or the web app's `addLibrary` was built by whoever made it, so
+/// every drawing is sanitised again on its way out, its ids prefixed so they cannot take over the
+/// page's own (markers, other drawings). Drawings come back on every render, so the results are
+/// cached; sanitising itself runs outside the lock.
+std::string safe_drawing(std::string_view svg, std::string_view prefix) {
+  static DrawingCache cache;
+  if (auto hit = cache.find({prefix, svg})) return std::move(*hit);
+  std::string clean = sanitize_svg_body(svg, prefix);
+  cache.add({prefix, svg}, clean);
+  return clean;
+}
+
+/// `lib-<alias>-<shape>-`, kept to letters, digits and `_xx` codes, which ids and `url(#…)` take as
+/// they are.
+std::string drawing_prefix(std::string_view alias, std::string_view id) {
+  std::string out = "lib-";
+  for (std::string_view part : {alias, id}) {
+    for (char c : part)
+      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+        out += c;
+      } else {  // `_` and its hex code, so `a.b` and `a_b` stay apart
+        constexpr char kHex[] = "0123456789abcdef";
+        auto u = static_cast<unsigned char>(c);
+        out += '_';
+        out += kHex[u >> 4];
+        out += kHex[u & 15];
+      }
+    out += '-';
+  }
+  return out;
+}
+
+/// A library's recolourable colour: `#rgb` to `#rrggbbaa` or a colour name. Anything else could
+/// match across the drawing's markup when the renderer swaps colours as text.
+bool plain_color(std::string_view c) {
+  auto letter = [](char ch) { return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'); };
+  auto hex = [](char ch) { return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'); };
+  if (c.empty()) return false;
+  if (c[0] != '#') return std::all_of(c.begin(), c.end(), letter);
+  std::size_t digits = c.size() - 1;
+  return (digits == 3 || digits == 4 || digits == 6 || digits == 8) && std::all_of(c.begin() + 1, c.end(), hex);
+}
+
+}  // namespace
+
 // ── bundles ────────────────────────────────────────────────────────────────────────────────────
 
 std::optional<SvgArt> sanitize_svg(std::string_view svg, const std::string& id_prefix) {
-  static const Regex kXmlDecl("<\\?xml[^>]*\\?>", "g");
-  static const Regex kDoctype("<!DOCTYPE[^>]*>", "gi");
-  static const Regex kComment("<!--[\\s\\S]*?-->", "g");
-  static const Regex kOpen("<svg\\b([^>]*)>", "i");
-  std::string text = kComment.replace(kDoctype.replace(kXmlDecl.replace(svg, "", true), "", true), "", true);
-  auto open = kOpen.exec(text);
-  std::size_t close = text.rfind("</svg>");
-  if (!open || close == std::string::npos || close < open->index()) return std::nullopt;
-  std::string attrs = open->str(1);
-  auto attr = [&](const std::string& name) -> std::optional<std::string> {
-    Regex re("\\b" + name + "\\s*=\\s*[\"']([^\"']*)[\"']", "i");
-    auto m = re.exec(attrs);
-    return m ? m->get(1) : std::nullopt;
+  auto clean = sanitize_svg_markup(svg, id_prefix);
+  if (!clean) return std::nullopt;
+  auto attr = [&](std::string_view name) -> std::optional<std::string> {
+    for (const auto& [k, v] : clean->root_attributes)
+      if (js::to_lower(k) == js::to_lower(name)) return v;
+    return std::nullopt;
   };
   double w = parse_float(attr("width").value_or(""));
   double h = parse_float(attr("height").value_or(""));
@@ -530,40 +652,7 @@ std::optional<SvgArt> sanitize_svg(std::string_view svg, const std::string& id_p
   auto parts = kSeparators.split(*view_box);
   double vw = parts.size() > 2 ? js_to_number(parts[2]) : 0;
   double vh = parts.size() > 3 ? js_to_number(parts[3]) : 0;
-  std::string body = text.substr(open->end(), close - open->end());
-  static const Regex kScript("<script[\\s\\S]*?<\\/script\\s*>", "gi");
-  static const Regex kScriptEmpty("<script[^>]*\\/>", "gi");
-  static const Regex kForeign("<foreignObject[\\s\\S]*?<\\/foreignObject\\s*>", "gi");
-  static const Regex kHandler("\\son\\w+\\s*=\\s*(\"[^\"]*\"|'[^']*')", "gi");
-  static const Regex kHref("\\s(xlink:)?href\\s*=\\s*(\"([^\"]*)\"|'([^']*)')", "gi");
-  static const Regex kDataImage("^data:image\\/(png|jpeg|gif|webp);", "i");
-  static const Regex kUrl("url\\(\\s*(['\"]?)(?!#)[^)]*\\1\\s*\\)", "gi");
-  body = kScript.replace(body, "", true);
-  body = kScriptEmpty.replace(body, "", true);
-  body = kForeign.replace(body, "", true);
-  body = kHandler.replace(body, "", true);
-  // External references: only same-document fragments and embedded images stay.
-  body = kHref.replace(
-      body,
-      [](const js::Match& m) -> std::string {
-        std::string url = m.has(3) ? m.str(3) : m.has(4) ? m.str(4) : "";
-        return (!url.empty() && url[0] == '#') || kDataImage.test(url) ? m.str(0) : "";
-      },
-      true);
-  body = trim(kUrl.replace(body, "none", true));
-  // Prefix ids and their references.
-  static const Regex kId("\\sid\\s*=\\s*[\"']([^\"']+)[\"']", "g");
-  static const Regex kSpecials("[.*+?^${}()|[\\]\\\\]", "g");
-  std::vector<std::string> ids;
-  for (const auto& m : kId.match_all(body))
-    if (std::find(ids.begin(), ids.end(), m.str(1)) == ids.end()) ids.push_back(m.str(1));
-  for (const auto& id : ids) {
-    std::string safe = kSpecials.replace(id, "\\$&", true);
-    body = Regex("(\\sid\\s*=\\s*[\"'])" + safe + "([\"'])", "g").replace(body, "$1" + id_prefix + id + "$2", true);
-    body = Regex("url\\(\\s*#" + safe + "\\s*\\)", "g").replace(body, "url(#" + id_prefix + id + ")", true);
-    body = Regex("(href\\s*=\\s*[\"'])#" + safe + "([\"'])", "g").replace(body, "$1#" + id_prefix + id + "$2", true);
-  }
-  return SvgArt{body, *view_box, w > 0 ? w : vw, h > 0 ? h : vh};
+  return SvgArt{std::move(clean->body), *view_box, w > 0 ? w : vw, h > 0 ? h : vh};
 }
 
 BuildResult build_bundle(const Json& manifest, const FileReader& read) {
@@ -711,7 +800,11 @@ std::optional<Art> LibrarySet::art(std::string_view ref, int depth) const {
   const Json* shapes = lib->get("shapes");
   if (const Json* shape = shapes ? shapes->get(id) : nullptr; truthy(shape)) {
     Art art;
-    if (truthy(shape->get("svg"))) art.shape.body = js_string(shape->get("svg"));
+    if (truthy(shape->get("svg"))) {
+      const std::string* svg = string_of(shape->get("svg"));
+      std::string prefix = drawing_prefix(alias, id);
+      art.shape.body = svg ? safe_drawing(*svg, prefix) : safe_drawing(js_string(shape->get("svg")), prefix);
+    }
     if (truthy(shape->get("viewBox"))) art.shape.view_box = js_string(shape->get("viewBox"));
     if (truthy(shape->get("base"))) art.shape.base = js_string(shape->get("base"));
     if (truthy(shape->get("width"))) art.shape.width = js_number(shape->get("width"));
@@ -721,9 +814,9 @@ std::optional<Art> LibrarySet::art(std::string_view ref, int depth) const {
     art.shape.label_inside = position && *position == "inside";
     if (const Json* colors = lib->get("colors"); truthy(colors)) {
       for (const auto& c : colors->get("fill") && colors->get("fill")->is_array() ? colors->get("fill")->as_array() : Json::Array{})
-        art.shape.fill_colors.push_back(js_string(&c));
+        if (std::string color = js_string(&c); plain_color(color)) art.shape.fill_colors.push_back(std::move(color));
       for (const auto& c : colors->get("stroke") && colors->get("stroke")->is_array() ? colors->get("stroke")->as_array() : Json::Array{})
-        art.shape.stroke_colors.push_back(js_string(&c));
+        if (std::string color = js_string(&c); plain_color(color)) art.shape.stroke_colors.push_back(std::move(color));
     }
     const Json* label = shape->get("label");
     art.label = label && !label->is_null() ? js_string(label) : title_case(id);
@@ -742,9 +835,11 @@ std::optional<Art> LibrarySet::art(std::string_view ref, int depth) const {
                                    ? *inner->shape.view_box
                                    : "0 0 " + js_number_string(inner->shape.width.value_or(48)) + " " +
                                          js_number_string(inner->shape.height.value_or(48));
-        body += "<svg x=\"" + js_string(part.get("x")) + "\" y=\"" + js_string(part.get("y")) + "\" width=\"" +
-                js_string(part.get("width")) + "\" height=\"" + js_string(part.get("height")) + "\" viewBox=\"" +
-                view_box + "\" preserveAspectRatio=\"xMidYMid meet\">" + *inner->shape.body + "</svg>";
+        auto attr = [](const std::string& v) { return escape_xml(v); };
+        body += "<svg x=\"" + attr(js_string(part.get("x"))) + "\" y=\"" + attr(js_string(part.get("y"))) +
+                "\" width=\"" + attr(js_string(part.get("width"))) + "\" height=\"" +
+                attr(js_string(part.get("height"))) + "\" viewBox=\"" + attr(view_box) +
+                "\" preserveAspectRatio=\"xMidYMid meet\">" + *inner->shape.body + "</svg>";
       }
     Art out;
     out.shape.body = body;
@@ -828,11 +923,13 @@ std::optional<ThemeDef> LibrarySet::theme(std::string_view ref) const {
   named.set("name", std::string(ref));
   auto def = theme_from_json(named);
   if (!def) return std::nullopt;
-  // `extends` names a built-in, another theme of this library, or `dep.theme` of a dependency.
+  // `extends` names another theme of this library, a built-in, or `dep.theme` of a dependency.
+  // The library's own theme wins over a built-in of the same name, so a library written before
+  // that built-in existed keeps its meaning; a theme extending its own name means the built-in.
   if (def->base) {
     if (def->base->find('.') != std::string::npos)
       def->base = dependency_ref(*lib, *def->base);
-    else if (!find_theme(*def->base) && themes->get(*def->base))
+    else if (*def->base != id && themes->get(*def->base))
       def->base = alias + "." + *def->base;
   }
   return std::move(*def);

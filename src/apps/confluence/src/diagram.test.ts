@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadDiaDraw } from '@diadraw/wasm';
 import {
+  BUILT_IN_THEMES,
   STARTER_SOURCE,
   draw,
   importFileName,
@@ -66,7 +67,25 @@ describe('draw', () => {
     const drawing = draw(dd, { source: 'model {\n  a = \n}\n' }, 'dd-');
     expect(drawing.result.ok).toBe(false);
     expect(drawing.diagnostics.some((d) => d.severity === 'error')).toBe(true);
-    expect(drawing.themes).toEqual(['default', 'dark', 'mono']);
+    expect(drawing.themes).toEqual([
+      'default',
+      'dark',
+      'mono',
+      'ocean',
+      'forest',
+      'sunset',
+      'lavender',
+      'sand',
+      'graphite',
+      'pastel',
+      'vivid',
+      'contrast',
+      'blueprint',
+      'midnight',
+      'aurora',
+      'ember',
+      'terminal',
+    ]);
   });
 
   it('draws the starter diagram', () => {
@@ -93,12 +112,7 @@ describe('withTheme', () => {
 
   it('offers the themes the document declares', () => {
     const branded = `theme brand extends dark {\n  background "#101820"\n}\n${shop}`;
-    expect(draw(dd, { source: branded }, 'dd-').themes).toEqual([
-      'default',
-      'dark',
-      'mono',
-      'brand',
-    ]);
+    expect(draw(dd, { source: branded }, 'dd-').themes).toEqual([...BUILT_IN_THEMES, 'brand']);
   });
 });
 

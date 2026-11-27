@@ -12,11 +12,14 @@ src/*
 !src/apps/
 !src/wasm/
 !src/markdown/
-!src/node/
 src/wasm/src/core/diadraw.mjs
 src/apps/desktop/src-tauri/target/
 src/apps/desktop/src-tauri/gen/
 src/apps/confluence-drawio/vendor/
+
+# The Python and Rust bindings (their own style); the Node.js addon is a workspace package.
+bindings/*
+!bindings/node/
 
 # The website's generated pages (site/scripts/sync-docs.mjs, render-tutorial.mjs) and Astro's types.
 site/.astro/

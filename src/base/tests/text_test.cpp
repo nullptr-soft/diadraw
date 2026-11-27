@@ -109,3 +109,13 @@ TEST(Text, FromCharsDouble) {
     }
   }
 }
+
+TEST(Text, AsciiCaseAndCharacterClasses) {
+  static_assert(dd::starts_with_ascii_icase("BR/", "br") && dd::starts_with_ascii_icase("br", "BR"));
+  static_assert(!dd::starts_with_ascii_icase("b", "br") && !dd::starts_with_ascii_icase("\xC3\xA9", "\xC3\x89"));
+  static_assert(dd::ascii_iequals("Div", "dIV") && !dd::ascii_iequals("div", "divx"));
+  static_assert(dd::is_ascii_space('\v') && dd::is_ascii_space(' ') && !dd::is_ascii_space('\xA0'));
+  static_assert(dd::is_ascii_word('_') && dd::is_ascii_word('Z') && !dd::is_ascii_word('-') && !dd::is_ascii_word('\xC3'));
+  EXPECT_EQ(dd::ascii_lower('Q'), 'q');
+  EXPECT_EQ(dd::ascii_lower('['), '[');
+}

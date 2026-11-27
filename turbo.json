@@ -4,7 +4,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["DIADRAW_WEB_BASE", "VITE_GOOGLE_CLIENT_ID", "VITE_ONEDRIVE_CLIENT_ID"],
+      "env": [
+        "DIADRAW_WEB_BASE",
+        "VITE_GOOGLE_CLIENT_ID",
+        "VITE_ONEDRIVE_CLIENT_ID",
+        "TAURI_ENV_PLATFORM"
+      ],
       "outputs": ["dist/**"]
     },
     "typecheck": {
@@ -15,7 +20,7 @@
     },
     "dev": {
       "dependsOn": ["^build"],
-      "env": ["VITE_GOOGLE_CLIENT_ID", "VITE_ONEDRIVE_CLIENT_ID"],
+      "env": ["VITE_GOOGLE_CLIENT_ID", "VITE_ONEDRIVE_CLIENT_ID", "TAURI_ENV_PLATFORM"],
       "cache": false,
       "persistent": true
     }

@@ -45,7 +45,7 @@ struct Theme {
 };
 
 const Theme& default_theme();
-/// A built-in theme by name (`default`, `dark`, `mono`), or null.
+/// A built-in theme by name (`default`, `dark`, `mono`, `ocean`, …), or null.
 const Theme* find_theme(std::string_view name);
 /// The built-in themes' names, `default` first.
 std::vector<std::string> theme_names();
@@ -157,7 +157,6 @@ ShapeParams shape_params(const Style& style);
 std::string shape_svg(const std::string& shape, const Box& b, const std::string& paint, bool rounded = false,
                       const ShapeParams& params = {});
 
-std::string escape_xml(std::string_view text);
 /// Approximate text width without a font: average glyph widths of a proportional sans font.
 double text_width(std::string_view text, double font_size);
 /// Splits text into lines that fit `width`; explicit newlines always break.

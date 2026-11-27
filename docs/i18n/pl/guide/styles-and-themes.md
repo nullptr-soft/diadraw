@@ -23,7 +23,7 @@ Wszystkie selektory i klucze znajdziesz w [dokumentacji DSL](../dsl.md#style-i-m
 
 - Użyj **bloku stylu**, gdy wygląd zależy od rodzaju lub tagu: „każda baza danych jest pomarańczowa”, „wszystko z tagiem `external` jest szare i ma kreskowany obrys”. Nowe elementy tego rodzaju lub z tym tagiem automatycznie otrzymają taki sam wygląd.
 - Użyj pola **Styl** danego elementu, gdy tylko on ma wyglądać inaczej.
-- Użyj **motywu**, aby ustawić wygląd całego diagramu: tło, kolor linii, czcionkę i domyślne kolory poszczególnych rodzajów. Wybierz motyw wbudowany (`default`, `dark`, a do druku `mono`) lub utwórz własny.
+- Użyj **motywu**, aby ustawić wygląd całego diagramu: tło, kolor linii, czcionkę i domyślne kolory poszczególnych rodzajów. Wybierz motyw wbudowany (`default`, `dark`, do druku `mono`, a także `ocean`, `blueprint` i inne, zob. [opis DSL](../dsl.md)) lub utwórz własny.
 
 Gdy kilka ustawień dotyczy tego samego obiektu, pierwszeństwo ma bardziej szczegółowe. Kolejność od najmniej do najbardziej szczegółowego jest następująca: motyw, bloki `*`, bloki rodzaju, bloki tagu, bloki rodzaju z tagiem i wreszcie własny styl elementu.
 
@@ -55,7 +55,7 @@ Pole przyjmuje tylko selektory pasujące do zaznaczonego elementu: jego rodzaj, 
 
 Kliknij puste miejsce na płótnie. Gdy nic nie jest zaznaczone, panel właściwości obok płótna pokazuje ustawienia dokumentu:
 
-- **Motyw**: instrukcja `theme` dokumentu. Wpisz `default`, `dark`, `mono`, nazwę zadeklarowanego przez siebie motywu lub nazwę motywu z biblioteki (`acme.corporate`). Wyczyszczenie pola usuwa instrukcję.
+- **Motyw**: instrukcja `theme` dokumentu. Wpisz wbudowany motyw (np. `default`, `dark`, `ocean`), nazwę zadeklarowanego przez siebie motywu lub nazwę motywu z biblioteki (`acme.corporate`). Wyczyszczenie pola usuwa instrukcję.
 - **Motyw tego widoku**: instrukcja `theme` wewnątrz bieżącego widoku. Zastępuje motyw dokumentu tylko w tym widoku. Puste pole oznacza, że widok używa motywu dokumentu.
 - **Bloki stylów**: wszystkie bloki stylów w dokumencie, także te dotyczące relacji, np. `relationship tag "async": dashed=1`. Podobnie jak wyżej, każdy blok zajmuje jeden wiersz.
 

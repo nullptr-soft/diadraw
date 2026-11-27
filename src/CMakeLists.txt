@@ -15,14 +15,6 @@ if(NOT EMSCRIPTEN)
   add_subdirectory(host "${CMAKE_BINARY_DIR}/host")
 endif()
 
-if(DIADRAW_BUILD_NODE AND NOT EMSCRIPTEN)
-  add_subdirectory(node "${CMAKE_BINARY_DIR}/node")
-endif()
-
-if(DIADRAW_BUILD_PYTHON AND NOT EMSCRIPTEN)
-  add_subdirectory(python "${CMAKE_BINARY_DIR}/python")
-endif()
-
 if(DIADRAW_BUILD_WINUI AND WIN32 AND MSVC)
   add_subdirectory(apps/winui "${CMAKE_BINARY_DIR}/apps/winui")
 endif()

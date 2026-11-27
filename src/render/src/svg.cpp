@@ -70,10 +70,12 @@ const std::string* style_value(const std::optional<Style>& style, std::string_vi
 }
 
 
-/// `color(v, fallback)`
+/// `color(v, fallback)`: a colour from a style, escaped for an attribute value (a document can
+/// put anything in one), or `fallback`, which must be safe there already: a literal or a colour of
+/// the theme render_scene draws with (see attribute_safe).
 std::string color(const std::string* v, const std::string& fallback) {
   if (!v || v->empty() || *v == "default") return fallback;
-  return *v == "none" ? "none" : *v;
+  return escape_xml(*v);
 }
 
 const std::string* prop(const Element& e, std::string_view key) { return e.properties.find(key); }
@@ -152,8 +154,407 @@ Theme mono_theme() {
   return t;
 }
 
+/// Cyan and teal on a pale blue-white page.
+Theme ocean_theme() {
+  Theme t = default_theme();
+  t.name = "ocean";
+  t.background = "#f5fdff";
+  t.edge = "#0e7490";
+  t.edge_text = "#164e63";
+  t.boundary = "#22d3ee";
+  t.boundary_text = "#0e7490";
+  t.surface = "#ffffff";
+  t.divider_fill = "#cffafe";
+  t.label_text = "#083344";
+  t.nodes = {
+      {"default", {"#ffffff", "#0891b2", "#083344"}},
+      {"person", {"#164e63", "#083344", "#ffffff"}},
+      {"system", {"#155e75", "#164e63", "#ffffff"}},
+      {"container", {"#0e7490", "#155e75", "#ffffff"}},
+      {"component", {"#a5f3fc", "#0891b2", "#083344"}},
+      {"database", {"#0e7490", "#164e63", "#ffffff"}},
+      {"start", {"#dcfce7", "#16a34a", "#14532d"}},
+      {"end", {"#fee2e2", "#dc2626", "#7f1d1d"}},
+      {"decision", {"#fef3c7", "#d97706", "#451a03"}},
+      {"note", {"#fefce8", "#a16207", "#422006"}},
+  };
+  t.external = {"#cbd5e1", "#64748b", "#0f172a"};
+  return t;
+}
+
+/// Emerald greens on a soft green-white page.
+Theme forest_theme() {
+  Theme t = default_theme();
+  t.name = "forest";
+  t.background = "#f6fbf7";
+  t.edge = "#047857";
+  t.edge_text = "#064e3b";
+  t.boundary = "#34d399";
+  t.boundary_text = "#047857";
+  t.surface = "#ffffff";
+  t.divider_fill = "#d1fae5";
+  t.label_text = "#022c22";
+  t.nodes = {
+      {"default", {"#ffffff", "#059669", "#022c22"}},
+      {"person", {"#064e3b", "#022c22", "#ffffff"}},
+      {"system", {"#065f46", "#064e3b", "#ffffff"}},
+      {"container", {"#047857", "#065f46", "#ffffff"}},
+      {"component", {"#a7f3d0", "#059669", "#022c22"}},
+      {"database", {"#047857", "#064e3b", "#ffffff"}},
+      {"start", {"#ecfccb", "#65a30d", "#365314"}},
+      {"end", {"#fee2e2", "#dc2626", "#7f1d1d"}},
+      {"decision", {"#fef3c7", "#d97706", "#451a03"}},
+      {"note", {"#fefce8", "#a16207", "#422006"}},
+  };
+  t.external = {"#d6d3d1", "#78716c", "#1c1917"};
+  return t;
+}
+
+/// Warm oranges and rose on a cream page.
+Theme sunset_theme() {
+  Theme t = default_theme();
+  t.name = "sunset";
+  t.background = "#fffaf5";
+  t.edge = "#c2410c";
+  t.edge_text = "#7c2d12";
+  t.boundary = "#fb923c";
+  t.boundary_text = "#c2410c";
+  t.surface = "#ffffff";
+  t.divider_fill = "#ffedd5";
+  t.label_text = "#431407";
+  t.nodes = {
+      {"default", {"#ffffff", "#ea580c", "#431407"}},
+      {"person", {"#9f1239", "#881337", "#ffffff"}},
+      {"system", {"#9a3412", "#7c2d12", "#ffffff"}},
+      {"container", {"#c2410c", "#9a3412", "#ffffff"}},
+      {"component", {"#fed7aa", "#f97316", "#431407"}},
+      {"database", {"#c2410c", "#7c2d12", "#ffffff"}},
+      {"start", {"#dcfce7", "#16a34a", "#14532d"}},
+      {"end", {"#ffe4e6", "#e11d48", "#881337"}},
+      {"decision", {"#fef9c3", "#ca8a04", "#422006"}},
+      {"note", {"#fffbeb", "#b45309", "#451a03"}},
+  };
+  t.external = {"#d6d3d1", "#78716c", "#1c1917"};
+  return t;
+}
+
+/// Violet and purple on a lilac-white page.
+Theme lavender_theme() {
+  Theme t = default_theme();
+  t.name = "lavender";
+  t.background = "#fbfaff";
+  t.edge = "#6d28d9";
+  t.edge_text = "#4c1d95";
+  t.boundary = "#a78bfa";
+  t.boundary_text = "#6d28d9";
+  t.surface = "#ffffff";
+  t.divider_fill = "#ede9fe";
+  t.label_text = "#2e1065";
+  t.nodes = {
+      {"default", {"#ffffff", "#7c3aed", "#2e1065"}},
+      {"person", {"#581c87", "#3b0764", "#ffffff"}},
+      {"system", {"#5b21b6", "#4c1d95", "#ffffff"}},
+      {"container", {"#6d28d9", "#5b21b6", "#ffffff"}},
+      {"component", {"#ddd6fe", "#7c3aed", "#2e1065"}},
+      {"database", {"#6d28d9", "#4c1d95", "#ffffff"}},
+      {"start", {"#dcfce7", "#16a34a", "#14532d"}},
+      {"end", {"#fee2e2", "#dc2626", "#7f1d1d"}},
+      {"decision", {"#fef3c7", "#d97706", "#451a03"}},
+      {"note", {"#fefce8", "#a16207", "#422006"}},
+  };
+  t.external = {"#cbd5e1", "#64748b", "#0f172a"};
+  return t;
+}
+
+/// Earthy browns and stone greys on a warm beige page.
+Theme sand_theme() {
+  Theme t = default_theme();
+  t.name = "sand";
+  t.background = "#fbf7f0";
+  t.edge = "#57534e";
+  t.edge_text = "#292524";
+  t.boundary = "#a8a29e";
+  t.boundary_text = "#57534e";
+  t.surface = "#ffffff";
+  t.divider_fill = "#e7e5e4";
+  t.label_text = "#1c1917";
+  t.nodes = {
+      {"default", {"#fffdf8", "#d97706", "#451a03"}},
+      {"person", {"#78350f", "#451a03", "#ffffff"}},
+      {"system", {"#92400e", "#78350f", "#ffffff"}},
+      {"container", {"#57534e", "#44403c", "#ffffff"}},
+      {"component", {"#fde68a", "#d97706", "#451a03"}},
+      {"database", {"#44403c", "#292524", "#ffffff"}},
+      {"start", {"#dcfce7", "#16a34a", "#14532d"}},
+      {"end", {"#fee2e2", "#dc2626", "#7f1d1d"}},
+      {"decision", {"#fef9c3", "#ca8a04", "#422006"}},
+      {"note", {"#fafaf9", "#44403c", "#0c0a09"}},
+  };
+  t.external = {"#d6d3d1", "#78716c", "#1c1917"};
+  return t;
+}
+
+/// Neutral greys with a sky-blue accent, for technical documents.
+Theme graphite_theme() {
+  Theme t = default_theme();
+  t.name = "graphite";
+  t.background = "#fafafa";
+  t.edge = "#3f3f46";
+  t.edge_text = "#18181b";
+  t.boundary = "#a1a1aa";
+  t.boundary_text = "#52525b";
+  t.surface = "#ffffff";
+  t.divider_fill = "#f4f4f5";
+  t.label_text = "#09090b";
+  t.nodes = {
+      {"default", {"#ffffff", "#52525b", "#09090b"}},
+      {"person", {"#18181b", "#09090b", "#ffffff"}},
+      {"system", {"#27272a", "#18181b", "#ffffff"}},
+      {"container", {"#3f3f46", "#27272a", "#ffffff"}},
+      {"component", {"#e0f2fe", "#0ea5e9", "#082f49"}},
+      {"database", {"#0369a1", "#075985", "#ffffff"}},
+      {"start", {"#dcfce7", "#16a34a", "#14532d"}},
+      {"end", {"#fee2e2", "#dc2626", "#7f1d1d"}},
+      {"decision", {"#fef3c7", "#d97706", "#451a03"}},
+      {"note", {"#fefce8", "#a16207", "#422006"}},
+  };
+  t.external = {"#d4d4d8", "#71717a", "#18181b"};
+  return t;
+}
+
+/// A different soft pastel per kind, with dark text.
+Theme pastel_theme() {
+  Theme t = default_theme();
+  t.name = "pastel";
+  t.background = "#fffdfa";
+  t.edge = "#475569";
+  t.edge_text = "#334155";
+  t.boundary = "#cbd5e1";
+  t.boundary_text = "#475569";
+  t.surface = "#ffffff";
+  t.divider_fill = "#f1f5f9";
+  t.label_text = "#1e293b";
+  t.nodes = {
+      {"default", {"#f0f9ff", "#7dd3fc", "#0c4a6e"}},
+      {"person", {"#fbcfe8", "#f472b6", "#500724"}},
+      {"system", {"#ddd6fe", "#a78bfa", "#2e1065"}},
+      {"container", {"#bae6fd", "#38bdf8", "#082f49"}},
+      {"component", {"#ccfbf1", "#2dd4bf", "#134e4a"}},
+      {"database", {"#fde68a", "#fbbf24", "#451a03"}},
+      {"start", {"#bbf7d0", "#4ade80", "#14532d"}},
+      {"end", {"#fecdd3", "#fb7185", "#881337"}},
+      {"decision", {"#fef08a", "#facc15", "#713f12"}},
+      {"note", {"#fff7ed", "#fdba74", "#7c2d12"}},
+  };
+  t.external = {"#f1f5f9", "#cbd5e1", "#334155"};
+  return t;
+}
+
+/// A different saturated colour per kind, with white text.
+Theme vivid_theme() {
+  Theme t = default_theme();
+  t.name = "vivid";
+  t.background = "#ffffff";
+  t.edge = "#27272a";
+  t.edge_text = "#18181b";
+  t.boundary = "#a1a1aa";
+  t.boundary_text = "#52525b";
+  t.surface = "#ffffff";
+  t.divider_fill = "#f4f4f5";
+  t.label_text = "#18181b";
+  t.nodes = {
+      {"default", {"#ffffff", "#2563eb", "#172554"}},
+      {"person", {"#a21caf", "#86198f", "#ffffff"}},
+      {"system", {"#1d4ed8", "#1e40af", "#ffffff"}},
+      {"container", {"#c2410c", "#9a3412", "#ffffff"}},
+      {"component", {"#0f766e", "#115e59", "#ffffff"}},
+      {"database", {"#6d28d9", "#5b21b6", "#ffffff"}},
+      {"start", {"#15803d", "#166534", "#ffffff"}},
+      {"end", {"#b91c1c", "#991b1b", "#ffffff"}},
+      {"decision", {"#facc15", "#ca8a04", "#422006"}},
+      {"note", {"#fef3c7", "#f59e0b", "#451a03"}},
+  };
+  t.external = {"#71717a", "#52525b", "#ffffff"};
+  return t;
+}
+
+/// Black on white with bold fills and larger text, for accessibility and projectors.
+Theme contrast_theme() {
+  Theme t = default_theme();
+  t.name = "contrast";
+  t.background = "#ffffff";
+  t.font_size = 14;
+  t.small_font_size = 12;
+  t.edge = "#000000";
+  t.edge_text = "#000000";
+  t.boundary = "#000000";
+  t.boundary_text = "#000000";
+  t.surface = "#ffffff";
+  t.divider_fill = "#ffffff";
+  t.label_text = "#000000";
+  t.nodes = {
+      {"default", {"#ffffff", "#000000", "#000000"}},
+      {"person", {"#000000", "#000000", "#ffffff"}},
+      {"system", {"#003399", "#000000", "#ffffff"}},
+      {"container", {"#ffffff", "#000000", "#000000"}},
+      {"component", {"#fff4a3", "#000000", "#000000"}},
+      {"database", {"#dbe7ff", "#000000", "#000000"}},
+      {"start", {"#d6f5d6", "#000000", "#000000"}},
+      {"end", {"#000000", "#000000", "#ffffff"}},
+      {"decision", {"#ffe14d", "#000000", "#000000"}},
+      {"note", {"#ffffff", "#000000", "#000000"}},
+  };
+  t.external = {"#ffffff", "#595959", "#000000"};
+  return t;
+}
+
+/// White lines on blueprint blue.
+Theme blueprint_theme() {
+  Theme t = default_theme();
+  t.name = "blueprint";
+  t.background = "#123a6b";
+  t.edge = "#e0f2fe";
+  t.edge_text = "#ffffff";
+  t.boundary = "#7dd3fc";
+  t.boundary_text = "#bae6fd";
+  t.surface = "#123a6b";
+  t.divider_fill = "#1a4a85";
+  t.label_text = "#ffffff";
+  t.nodes = {
+      {"default", {"#17457f", "#bae6fd", "#f0f9ff"}},
+      {"person", {"#0b2a52", "#ffffff", "#ffffff"}},
+      {"system", {"#1d5aa6", "#ffffff", "#ffffff"}},
+      {"container", {"#1a4f94", "#e0f2fe", "#ffffff"}},
+      {"component", {"#15417a", "#7dd3fc", "#e0f2fe"}},
+      {"database", {"#1a4f94", "#e0f2fe", "#ffffff"}},
+      {"start", {"#123a6b", "#86efac", "#dcfce7"}},
+      {"end", {"#123a6b", "#fca5a5", "#fee2e2"}},
+      {"decision", {"#123a6b", "#fde047", "#fef9c3"}},
+      {"note", {"#0f3360", "#93c5fd", "#e0f2fe"}},
+  };
+  t.external = {"#123a6b", "#94a3b8", "#cbd5e1"};
+  return t;
+}
+
+/// Violet and fuchsia on a near-black indigo page.
+Theme midnight_theme() {
+  Theme t = default_theme();
+  t.name = "midnight";
+  t.background = "#0c0a1f";
+  t.edge = "#a78bfa";
+  t.edge_text = "#ddd6fe";
+  t.boundary = "#7c3aed";
+  t.boundary_text = "#c4b5fd";
+  t.surface = "#17142e";
+  t.divider_fill = "#1e293b";
+  t.label_text = "#ede9fe";
+  t.nodes = {
+      {"default", {"#17142e", "#a78bfa", "#ede9fe"}},
+      {"person", {"#86198f", "#e879f9", "#ffffff"}},
+      {"system", {"#5b21b6", "#a78bfa", "#ffffff"}},
+      {"container", {"#6d28d9", "#c4b5fd", "#ffffff"}},
+      {"component", {"#4c1d95", "#c4b5fd", "#ede9fe"}},
+      {"database", {"#5b21b6", "#c4b5fd", "#ffffff"}},
+      {"start", {"#14532d", "#4ade80", "#dcfce7"}},
+      {"end", {"#7f1d1d", "#f87171", "#fee2e2"}},
+      {"decision", {"#713f12", "#facc15", "#fef9c3"}},
+      {"note", {"#422006", "#ca8a04", "#fef3c7"}},
+  };
+  t.external = {"#334155", "#64748b", "#f1f5f9"};
+  return t;
+}
+
+/// Teal and violet on a dark sea-green page.
+Theme aurora_theme() {
+  Theme t = default_theme();
+  t.name = "aurora";
+  t.background = "#06181a";
+  t.edge = "#2dd4bf";
+  t.edge_text = "#99f6e4";
+  t.boundary = "#0d9488";
+  t.boundary_text = "#5eead4";
+  t.surface = "#0c2a2d";
+  t.divider_fill = "#1e293b";
+  t.label_text = "#ccfbf1";
+  t.nodes = {
+      {"default", {"#0c2a2d", "#2dd4bf", "#ccfbf1"}},
+      {"person", {"#6d28d9", "#a78bfa", "#ffffff"}},
+      {"system", {"#115e59", "#2dd4bf", "#ffffff"}},
+      {"container", {"#0f766e", "#5eead4", "#ffffff"}},
+      {"component", {"#164e63", "#67e8f9", "#cffafe"}},
+      {"database", {"#115e59", "#5eead4", "#ffffff"}},
+      {"start", {"#14532d", "#4ade80", "#dcfce7"}},
+      {"end", {"#7f1d1d", "#f87171", "#fee2e2"}},
+      {"decision", {"#713f12", "#facc15", "#fef9c3"}},
+      {"note", {"#422006", "#ca8a04", "#fef3c7"}},
+  };
+  t.external = {"#334155", "#64748b", "#f1f5f9"};
+  return t;
+}
+
+/// Orange and red embers on a dark brown page.
+Theme ember_theme() {
+  Theme t = default_theme();
+  t.name = "ember";
+  t.background = "#1a120d";
+  t.edge = "#fb923c";
+  t.edge_text = "#fed7aa";
+  t.boundary = "#ea580c";
+  t.boundary_text = "#fdba74";
+  t.surface = "#2a1c14";
+  t.divider_fill = "#292524";
+  t.label_text = "#ffedd5";
+  t.nodes = {
+      {"default", {"#2a1c14", "#fb923c", "#ffedd5"}},
+      {"person", {"#991b1b", "#f87171", "#ffffff"}},
+      {"system", {"#9a3412", "#fb923c", "#ffffff"}},
+      {"container", {"#c2410c", "#fdba74", "#ffffff"}},
+      {"component", {"#7c2d12", "#fdba74", "#ffedd5"}},
+      {"database", {"#9a3412", "#fdba74", "#ffffff"}},
+      {"start", {"#14532d", "#4ade80", "#dcfce7"}},
+      {"end", {"#7f1d1d", "#f87171", "#fee2e2"}},
+      {"decision", {"#713f12", "#facc15", "#fef9c3"}},
+      {"note", {"#422006", "#ca8a04", "#fef3c7"}},
+  };
+  t.external = {"#44403c", "#78716c", "#f5f5f4"};
+  return t;
+}
+
+/// Phosphor green on black.
+Theme terminal_theme() {
+  Theme t = default_theme();
+  t.name = "terminal";
+  t.background = "#0a0f0a";
+  t.edge = "#22c55e";
+  t.edge_text = "#86efac";
+  t.boundary = "#15803d";
+  t.boundary_text = "#4ade80";
+  t.surface = "#0a0f0a";
+  t.divider_fill = "#052e16";
+  t.label_text = "#bbf7d0";
+  t.nodes = {
+      {"default", {"#04140a", "#22c55e", "#bbf7d0"}},
+      {"person", {"#14532d", "#4ade80", "#f0fdf4"}},
+      {"system", {"#166534", "#4ade80", "#f0fdf4"}},
+      {"container", {"#052e16", "#4ade80", "#dcfce7"}},
+      {"component", {"#04140a", "#16a34a", "#86efac"}},
+      {"database", {"#052e16", "#22c55e", "#dcfce7"}},
+      {"start", {"#052e16", "#a3e635", "#ecfccb"}},
+      {"end", {"#450a0a", "#f87171", "#fee2e2"}},
+      {"decision", {"#1a2e05", "#facc15", "#fef9c3"}},
+      {"note", {"#0a1a0f", "#15803d", "#86efac"}},
+  };
+  t.external = {"#111811", "#3f6212", "#a3e635"};
+  return t;
+}
+
 const std::vector<Theme>& builtin_themes() {
-  static const std::vector<Theme> themes{default_theme(), dark_theme(), mono_theme()};
+  static const std::vector<Theme> themes{
+      default_theme(),   dark_theme(),      mono_theme(),      ocean_theme(),     forest_theme(),
+      sunset_theme(),    lavender_theme(),  sand_theme(),      graphite_theme(),  pastel_theme(),
+      vivid_theme(),     contrast_theme(),  blueprint_theme(), midnight_theme(),  aurora_theme(),
+      ember_theme(),     terminal_theme(),
+  };
   return themes;
 }
 
@@ -589,20 +990,30 @@ std::string shape_svg(const std::string& shape, const Box& b, const std::string&
 
 // ── Text ───────────────────────────────────────────────────────────────────────────────────────
 
-std::string escape_xml(std::string_view text) {
-  std::string out;
-  out.reserve(text.size());
-  for (char c : text) {
-    switch (c) {
-      case '&': out += "&amp;"; break;
-      case '<': out += "&lt;"; break;
-      case '>': out += "&gt;"; break;
-      case '"': out += "&quot;"; break;
-      default: out.push_back(c);
-    }
-  }
-  return out;
+namespace {
+
+void escape_in_place(std::string& s) {
+  if (s.find_first_of("&<>\"") != std::string::npos) s = escape_xml(s);
 }
+
+/// `t` with every colour and the font family escaped for an attribute value. Themes come from
+/// documents, libraries and hosts, and the renderer writes their values into attributes as they
+/// are, so it draws with this copy only.
+Theme attribute_safe(Theme t) {
+  for (std::string* s : {&t.background, &t.font_family, &t.edge, &t.edge_text, &t.boundary, &t.boundary_text,
+                         &t.surface, &t.divider_fill, &t.label_text})
+    escape_in_place(*s);
+  auto node = [](NodeStyle& n) {
+    escape_in_place(n.fill);
+    escape_in_place(n.stroke);
+    escape_in_place(n.text);
+  };
+  for (auto& [_, n] : t.nodes) node(n);
+  node(t.external);
+  return t;
+}
+
+}  // namespace
 
 namespace {
 
@@ -687,10 +1098,10 @@ std::string slant_and_decoration(bool italic, bool underline, bool strike) {
   return out;
 }
 
-/// The opening tag of a <text>, without its weight, slant and decoration.
+/// The opening tag of a <text>, without its weight, slant and decoration. `t` is attribute-safe.
 std::string text_open(Point at, double size, const Theme& t, const std::string& anchor) {
   return "<text x=\"" + num(at.x) + "\" y=\"" + num(at.y) + "\" text-anchor=\"" + anchor +
-         "\" dominant-baseline=\"central\" " + "font-family=\"" + escape_xml(t.font_family) + "\" font-size=\"" +
+         "\" dominant-baseline=\"central\" " + "font-family=\"" + t.font_family + "\" font-size=\"" +
          num(size) + "\"";
 }
 
@@ -1996,25 +2407,24 @@ Measure create_measure(const Theme& theme_in, ShapeResolver shapes, KindResolver
 // ── Scene ──────────────────────────────────────────────────────────────────────────────────────
 
 SvgScene render_scene(const ResolvedView& view, const Geometry& geometry, const RenderOptions& options) {
-  const Theme base_theme = options.theme ? *options.theme : theme_for(view, options.themes);
-  // Library kinds with colours of their own become node styles of a copy of the theme, unless the
-  // theme colours the kind itself.
-  std::optional<Theme> kind_theme;
+  Theme theme = options.theme ? *options.theme : theme_for(view, options.themes);
+  // Library kinds with colours of their own become node styles of the theme, unless the theme
+  // colours the kind itself.
   std::map<std::string, KindArt, std::less<>> kinds;
   if (options.kinds)
     for (const auto& e : view.elements) {
       if (e.kind.find('.') == std::string::npos || kinds.count(e.kind)) continue;
       auto kind = options.kinds(e.kind);
       if (!kind) continue;
-      if ((kind->fill || kind->stroke || kind->text) && !base_theme.nodes.count(e.kind)) {
-        if (!kind_theme) kind_theme = base_theme;
-        const NodeStyle& fallback = kind_theme->nodes.at("default");
-        kind_theme->nodes[e.kind] = {kind->fill.value_or(fallback.fill), kind->stroke.value_or(fallback.stroke),
-                                     kind->text.value_or(fallback.text)};
+      if ((kind->fill || kind->stroke || kind->text) && !theme.nodes.count(e.kind)) {
+        const NodeStyle& fallback = theme.nodes.at("default");
+        NodeStyle style{kind->fill.value_or(fallback.fill), kind->stroke.value_or(fallback.stroke),
+                        kind->text.value_or(fallback.text)};
+        theme.nodes.emplace(e.kind, std::move(style));
       }
       kinds.emplace(e.kind, std::move(*kind));
     }
-  const Theme& t = kind_theme ? *kind_theme : base_theme;
+  const Theme t = attribute_safe(std::move(theme));
   auto stereotype = [&](const Element& e) -> std::optional<std::string> {
     if (kC4Kinds.count(e.kind)) return "[" + e.kind + "]";
     auto it = kinds.find(e.kind);
@@ -2188,7 +2598,8 @@ std::string line_sample_svg(const Style& style, double width, double height, con
   Relationship r;
   r.style = style;
   Markers markers;
-  std::string line = edge(r, {{4, height / 2}, {width - 4, height / 2}}, std::nullopt, theme, markers, no_rules());
+  std::string line =
+      edge(r, {{4, height / 2}, {width - 4, height / 2}}, std::nullopt, attribute_safe(theme), markers, no_rules());
   std::string defs;
   for (const auto& [_, def] : markers.items) defs += def;
   return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + num(width) + "\" height=\"" + num(height) +

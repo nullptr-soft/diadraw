@@ -32,7 +32,8 @@ The target is a branch, file, directory, commit range or pull request; without o
 the uncommitted diff, or the branch's commits since `main`. Each returns blockers, warnings,
 nitpicks and positives, with `file:line` for every finding.
 
-The rule for every change to C++ code (the core under `src/`, the CLI, the native shells):
+The rule for every change to C++ code (the core under `src/`, the CLI, the native shells, the
+bindings under `bindings/`):
 
 - The agent that wrote the change never reviews it. When the change is done, a separate, fresh
   agent (the `cpp-reviewer` subagent, or another session) runs `/cpp-review` on it.

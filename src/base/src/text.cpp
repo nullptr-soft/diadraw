@@ -75,7 +75,12 @@ std::from_chars_result from_chars_double_strtod(const char* first, const char* l
 
 std::from_chars_result from_chars_double(const char* first, const char* last, double& value) {
 #if defined(DD_HAVE_FROM_CHARS_DOUBLE)
-  return std::from_chars(first, last, value);
+  // The standard leaves `value` alone when the number is out of range, but libc++ (macOS,
+  // Emscripten) stores infinity or zero there; read into a local so every library behaves the same.
+  double parsed = 0;
+  const auto result = std::from_chars(first, last, parsed);
+  if (result.ec == std::errc()) value = parsed;
+  return result;
 #elif defined(DD_HAVE_STRTOD_L)
   return from_chars_double_strtod(first, last, value);
 #else
@@ -321,6 +326,21 @@ std::int32_t js_to_int32(double d) {
   double m = std::fmod(std::trunc(d), 4294967296.0);
   if (m < 0) m += 4294967296.0;
   return static_cast<std::int32_t>(static_cast<std::uint32_t>(m));
+}
+
+std::string escape_xml(std::string_view text) {
+  std::string out;
+  out.reserve(text.size());
+  for (char c : text) {
+    switch (c) {
+      case '&': out += "&amp;"; break;
+      case '<': out += "&lt;"; break;
+      case '>': out += "&gt;"; break;
+      case '"': out += "&quot;"; break;
+      default: out.push_back(c);
+    }
+  }
+  return out;
 }
 
 }  // namespace dd

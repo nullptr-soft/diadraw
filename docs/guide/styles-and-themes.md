@@ -31,11 +31,40 @@ change still lands in your text.
   that tag pick it up without you doing anything.
 - Use the element's own **Style** field for the one element that is different.
 - Use a **theme** for the whole diagram: the background, the line colour, the font, and the
-  default colours of each kind. Pick a built-in one (`default`, `dark`, `mono` for print) or make
-  your own.
+  default colours of each kind. Pick one of the [built-in themes](#built-in-themes) or make your
+  own.
 
 When several apply, the more specific one wins: the theme, then `*` blocks, kind blocks, tag
 blocks, kind-and-tag blocks, and last the element's own style.
+
+## Built-in themes
+
+Every theme sets its own background, so a diagram looks the same in a light or a dark app and in
+an exported file. Every theme after `mono` keeps each label at a contrast of at least 4.5:1 against what it sits on.
+
+| Theme       | Background | Look                                                              |
+| ----------- | ---------- | ----------------------------------------------------------------- |
+| `default`   | light      | Indigo and blue, the theme every view uses until you pick another |
+| `dark`      | dark       | The default colours on a dark slate page                          |
+| `mono`      | light      | Black on white with grey fills, for print                         |
+| `ocean`     | light      | Cyan and teal on a pale blue-white page                           |
+| `forest`    | light      | Emerald greens on a soft green-white page                         |
+| `sunset`    | light      | Warm oranges and rose on a cream page                             |
+| `lavender`  | light      | Violet and purple on a lilac-white page                           |
+| `sand`      | light      | Earthy browns and stone greys on a warm beige page                |
+| `graphite`  | light      | Neutral greys with a sky-blue accent, for technical documents     |
+| `pastel`    | light      | A different soft pastel per kind, with dark text                  |
+| `vivid`     | light      | A different saturated colour per kind, with white text            |
+| `contrast`  | light      | Black on white with bold fills and larger text, for accessibility |
+| `blueprint` | dark       | White lines on blueprint blue                                     |
+| `midnight`  | dark       | Violet and fuchsia on a near-black indigo page                    |
+| `aurora`    | dark       | Teal and violet on a dark sea-green page                          |
+| `ember`     | dark       | Orange and red on a dark brown page                               |
+| `terminal`  | dark       | Phosphor green on black                                           |
+
+Pick one in the theme field of the inspector (shown while nothing is selected), or write it:
+`theme ocean` for the whole document, or `theme ocean` inside a view for that view only. A theme
+of your own can start from any of them: `theme brand extends blueprint { … }`.
 
 ## Shared styles of an element
 
@@ -71,8 +100,8 @@ message in the status line. Edit those with nothing selected (below).
 Click an empty part of the canvas. While nothing is selected, the properties panel beside the
 canvas shows the document:
 
-- **Theme**: the document's `theme` statement. Type `default`, `dark`, `mono`, a theme you have
-  declared, or a library theme (`acme.corporate`). Clearing it removes the statement.
+- **Theme**: the document's `theme` statement. Pick or type a [built-in theme](#built-in-themes), a theme you
+  have declared, or a library theme (`acme.corporate`). Clearing it removes the statement.
 - **This view's theme**: the `theme` inside the current view, which overrides the document's for
   this view only. Empty means the view uses the document's theme.
 - **Style blocks**: every style block in the document, including relationship ones such as

@@ -1,0 +1,8 @@
+type    note   =   process "Typed"     // typed, untidy
+indent 4
+format
+undo
+format
+# The status line names the error under the caret, and where Format leaves the caret is up to
+# each toolkit: put it on a line without one, so the status shows the summary everywhere.
+caret 1 1

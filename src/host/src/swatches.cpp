@@ -8,14 +8,13 @@
 
 namespace dd::host {
 
+using detail::take;
 using detail::trim_ascii;
 
 SwatchRows parse_swatches(std::string_view text) {
   SwatchRows rows(1);
   while (!text.empty()) {
-    auto end = text.find('\n');
-    std::string_view line = trim_ascii(text.substr(0, end));
-    text = end == std::string_view::npos ? std::string_view() : text.substr(end + 1);
+    std::string_view line = trim_ascii(take(text, '\n'));
     if (line.empty()) {
       if (!rows.back().empty()) rows.emplace_back();
       continue;

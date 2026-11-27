@@ -1,7 +1,7 @@
 # DiaDraw for Rust
 
 Rust bindings to `libdiadraw`, the DiaDraw C++ core, over its C ABI
-([`diadraw.h`](../capi/include/diadraw/diadraw.h)). Two crates:
+([`diadraw.h`](../../src/capi/include/diadraw/diadraw.h)). Two crates:
 
 | Crate | What it is |
 | --- | --- |

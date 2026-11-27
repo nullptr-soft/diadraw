@@ -4,7 +4,9 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <tuple>
 
 #include "diadraw/diadraw.h"
 #include "diadraw/dsl/parse.hpp"
@@ -49,10 +51,63 @@ TEST(Codec, Base64LikeAtob) {
 TEST(Codec, InflateRawAndZlib) {
   // "hello" compressed with zlib (78 9c ...) and as raw deflate (the same without the wrapper).
   const std::string zlib("\x78\x9c\xcb\x48\xcd\xc9\xc9\x07\x00\x06\x2c\x02\x15", 13);
-  EXPECT_EQ(inflate_zlib(zlib), std::optional<std::string>("hello"));
-  EXPECT_EQ(inflate_raw(zlib.substr(2, zlib.size() - 6)), std::optional<std::string>("hello"));
-  EXPECT_FALSE(inflate_raw("not deflate").has_value());
-  EXPECT_EQ(gunzip("plain"), std::optional<std::string>("plain"));
+  EXPECT_EQ(dd::test::ok(inflate_zlib(zlib)), "hello");
+  EXPECT_EQ(dd::test::ok(inflate_raw(zlib.substr(2, zlib.size() - 6))), "hello");
+  auto bad = inflate_raw("not deflate");
+  ASSERT_FALSE(bad);
+  EXPECT_FALSE(is_too_large(bad.error()));
+  EXPECT_FALSE(inflate_zlib(zlib.substr(0, 6)));  // truncated
+  EXPECT_EQ(dd::test::ok(gunzip("plain")), "plain");
+}
+
+namespace {
+
+/// Raw deflate of `bytes`: the gzip body without its 10-byte header and 8-byte trailer.
+std::string deflate_raw(std::string_view bytes) {
+  std::string gz = gzip(bytes);
+  return gz.substr(10, gz.size() - 18);
+}
+
+/// Raw deflate of `kMaxInflatedSize + 1` bytes of '<': a few tens of KB. Built once, as
+/// compressing it takes a while under the sanitizers.
+const std::string& deflate_bomb() {
+  static const std::string bomb = deflate_raw(std::string(kMaxInflatedSize + 1, '<'));
+  return bomb;
+}
+
+/// The import budget of the tests that need not use the real one: 1 MiB, so they run on KB.
+constexpr std::size_t kSmallBudget = std::size_t{1} << 20;
+
+}  // namespace
+
+TEST(Codec, InflateStopsAtItsLimit) {
+  const std::string text(5000, 'x');
+  const std::string raw = deflate_raw(text);
+  EXPECT_LT(raw.size(), 100u);  // the kind of ratio a decompression bomb relies on
+  EXPECT_EQ(dd::test::ok(inflate_raw(raw, text.size())), text);
+  auto over = inflate_raw(raw, text.size() - 1);
+  ASSERT_FALSE(over);
+  EXPECT_TRUE(is_too_large(over.error()));
+  EXPECT_EQ(over.error().message, "The decompressed data is larger than 4999 bytes");
+  auto gz = gunzip(gzip(text), 1000);
+  ASSERT_FALSE(gz);
+  EXPECT_TRUE(is_too_large(gz.error()));
+  auto none = inflate_raw(raw, 0);
+  ASSERT_FALSE(none);
+  EXPECT_TRUE(is_too_large(none.error()));
+}
+
+TEST(Codec, InflateRefusesABombPastTheDefaultLimit) {
+  // A few tens of KB that would decompress to more than 64 MiB; refused without allocating it all.
+  const std::string& bomb = deflate_bomb();
+  EXPECT_LT(bomb.size(), 100'000u);
+  auto out = inflate_raw(bomb);
+  ASSERT_FALSE(out);
+  EXPECT_EQ(out.error().message, "The decompressed data is larger than 64 MiB");
+  const std::string zipped = std::string("\x1F\x8B\x08\x00\x00\x00\x00\x00\x02\xFF", 10) + bomb + "CRC!SIZE";
+  auto unzipped = gunzip(zipped);
+  ASSERT_FALSE(unzipped);
+  EXPECT_TRUE(is_too_large(unzipped.error()));
 }
 
 TEST(Codec, DecodeUriComponent) {
@@ -115,6 +170,157 @@ TEST(Drawio, ImportsAPlainFileWithGeometry) {
   ASSERT_EQ(v.hints.size(), 3u);
   EXPECT_EQ(std::get<PinAtHint>(v.hints[0]).x, 10);
   EXPECT_EQ(std::get<RouteHint>(v.hints[2]).points, (std::vector<Point2>{{150, 40}}));
+}
+
+namespace {
+
+const char* const kOnePage =
+    R"(<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/>)"
+    R"(<mxCell id="a" value="Start" vertex="1" parent="1"><mxGeometry x="10" y="20" width="80" height="40" as="geometry"/>)"
+    R"(</mxCell></root></mxGraphModel>)";
+
+/// A `<diagram>` whose page is compressed as draw.io does it (base64 of raw deflate).
+std::string compressed_page(const std::string& name, std::string_view xml) {
+  return "<diagram name=\"" + name + "\">" + base64_encode(deflate_raw(xml)) + "</diagram>";
+}
+
+/// A page of `size` bytes: a model padded with a comment, which deflate shrinks a thousandfold.
+std::string padded_page(std::size_t size) {
+  std::string xml = kOnePage;
+  xml.insert(xml.size() - std::string_view("</root></mxGraphModel>").size(), "<!--");
+  std::string pad(size - xml.size() - 3, ' ');
+  xml.insert(xml.size() - std::string_view("</root></mxGraphModel>").size(), pad + "-->");
+  return xml;
+}
+
+}  // namespace
+
+TEST(Drawio, ImportsACompressedPage) {
+  ImportResult r = import_drawio("<mxfile>" + compressed_page("Main", kOnePage) + "</mxfile>");
+  EXPECT_TRUE(r.report.dropped.empty());
+  EXPECT_EQ(r.model.elements.size(), 1u);
+}
+
+TEST(Drawio, RefusesACompressedPagePastTheLimit) {
+  const std::string file = "<mxfile><diagram name=\"Bomb\">" + base64_encode(deflate_bomb()) + "</diagram>" +
+                           compressed_page("Fine", kOnePage) + "</mxfile>";
+  EXPECT_LT(file.size(), 200'000u);
+  ImportResult r = import_drawio(file);
+  ASSERT_EQ(r.report.dropped.size(), 1u);
+  EXPECT_EQ(r.report.dropped[0].message,
+            "Page \"Bomb\" could not be decompressed: the file would decompress to more than 64 MiB in all");
+  EXPECT_EQ(r.model.elements.size(), 1u);  // the other page still imports
+}
+
+TEST(Drawio, CapsTheCompressedPagesTogether) {
+  // Each page fits on its own, but three of them pass the limit: the third is refused.
+  const std::string page = compressed_page("P", padded_page(kSmallBudget / 2 - 1024));
+  ImportResult r = import_drawio("<mxfile>" + page + page + page + "</mxfile>", {.max_inflated = kSmallBudget});
+  ASSERT_EQ(r.report.dropped.size(), 1u);
+  EXPECT_EQ(r.report.dropped[0].message,
+            "Page \"P\" could not be decompressed: the file would decompress to more than 1 MiB in all");
+}
+
+TEST(Drawio, CountsCompressedPagesBeforeUriDecoding) {
+  // draw.io URI-encodes a page before deflating it, which can triple its size; the budget counts
+  // what was decompressed, so two pages of 600 KB of escapes exceed 1 MiB though each decodes smaller.
+  std::string xml = std::string(kOnePage);
+  std::string encoded;
+  for (char c : xml) encoded += c == '<' ? "%3C" : c == '>' ? "%3E" : c == '"' ? "%22" : std::string(1, c);
+  encoded.insert(encoded.size() - std::string_view("%3C/root%3E%3C/mxGraphModel%3E").size(), "%3C!--");
+  std::string pad;
+  while (pad.size() < 600'000) pad += "%20";
+  encoded.insert(encoded.size() - std::string_view("%3C/root%3E%3C/mxGraphModel%3E").size(), pad + "--%3E");
+  const std::string page = "<diagram name=\"P\">" + base64_encode(deflate_raw(encoded)) + "</diagram>";
+  ImportResult r = import_drawio("<mxfile>" + page + page + "</mxfile>", {.max_inflated = kSmallBudget});
+  ASSERT_EQ(r.report.dropped.size(), 1u);
+  EXPECT_NE(r.report.dropped[0].message.find("more than 1 MiB in all"), std::string::npos);
+  EXPECT_EQ(r.model.elements.size(), 1u);
+}
+
+TEST(Drawio, ReadsALargeContentAttributeOfAnSvg) {
+  std::string page = padded_page(300'000);
+  std::string escaped;
+  for (char c : page) escaped += c == '<' ? "&lt;" : c == '>' ? "&gt;" : c == '"' ? "&quot;" : std::string(1, c);
+  const std::string svg = "<?xml version=\"1.0\"?>\n<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\"\n content=\"" +
+                          escaped + "\"><g/></svg>";
+  DrawioFile file = read_drawio_file(svg);
+  EXPECT_EQ(file.xml, std::optional<std::string>(page));
+  EXPECT_EQ(file.inflated, 0u);
+  DrawioFile compressed = read_drawio_file("<svg  data-x=\"<svg\" content=\"" +
+                                           base64_encode(deflate_raw("<mxfile>" + page + "</mxfile>")) + "\"/>");
+  EXPECT_EQ(compressed.xml, std::optional<std::string>("<mxfile>" + page + "</mxfile>"));
+  EXPECT_EQ(compressed.inflated, page.size() + std::string_view("<mxfile></mxfile>").size());
+  EXPECT_EQ(read_drawio_file("<svgx content=\"&lt;a/&gt;\"/><svg width=\"1\"/>").problem,
+            std::optional<std::string>("SVG has no embedded draw.io diagram"));
+}
+
+TEST(Drawio, FindsTheSvgContentAttributeInLinearTime) {
+  // Many tags, tags never closed and a quote never closed: each would take minutes if every
+  // <svg searched the rest of the file again.
+  std::string many;
+  for (int i = 0; i < 400'000; ++i) many += "<svg>";
+  std::string open_tags;
+  for (int i = 0; i < 400'000; ++i) open_tags += "<svg ";
+  std::string open_quotes;
+  for (int i = 0; i < 200'000; ++i) open_quotes += "<svg xcontent=\"";
+  for (const std::string* text : {&many, &open_tags, &open_quotes}) {
+    auto start = std::chrono::steady_clock::now();
+    EXPECT_EQ(read_drawio_file(*text).problem, std::optional<std::string>("SVG has no embedded draw.io diagram"));
+    EXPECT_LT(std::chrono::steady_clock::now() - start, std::chrono::seconds(2));
+  }
+}
+
+TEST(Drawio, RefusesACompressedSvgOrPngDiagramPastTheLimit) {
+  const std::string bomb = deflate_raw(std::string(kSmallBudget + 1, '<'));
+  DrawioFile svg = read_drawio_file("<svg content=\"" + base64_encode(bomb) + "\"></svg>", kSmallBudget);
+  EXPECT_FALSE(svg.xml);
+  EXPECT_EQ(svg.problem, std::optional<std::string>("The SVG's draw.io diagram could not be decompressed: "
+                                                    "The decompressed data is larger than 1 MiB"));
+  // A PNG with a zTXt chunk `mxfile` (keyword, NUL, method 0, zlib data).
+  std::string zlib = "\x78\x9c" + bomb;
+  std::string chunk = std::string("mxfile\0\0", 8) + zlib;
+  auto be32 = [](std::size_t v) {
+    std::string out;
+    for (int i = 3; i >= 0; --i) out.push_back(static_cast<char>((v >> (8 * i)) & 0xFF));
+    return out;
+  };
+  std::string png = std::string("\x89PNG\r\n\x1a\n", 8) + be32(chunk.size()) + "zTXt" + chunk + "CRC!";
+  DrawioFile from_png = read_drawio_file(png, kSmallBudget);
+  EXPECT_FALSE(from_png.xml);
+  EXPECT_EQ(from_png.problem, std::optional<std::string>("The PNG's draw.io diagram could not be decompressed: "
+                                                         "The decompressed data is larger than 1 MiB"));
+  // import_drawio gives the file its budget too.
+  ImportResult imported = import_drawio(png, {.max_inflated = kSmallBudget});
+  ASSERT_EQ(imported.report.dropped.size(), 1u);
+  EXPECT_EQ(imported.report.dropped[0].message, *from_png.problem);
+  // A chunk that is not deflate data reports that no diagram is embedded.
+  std::string junk = std::string("mxfile\0\0", 8) + "not zlib";
+  DrawioFile malformed =
+      read_drawio_file(std::string("\x89PNG\r\n\x1a\n", 8) + be32(junk.size()) + "zTXt" + junk + "CRC!");
+  EXPECT_EQ(malformed.problem, std::optional<std::string>("PNG has no embedded draw.io diagram"));
+  // A valid chunk counts what it decompressed against the import's budget.
+  std::string fine = std::string("mxfile\0\0", 8) + std::string("\x78\x9c\xcb\x48\xcd\xc9\xc9\x07\x00\x06\x2c\x02\x15", 13);
+  DrawioFile from_fine =
+      read_drawio_file(std::string("\x89PNG\r\n\x1a\n", 8) + be32(fine.size()) + "zTXt" + fine + "CRC!");
+  EXPECT_EQ(from_fine.xml, std::optional<std::string>("hello"));  // zlib of "hello"
+  EXPECT_EQ(from_fine.inflated, 5u);
+}
+
+TEST(Drawio, CountsWhatTheFileDecompressedAgainstItsPages) {
+  // An SVG whose content decompresses to 600 KB, holding a page that decompresses to 500 KB: each
+  // fits a 1 MiB budget alone, but not together.
+  const std::string page = compressed_page("P", padded_page(500'000));
+  std::string mxfile = "<mxfile>" + page + "<!--";
+  constexpr std::string_view kEnd = "--></mxfile>";
+  mxfile += std::string(600'000 - mxfile.size() - kEnd.size(), ' ') + std::string(kEnd);
+  const std::string svg = "<svg content=\"" + base64_encode(deflate_raw(mxfile)) + "\"/>";
+  const DrawioOptions small{.max_inflated = kSmallBudget};
+  EXPECT_TRUE(import_drawio("<mxfile>" + page + "</mxfile>", small).report.dropped.empty());
+  ImportResult r = import_drawio(svg, small);
+  ASSERT_FALSE(r.report.dropped.empty());
+  EXPECT_EQ(r.report.dropped[0].message,
+            "Page \"P\" could not be decompressed: the file would decompress to more than 1 MiB in all");
 }
 
 TEST(Drawio, DecodesNamedEntitiesInLabels) {
@@ -264,6 +470,78 @@ view v {
   EXPECT_TRUE(first->spans[0].bold);
   EXPECT_EQ(first->spans[1].content, "b ");
   EXPECT_TRUE(first->spans[2].underline && first->spans[2].strike);
+}
+
+TEST(Labels, TurnLineBreakTagsIntoNewlinesThenDropTheOtherTags) {
+  // <br>s and closing block tags become line breaks first, then any other tag goes.
+  EXPECT_EQ(html_to_text("a<BR \t/>b<br/>c<br  >d</DIV>e</h7>f</h6>g"), "a\nb\nc\nd\nef\ng");
+  EXPECT_EQ(html_to_text("<a <br>x"), "<a\nx");          // the <br> goes first, so "<a" stays open
+  EXPECT_EQ(html_to_text("x<br/ >y<brx>z<br"), "xyz<br");  // not <br>s; the last is never closed
+  EXPECT_EQ(html_to_text("1 < 2 <b\nold>and</b> 3"), "1 and 3");  // a tag runs to the next '>'
+  EXPECT_EQ(html_to_text("a > b <i>c"), "a > b c");
+  EXPECT_EQ(html_to_text("</ div>a</divx>b</p >c"), "abc");
+}
+
+TEST(Drawio, ImportsALabelWithALargeEmbeddedImage) {
+  // A data URI of a few hundred KB inside one tag, which a recursive matcher overflows the stack on.
+  const std::string image = "&lt;img src=&quot;data:image/png;base64," + std::string(300'000, 'A') + "&quot;&gt;";
+  const std::string xml = R"(<mxfile><diagram name="Main"><mxGraphModel><root>
+    <mxCell id="0"/><mxCell id="1" parent="0"/>
+    <mxCell id="a" vertex="1" parent="1" value=")" + image + R"(&lt;br&gt;&lt;b&gt;Logo&lt;/b&gt;" style="html=1;">
+      <mxGeometry x="0" y="0" width="160" height="60" as="geometry"/></mxCell>
+    <mxCell id="b" vertex="1" parent="1" value=")" + image + R"(&lt;div&gt;Plain&lt;/div&gt;" style="rounded=1;">
+      <mxGeometry x="0" y="80" width="160" height="60" as="geometry"/></mxCell>
+  </root></mxGraphModel></diagram></mxfile>)";
+  auto start = std::chrono::steady_clock::now();
+  ImportResult r = import_drawio(xml);
+  EXPECT_LT(std::chrono::steady_clock::now() - start, std::chrono::seconds(5));
+  ASSERT_EQ(r.model.elements.size(), 2u);
+  const Element* a = nullptr;
+  const Element* b = nullptr;
+  for (const auto& e : r.model.elements) {
+    const std::string* id = e.properties.find("drawio.id");
+    ASSERT_NE(id, nullptr);
+    (*id == "a" ? a : b) = &e;
+  }
+  ASSERT_TRUE(a && b);
+  EXPECT_EQ(a->name, "Logo");
+  EXPECT_EQ(b->name, "Plain");
+  ASSERT_NE(a->properties.find("drawio.label"), nullptr);  // html=1 with tags keeps the HTML
+  EXPECT_EQ(b->properties.find("drawio.label"), nullptr);
+}
+
+TEST(Drawio, TellsHtmlLabelsAndTheHtmlToKeepByTheirTags) {
+  // Without html=1, a label is HTML when it holds one of a few tags as a whole word, in any case.
+  // With html=1, its HTML is kept when it holds a '<' and a letter with a '>' after them.
+  const std::vector<std::tuple<std::string, std::string, std::string, bool>> cases{
+      // value, style, name, keeps drawio.label
+      {"&lt;bold&gt;x", "", "<bold>x", false},
+      {"&lt;brx&gt;x", "", "<brx>x", false},
+      {"&lt;fonts&gt;x", "", "<fonts>x", false},
+      {"&lt;b_&gt;x", "", "<b_>x", false},
+      {"x&lt;SPAN class=a&gt;y", "", "xy", false},
+      {"x&lt;B&gt;y", "", "xy", false},
+      {"x&lt;b-c&gt;y", "", "xy", false},
+      {"x&lt;b", "", "x<b", false},
+      {"a &lt;1&gt; b", "html=1;", "a b", false},
+      {"x &lt;a", "html=1;", "x <a", false},
+      {"x &lt;", "html=1;", "x <", false},
+      {"x &lt;A href=y&gt;z", "html=1;", "x z", true},
+      {"&lt;a &lt;1&gt;", "html=1;", "", true},
+  };
+  for (const auto& [value, style, name, keeps] : cases) {
+    SCOPED_TRACE(value);
+    const std::string xml = R"(<mxfile><diagram name="Main"><mxGraphModel><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="a" vertex="1" parent="1" value=")" + value + R"(" style=")" + style + R"(">
+        <mxGeometry x="0" y="0" width="160" height="20" as="geometry"/></mxCell>
+    </root></mxGraphModel></diagram></mxfile>)";
+    ImportResult r = import_drawio(xml);
+    ASSERT_EQ(r.model.elements.size(), 1u);
+    const Element& e = *r.model.elements.begin();
+    EXPECT_EQ(e.name, name);
+    EXPECT_EQ(e.properties.find("drawio.label") != nullptr, keeps);
+  }
 }
 
 TEST(Drawio, KeepsAngleBracketsInLabelsThatAreNotHtml) {
@@ -1282,7 +1560,7 @@ TEST(Codec, HashesAndGzip) {
   EXPECT_EQ(base64_encode("hi!"), "aGkh");
   EXPECT_EQ(crc32("123456789"), 0xCBF43926u);
   std::string text(5000, 'x');
-  EXPECT_EQ(gunzip(gzip(text)), std::optional<std::string>(text));
+  EXPECT_EQ(dd::test::ok(gunzip(gzip(text))), text);
 }
 
 #include "diadraw/io/drawio_stencil.hpp"

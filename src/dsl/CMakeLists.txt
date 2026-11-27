@@ -3,6 +3,7 @@ target_sources(diadraw PRIVATE
   src/highlight.cpp
   src/lower.cpp
   src/print.cpp
+  src/format.cpp
   src/patch.cpp
   src/json.cpp
 )

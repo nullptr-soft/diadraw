@@ -40,20 +40,35 @@ Result<DrawioIndex> DrawioIndex::from_json(const Json& json) {
 
 // ── File forms ────────────────────────────────────────────────────────────────────────────────
 
-std::optional<std::string> inflate_page(std::string_view text) {
+Result<std::string> inflate_page(std::string_view text, std::size_t limit, std::size_t* inflated) {
   auto bytes = base64_decode(text);
-  if (!bytes) return std::nullopt;
-  auto xml = inflate_raw(*bytes);
-  if (!xml) xml = inflate_zlib(*bytes);
-  if (!xml) return std::nullopt;
+  if (!bytes) return fail("The page is not base64");
+  auto xml = inflate_raw(*bytes, limit);
+  if (!xml && !is_too_large(xml.error())) {
+    auto zlib = inflate_zlib(*bytes, limit);
+    if (zlib || is_too_large(zlib.error())) xml = std::move(zlib);
+  }
+  if (!xml) return xml;
+  if (inflated) *inflated = xml->size();
   std::string_view head = js_trim(*xml);
-  return !head.empty() && head.front() == '<' ? *xml : safe_decode_uri(*xml);
+  if (!head.empty() && head.front() == '<') return xml;
+  return safe_decode_uri(*xml);
 }
 
 namespace {
 
 /// The `mxfile` XML embedded in a draw.io PNG (a tEXt, zTXt or iTXt chunk named `mxfile`).
-std::optional<std::string> xml_from_png(std::string_view bytes) {
+Result<std::string> xml_from_png(std::string_view bytes, std::size_t limit, std::size_t& inflated_size) {
+  auto inflated = [&](std::string_view body) -> Result<std::string> {
+    auto text = inflate_zlib(body, limit);
+    if (!text) {
+      if (is_too_large(text.error()))
+        return fail("The PNG's draw.io diagram could not be decompressed: ", text.error().message);
+      return fail("PNG has no embedded draw.io diagram");
+    }
+    inflated_size = text->size();
+    return safe_decode_uri(*text);
+  };
   auto u32 = [&](std::size_t at) {
     return (static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[at])) << 24) |
            (static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[at + 1])) << 16) |
@@ -69,11 +84,7 @@ std::optional<std::string> xml_from_png(std::string_view bytes) {
     auto nul = data.find('\0');
     if (nul == std::string_view::npos || data.substr(0, nul) != "mxfile") continue;
     if (type == "tEXt") return safe_decode_uri(decode_windows1252(data.substr(nul + 1)));
-    if (type == "zTXt") {
-      auto text = inflate_zlib(data.substr(std::min(nul + 2, data.size())));
-      if (!text) return std::nullopt;
-      return safe_decode_uri(*text);
-    }
+    if (type == "zTXt") return inflated(data.substr(std::min(nul + 2, data.size())));
     // iTXt: compression flag, method, language tag \0, translated keyword \0, text
     bool compressed = nul + 1 < data.size() && data[nul + 1] != '\0';
     auto find0 = [&](std::size_t from) {
@@ -83,46 +94,76 @@ std::optional<std::string> xml_from_png(std::string_view bytes) {
     std::size_t p = find0(nul + 3);
     p = find0(p);
     std::string_view body = data.substr(p);
-    if (compressed) {
-      auto text = inflate_zlib(body);
-      if (!text) return std::nullopt;
-      return safe_decode_uri(*text);
-    }
+    if (compressed) return inflated(body);
     return safe_decode_uri(body);
+  }
+  return fail("PNG has no embedded draw.io diagram");
+}
+
+/// The value of the first `content` attribute of the first `<svg>` tag that has one, as the
+/// regex `<svg\b[^>]*?\scontent="([^"]*)"` finds it, in linear time and constant stack
+/// (std::regex recurses once per character, which overflows on an attribute of tens of KB).
+std::optional<std::string_view> svg_content_attribute(std::string_view text) {
+  constexpr std::string_view kAttr = "content=\"";
+  for (std::size_t tag = text.find("<svg"); tag != std::string_view::npos;) {
+    std::size_t at = tag + 4;
+    if (at < text.size() && is_ascii_word(text[at])) {
+      tag = text.find("<svg", tag + 1);
+      continue;
+    }
+    std::size_t end = std::min(text.find('>', at), text.size());
+    // `content="` holds no '>', so a candidate lies in the tag exactly when it fits before `end`.
+    std::string_view head = text.substr(0, end);
+    for (std::size_t attr = head.find(kAttr, at); attr != std::string_view::npos; attr = head.find(kAttr, attr + 1)) {
+      if (!is_ascii_space(text[attr - 1])) continue;
+      std::size_t from = attr + kAttr.size();
+      std::size_t to = text.find('"', from);
+      if (to == std::string_view::npos) return std::nullopt;  // no later candidate can close either
+      return text.substr(from, to - from);
+    }
+    // An <svg before `end` sees only candidates of this tag, all of them refused already.
+    tag = text.find("<svg", std::max(tag + 1, end));
   }
   return std::nullopt;
 }
 
-bool contains_word(const std::string& text, const char* pattern) {
-  return std::regex_search(text, std::regex(pattern));
+/// Whether `text` holds `tag` not followed by a word character, in linear time: the regex
+/// `tag\b` for a `tag` that ends in a word character, such as `<svg`.
+bool contains_tag(std::string_view text, std::string_view tag) {
+  for (std::size_t at = text.find(tag); at != std::string_view::npos; at = text.find(tag, at + 1))
+    if (at + tag.size() == text.size() || !is_ascii_word(text[at + tag.size()])) return true;
+  return false;
 }
 
 }  // namespace
 
-DrawioFile read_drawio_file(std::string_view bytes) {
+DrawioFile read_drawio_file(std::string_view bytes, std::size_t limit) {
   if (bytes.size() >= 4 && static_cast<unsigned char>(bytes[0]) == 0x89 && bytes.substr(1, 3) == "PNG") {
-    auto xml = xml_from_png(bytes);
-    if (xml) return {xml, std::nullopt};
-    return {std::nullopt, "PNG has no embedded draw.io diagram"};
+    std::size_t inflated = 0;
+    auto xml = xml_from_png(bytes, limit, inflated);
+    if (xml) return {std::move(*xml), std::nullopt, inflated};
+    return {std::nullopt, xml.error().message};
   }
   if (bytes.size() >= 2 && bytes[0] == 'P' && bytes[1] == 'K')
     return {std::nullopt, "Visio (.vsdx) files are not supported; open them in draw.io and save as .drawio"};
   std::string text(bytes);
   if (text.rfind("\xEF\xBB\xBF", 0) == 0) text.erase(0, 3);
-  static const std::regex svg_re("<svg\\b[^>]*?\\scontent=\"([^\"]*)\"");
-  std::smatch m;
-  if (std::regex_search(text, m, svg_re)) {
-    std::string content = decode_entities(m[1].str());
+  if (auto attr = svg_content_attribute(text)) {
+    std::string content = decode_entities(*attr);
     if (content.rfind("%3C", 0) == 0) content = safe_decode_uri(content);
     std::string_view head = js_trim(content);
     if (!head.empty() && head.front() == '<') return {content, std::nullopt};
-    auto xml = inflate_page(content);
-    if (xml) return {xml, std::nullopt};
+    std::size_t inflated = 0;
+    auto xml = inflate_page(content, limit, &inflated);
+    if (xml) return {std::move(*xml), std::nullopt, inflated};
+    if (is_too_large(xml.error()))
+      return {std::nullopt, "The SVG's draw.io diagram could not be decompressed: " + xml.error().message};
     return {std::nullopt, "SVG has a content attribute that is not a draw.io diagram"};
   }
-  if (contains_word(text, "<svg\\b") && !contains_word(text, "<mxfile|<mxGraphModel"))
+  if (contains_tag(text, "<svg") && text.find("<mxfile") == std::string::npos &&
+      text.find("<mxGraphModel") == std::string::npos)
     return {std::nullopt, "SVG has no embedded draw.io diagram"};
-  if (contains_word(text, "<mxlibrary\\b")) return {std::nullopt, "This is a draw.io shape library, not a diagram"};
+  if (contains_tag(text, "<mxlibrary")) return {std::nullopt, "This is a draw.io shape library, not a diagram"};
   return {text, std::nullopt};
 }
 
@@ -317,8 +358,59 @@ bool is_known_style_key(std::string_view key) {
 
 namespace {
 
-std::string regex_replace_all(const std::string& s, const std::regex& re, const std::string& with) {
-  return std::regex_replace(s, re, with);
+/// Whether the inside of a tag (between '<' and '>') is a line break as the regexes
+/// `<br\s*\/?>` and `<\/(div|p|li|h[1-6]|tr)>` read it, ignoring case.
+bool is_line_break_tag(std::string_view inside) {
+  if (starts_with_ascii_icase(inside, "br")) {
+    std::size_t i = 2;
+    while (i < inside.size() && is_ascii_space(inside[i])) ++i;
+    if (i < inside.size() && inside[i] == '/') ++i;
+    return i == inside.size();
+  }
+  if (inside.empty() || inside.front() != '/') return false;
+  std::string_view name = inside.substr(1);
+  if (name.size() == 2 && ascii_lower(name[0]) == 'h' && name[1] >= '1' && name[1] <= '6') return true;
+  static constexpr std::array<std::string_view, 4> kBlocks{"div", "p", "li", "tr"};
+  return std::any_of(kBlocks.begin(), kBlocks.end(), [&](std::string_view block) { return ascii_iequals(name, block); });
+}
+
+/// `html` with its <br>s and closing block tags as line breaks and every other tag removed: the
+/// regex replacements `<br\s*\/?>` and `<\/(div|p|li|h[1-6]|tr)>` with "\n", then `<[^>]*>` with "",
+/// ignoring case. Scanned by hand in linear time and constant stack, because std::regex recurses
+/// once per character of a match and overflows on a tag that holds an image of a few hundred KB.
+std::string strip_tags(std::string_view html) {
+  // First the line breaks: a tag of either kind holds no '<' or '>' but its own, so it is the
+  // text from a '<' to the next '>' with no '<' between them.
+  std::string breaks;
+  breaks.reserve(html.size());
+  for (std::size_t i = 0; i < html.size();) {
+    std::size_t open = html.find('<', i);
+    if (open == std::string_view::npos) open = html.size();
+    breaks.append(html, i, open - i);
+    if (open == html.size()) break;
+    std::size_t end = html.find_first_of("<>", open + 1);
+    if (end != std::string_view::npos && html[end] == '>' && is_line_break_tag(html.substr(open + 1, end - open - 1))) {
+      breaks.push_back('\n');
+      i = end + 1;
+    } else {
+      breaks.push_back('<');
+      i = open + 1;
+    }
+  }
+  // Then every other tag: from a '<' to the next '>'. With no '>' left, no later '<' closes.
+  std::string out;
+  out.reserve(breaks.size());
+  for (std::size_t i = 0; i < breaks.size();) {
+    std::size_t open = breaks.find('<', i);
+    std::size_t close = open == std::string::npos ? std::string::npos : breaks.find('>', open + 1);
+    if (close == std::string::npos) {
+      out.append(breaks, i, std::string::npos);
+      break;
+    }
+    out.append(breaks, i, open - i);
+    i = close + 1;
+  }
+  return out;
 }
 
 /// One line of a label: runs of spaces, tabs and no-break spaces become one space; then trimmed.
@@ -342,13 +434,7 @@ std::string collapse_line(std::string_view line) {
 }  // namespace
 
 std::string html_to_text(std::string_view html) {
-  static const std::regex br("<br\\s*\\/?>", std::regex::icase);
-  static const std::regex block("<\\/(div|p|li|h[1-6]|tr)>", std::regex::icase);
-  static const std::regex tag("<[^>]*>");
-  std::string s = regex_replace_all(std::string(html), br, "\n");
-  s = regex_replace_all(s, block, "\n");
-  s = regex_replace_all(s, tag, "");
-  s = decode_entities(s);
+  std::string s = decode_entities(strip_tags(html));
   std::string joined;
   std::size_t start = 0;
   while (true) {
@@ -797,10 +883,27 @@ std::string fill_placeholders(const std::string& label, const Values& data) {
   return out;
 }
 
-bool is_html_label(const Cell& c, const std::string& raw) {
-  static const std::regex html_tag("<(br|div|span|b|i|font|p)\\b", std::regex::icase);
+bool is_html_label(const Cell& c, std::string_view raw) {
   const std::string* html = value_of(c.style, "html");
-  return (html && *html == "1") || std::regex_search(raw, html_tag);
+  if (html && *html == "1") return true;
+  // The regex `<(br|div|span|b|i|font|p)\b`, ignoring case, scanned by hand as html_to_text is.
+  static constexpr std::array<std::string_view, 7> kNames{"br", "div", "span", "b", "i", "font", "p"};
+  for (std::size_t at = raw.find('<'); at != std::string_view::npos; at = raw.find('<', at + 1)) {
+    std::string_view rest = raw.substr(at + 1);
+    for (std::string_view name : kNames)
+      if (starts_with_ascii_icase(rest, name) && (rest.size() == name.size() || !is_ascii_word(rest[name.size()])))
+        return true;
+  }
+  return false;
+}
+
+/// Whether `value` holds a tag as the regex `<[a-z][^>]*>`, ignoring case, finds one: a '<' and a
+/// letter with a '>' anywhere after them. The first such pair has a '>' after it if any has.
+bool has_tag(std::string_view value) {
+  for (std::size_t at = value.find('<'); at != std::string_view::npos; at = value.find('<', at + 1))
+    if (at + 1 < value.size() && ascii_lower(value[at + 1]) >= 'a' && ascii_lower(value[at + 1]) <= 'z')
+      return value.find('>', at + 2) != std::string_view::npos;
+  return false;
 }
 
 std::string label_of(const Cell& c) {
@@ -968,7 +1071,7 @@ ImportResult import_drawio(std::string_view bytes, const DrawioOptions& options)
     return r;
   };
 
-  DrawioFile file = read_drawio_file(bytes);
+  DrawioFile file = read_drawio_file(bytes, options.max_inflated);
   if (!file.xml) {
     b.drop(file.problem.value_or("Not a draw.io file"));
     return finish();
@@ -976,6 +1079,9 @@ ImportResult import_drawio(std::string_view bytes, const DrawioOptions& options)
 
   auto doc = parse_xml(*file.xml);
   std::vector<std::unique_ptr<XmlNode>> inflated;  // keeps decompressed pages alive
+  // Everything one import decompresses (the file, then each compressed page) shares one budget,
+  // counted before URI decoding, so many pages cannot add up to more than one could.
+  std::size_t budget = options.max_inflated - std::min(options.max_inflated, file.inflated);
   struct Page {
     std::string name;
     const XmlNode* model;
@@ -987,11 +1093,17 @@ ImportResult import_drawio(std::string_view bytes, const DrawioOptions& options)
     if (const XmlNode* inline_model = node.child("mxGraphModel")) {
       pages.push_back({name, inline_model});
     } else if (!js_trim(node.text).empty()) {
-      auto xml = inflate_page(node.text);
+      std::size_t page_size = 0;
+      auto xml = inflate_page(node.text, budget, &page_size);
       if (!xml) {
-        b.drop("Page \"" + name + "\" could not be decompressed");
+        if (is_too_large(xml.error()))
+          b.drop("Page \"" + name + "\" could not be decompressed: the file would decompress to more than " +
+                 describe_size(options.max_inflated) + " in all");
+        else
+          b.drop("Page \"" + name + "\" could not be decompressed");
         return;
       }
+      budget -= std::min(budget, page_size);
       auto inner = parse_xml(*xml);
       const XmlNode* model = inner->child("mxGraphModel");
       if (model) {
@@ -1170,8 +1282,7 @@ ImportResult import_drawio(std::string_view bytes, const DrawioOptions& options)
       properties.set("drawio.id", v.id);
       properties.set("drawio.style", v.style_text);
       const std::string* html = value_of(v.style, "html");
-      static const std::regex tag_re("<[a-z][^>]*>", std::regex::icase);
-      if (html && *html == "1" && std::regex_search(v.value, tag_re)) properties.set("drawio.label", v.value);
+      if (html && *html == "1" && has_tag(v.value)) properties.set("drawio.label", v.value);
       if (layers.size() > 1 && layer) properties.set("drawio.layer", layer->value.empty() ? layer->id : layer->value);
       for (const auto& [k, val] : v.data) properties.set(k, val);
       ElementInit init;

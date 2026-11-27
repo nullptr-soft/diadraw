@@ -17,6 +17,7 @@
 #include "cloud_dialog.hpp"
 #include "inspector.hpp"
 #include "style_panel.hpp"
+#include "text_folds.hpp"
 #include "host/document.hpp"
 
 namespace dd::gtk {
@@ -53,6 +54,11 @@ class DocumentWindow : public Gtk::ApplicationWindow {
   /// there are unsaved changes.
   void ask_clear_canvas();
   void clear_canvas();
+  /// Format Document: reindents the text with the Indent Size setting, as one undo step.
+  void format_text();
+  /// Format Document's indent size: the one kept in memory, else the settings file's, which
+  /// another window may have changed. Moves Indent Size's check mark to it.
+  int sync_indent_size();
   /// Renames an element (its id) and every reference to it; the selection follows.
   void rename_element(const std::string& element, const std::string& to);
   /// Rename Element…: asks for a new name for the element named at the text cursor (when the text
@@ -102,6 +108,8 @@ class DocumentWindow : public Gtk::ApplicationWindow {
   std::unique_ptr<dd::host::Document> doc_;
   Glib::RefPtr<Gtk::TextBuffer> buffer_;
   Gtk::TextView text_;
+  /// The fold markers beside the text; made once the text has its buffer.
+  std::unique_ptr<TextFolds> folds_;
   CanvasView canvas_;
   Inspector inspector_;
   StylePanel style_panel_;
@@ -113,6 +121,10 @@ class DocumentWindow : public Gtk::ApplicationWindow {
   Gtk::Label status_;
   sigc::connection timer_;
   Glib::RefPtr<Gio::SimpleAction> grid_action_;
+  Glib::RefPtr<Gio::SimpleAction> indent_action_;
+  /// The indent size a test script chose (`indent`), or one the settings file could not keep;
+  /// 0 to follow the settings file, as a size chosen from the menu and saved does again.
+  int kept_indent_ = 0;
   Glib::RefPtr<Gio::SimpleAction> remove_view_action_;
   std::unique_ptr<Gtk::Window> prompt_;
   bool applying_ = false;

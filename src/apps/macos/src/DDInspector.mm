@@ -394,10 +394,10 @@ void set_items(NSComboBox* combo, const std::vector<dd::host::Choice>& choices) 
 - (void)showFields:(const std::optional<ElementFields>&)shown {
   bool same = shown && _element && shown->id == _element->id;
   _element = shown;
-  if (shown) _relationship.reset();
+  _relationship.reset();  // the panel shows one element, one relationship or nothing
   _elementStack.hidden = !shown;
-  if (shown) _relationshipStack.hidden = YES;
-  self.hidden = !_element && !_relationship;
+  _relationshipStack.hidden = YES;
+  self.hidden = !shown;
   if (!shown) {
     [self outlineRefusedFields];  // a hidden panel keeps no outlines
     return;
@@ -412,10 +412,10 @@ void set_items(NSComboBox* combo, const std::vector<dd::host::Choice>& choices) 
 - (void)showRelationshipFields:(const std::optional<RelationshipFields>&)shown {
   bool same = shown && _relationship && shown->id == _relationship->id;
   _relationship = shown;
-  if (shown) _element.reset();
+  _element.reset();
   _relationshipStack.hidden = !shown;
-  if (shown) _elementStack.hidden = YES;
-  self.hidden = !_element && !_relationship;
+  _elementStack.hidden = YES;
+  self.hidden = !shown;
   if (!shown) {
     [self outlineRefusedFields];  // a hidden panel keeps no outlines
     return;

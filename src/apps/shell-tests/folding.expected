@@ -1,0 +1,32 @@
+folds: 2 9
+ok   folds
+ok   fold 2
+ok   fold 9
+folds: 2* 9*
+ok   folds
+ok   type // more
+folds: 2* 9*
+ok   folds
+ok   select db
+folds: 2 9*
+ok   folds
+ok   fold 9
+FAIL fold 3
+folds: 2 9
+ok   folds
+--- text
+// a comment that must survive
+model {
+  user = person "Customer"
+  shop = system "Shop"
+  db = database "Orders"
+  user -> shop "browses"
+}
+
+view main {
+  include *
+  layout layered direction down
+}
+// more
+--- status
+

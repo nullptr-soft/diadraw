@@ -20,6 +20,8 @@ import { DiaDrawError } from '@diadraw/wasm';
 import { localId } from './element-fields';
 import type { AboutDialog } from './about';
 import './about';
+import type { HelpDialog } from './help';
+import './help';
 import type { DiagramCanvas } from './canvas';
 import './canvas';
 import { clearAction, EMPTY_DIAGRAM } from './clear-canvas';
@@ -98,14 +100,18 @@ const TEMPLATE = `
     <span class="spacer"></span>
     <span class="status" role="status"></span>
     <button type="button" data-action="share">Share link</button>
-    <button type="button" data-action="svg">SVG</button>
-    <button type="button" data-action="png">PNG</button>
-    <button type="button" data-action="drawio" title="Export all views as a draw.io file">draw.io</button>
-    <button type="button" data-action="bpmn" title="Export all views as BPMN 2.0">BPMN</button>
+    <select aria-label="Export" data-role="export" title="Export the view as SVG or PNG, or all views as draw.io or BPMN">
+      <option value="">Export…</option>
+      <option value="svg">SVG</option>
+      <option value="png">PNG</option>
+      <option value="drawio" title="Export all views as a draw.io file">draw.io</option>
+      <option value="bpmn" title="Export all views as BPMN 2.0">BPMN</option>
+    </select>
     <span class="feedback-group">
       <button type="button" data-action="report-bug" title="Report a bug (opens a form on GitHub)">Report a bug</button>
       <button type="button" class="feedback" data-action="feedback" title="Send an idea, a wish or anything that could be easier (opens a form on GitHub)">Give feedback</button>
       <button type="button" data-action="about" title="Version, licence and the open-source software DiaDraw uses">About</button>
+      <button type="button" data-action="help" title="What the canvas does with the mouse and the keyboard">Help</button>
     </span>
   </header>
   <section class="panes">
@@ -126,9 +132,7 @@ const TEMPLATE = `
       </div>
       <dd-storage></dd-storage>
       <dd-about></dd-about>
-      <p class="help">Drag to move (Alt: place by the neighbours) · Shift- or ⌘-click, or drag over empty space, to select several · ⌘A selects all · drag the dot to connect · drag an end of a selected line to reconnect it ·
-        double-click to rename · F2 renames the id everywhere · select one element or line to edit its properties · drag corners to resize (double-click one, or ⌥⌘=, to fit the content) and the round handle to turn · with Grid on, drags line up with it ·
-        in fixed views, drag bend points to reroute · Delete to remove · ⌘Z / ⇧⌘Z undo and redo in both panes</p>
+      <dd-help></dd-help>
     </div>
   </section>
 `;
@@ -210,6 +214,8 @@ export class DiaDrawApp extends HTMLElement {
     this.dd = dd;
     this.querySelector('.app-version')!.textContent = dd.version;
     this.#palette.dd = dd;
+    this.#text.formatter = (text, indentSize) => dd.formatSource(text, { indentSize });
+    this.#text.folds = (text) => dd.foldRanges(text);
     this.#text.diagnostics = (text) => {
       this.#sync(text);
       return this.#diagnostics;
@@ -244,16 +250,12 @@ export class DiaDrawApp extends HTMLElement {
       redo: () => this.#text.redo(),
       clear: () => this.#clearCanvas(),
       share: () => this.#share(),
-      svg: () => this.#export('svg'),
-      png: () => this.#export('png'),
       import: () => this.#import(),
       shapes: () => this.#togglePalette(),
       grid: () => {
         const grid = readGrid();
         this.#setGrid({ ...grid, show: !grid.show });
       },
-      drawio: () => this.#exportPages('drawio'),
-      bpmn: () => this.#exportPages('bpmn'),
       'report-bug': () => this.#openFeedback('bug'),
       feedback: () => this.#openFeedback('feedback'),
       about: () =>
@@ -261,6 +263,7 @@ export class DiaDrawApp extends HTMLElement {
           this.dd?.version ?? '',
           isTauri() ? 'desktop' : 'web',
         ),
+      help: () => this.querySelector<HelpDialog>('dd-help')!.show(),
     };
     this.addEventListener('dd-insert', (e) =>
       this.#insert((e as CustomEvent<InsertDetail>).detail),
@@ -301,6 +304,14 @@ export class DiaDrawApp extends HTMLElement {
       const kind = select.value;
       select.value = '';
       if (kind) this.#addElement(kind);
+    });
+    // One Export menu: choosing a format saves the diagram in it.
+    this.#select<HTMLSelectElement>('export').addEventListener('change', (e) => {
+      const select = e.target as HTMLSelectElement;
+      const format = select.value;
+      select.value = '';
+      if (format === 'svg' || format === 'png') void this.#export(format);
+      else if (format === 'drawio' || format === 'bpmn') this.#exportPages(format);
     });
     this.#select<HTMLSelectElement>('view-actions').addEventListener('change', (e) => {
       const select = e.target as HTMLSelectElement;

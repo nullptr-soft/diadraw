@@ -246,7 +246,7 @@ TEST_F(Mcp, ListsWhatADocumentCanUse) {
   std::string all = text(call("reference", Json::object()));
   EXPECT_NE(all.find("Element kinds: person system container"), std::string::npos) << all;
   EXPECT_NE(all.find("cylinder"), std::string::npos);
-  EXPECT_NE(all.find("Themes (`theme …`): default dark mono"), std::string::npos);
+  EXPECT_NE(all.find("Themes (`theme …`): default dark mono ocean forest sunset lavender sand graphite pastel vivid contrast blueprint midnight aurora ember terminal"), std::string::npos);
   EXPECT_NE(all.find("sequence"), std::string::npos);
   EXPECT_NE(all.find("  c4: "), std::string::npos);
 
@@ -291,9 +291,15 @@ TEST_F(Mcp, HandlesNonAsciiPaths) {
 
 #ifndef _WIN32
 TEST_F(Mcp, KeepsPosixFileNamesThatAreNotUtf8) {
-  // A Latin-1 name is just bytes on Linux and macOS: it must open and be written as given.
+  // A Latin-1 name is just bytes on Linux: it must open and be written as given.
   const std::string name = "caf\xE9.draw";
-  ASSERT_TRUE(write_file(path_utf8(dir_) + "/" + name, kDoc));
+  if (!write_file(path_utf8(dir_) + "/" + name, kDoc)) {
+#if defined(__APPLE__)
+    GTEST_SKIP() << "APFS takes only UTF-8 file names";
+#else
+    FAIL() << "could not write a file named with Latin-1 bytes";
+#endif
+  }
   EXPECT_FALSE(is_error(call("check", args({{"path", name}}))));
   Json written = call("render", args({{"path", name}, {"format", "none"}, {"output", "out\xE9.svg"}}));
   ASSERT_FALSE(is_error(written)) << text(written);

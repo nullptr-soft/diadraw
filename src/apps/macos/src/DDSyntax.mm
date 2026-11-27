@@ -2,10 +2,7 @@
 
 #include "diadraw/dsl/highlight.hpp"
 
-namespace {
-
-/// UTF-16 offset of every UTF-8 byte offset of `text` (and of its end).
-std::vector<NSUInteger> utf16_map(const std::string& text) {
+std::vector<NSUInteger> DDUtf16Map(const std::string& text) {
   std::vector<NSUInteger> map(text.size() + 1);
   NSUInteger unit = 0;
   for (std::size_t i = 0; i < text.size(); ++i) {
@@ -16,6 +13,8 @@ std::vector<NSUInteger> utf16_map(const std::string& text) {
   map[text.size()] = unit;
   return map;
 }
+
+namespace {
 
 NSColor* colour(dd::dsl::TokenKind kind) {
   using K = dd::dsl::TokenKind;
@@ -41,7 +40,7 @@ void DDColourSyntax(NSTextView* view) {
   NSRange all = NSMakeRange(0, string.length);
   [layout removeTemporaryAttribute:NSForegroundColorAttributeName forCharacterRange:all];
   std::string text = string.UTF8String;
-  auto map = utf16_map(text);
+  auto map = DDUtf16Map(text);
   for (const auto& t : dd::dsl::highlight(text))
     if (NSColor* c = colour(t.kind))
       [layout addTemporaryAttribute:NSForegroundColorAttributeName
@@ -59,7 +58,7 @@ std::vector<DDMark> DDMarkDiagnostics(NSTextView* view, const std::string& text,
   std::vector<DDMark> marks;
   // The diagnostics belong to the text the core parsed; if the view has moved on, wait for the next.
   if (std::string(view.string.UTF8String) != text) return marks;
-  auto map = utf16_map(text);
+  auto map = DDUtf16Map(text);
   for (const auto& d : diagnostics) {
     NSUInteger from = map[std::min<std::size_t>(d.span.from, text.size())];
     NSUInteger to = map[std::min<std::size_t>(std::max(d.span.to, d.span.from), text.size())];

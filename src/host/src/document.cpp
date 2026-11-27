@@ -4,6 +4,8 @@
 #include <filesystem>
 
 #include "diadraw/base/text.hpp"
+#include "diadraw/dsl/format.hpp"
+#include "diadraw/dsl/patch.hpp"
 #include "diadraw/dsl/print.hpp"
 #include "diadraw/export/export.hpp"
 #include "diadraw/io/bpmn.hpp"
@@ -345,6 +347,17 @@ Result<std::optional<Change>> Document::clear() {
   session_.set_source(std::string(kEmptyText));
   Change change;
   change.edits.push_back({0, size, std::string(kEmptyText)});
+  return std::optional(std::move(change));
+}
+
+Result<std::optional<Change>> Document::format(int indent_size) {
+  const std::string& before = session_.source();  // read only before set_source below
+  std::string after = dsl::format_source(before, dsl::FormatOptions{indent_size});
+  if (after == before) return std::optional<Change>{};
+  // One edit over what differs, so the caret and the scroll position stay put elsewhere.
+  Change change;
+  change.edits = dsl::diff_edit(before, after);
+  session_.set_source(std::move(after));
   return std::optional(std::move(change));
 }
 

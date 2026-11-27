@@ -12,7 +12,7 @@ const FIELDS: readonly {
   /** In the section of the declared theme the view is drawn with. */
   declared?: boolean;
 }[] = [
-  { key: 'theme', label: 'Theme', hint: 'default, dark, mono or a new name' },
+  { key: 'theme', label: 'Theme', hint: 'a built-in theme such as dark or ocean, or a new name' },
   { key: 'viewTheme', label: "This view's theme", hint: "the document's" },
   { key: 'styles', label: 'Style blocks', control: 'dd-style-blocks' },
   { key: 'extends', label: 'Extends', hint: 'default', declared: true },

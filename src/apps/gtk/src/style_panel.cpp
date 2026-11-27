@@ -18,7 +18,7 @@ struct FieldSpec {
 };
 
 const FieldSpec kFields[] = {
-    {"theme", "Theme", "default, dark, mono or a new name", &Fields::theme, Kind::Theme, false},
+    {"theme", "Theme", "a built-in theme such as dark or ocean, or a new name", &Fields::theme, Kind::Theme, false},
     {"view-theme", "This view's theme", "the document's", &Fields::view_theme, Kind::Theme, false},
     {"styles", "Style blocks", "", &Fields::styles, Kind::Blocks, false},
     {"extends", "Extends", "default", &Fields::extends, Kind::Theme, true},

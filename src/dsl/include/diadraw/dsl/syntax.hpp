@@ -139,6 +139,29 @@ struct Tree {
 /// Parses DiaDraw source. Never fails: problems become `Error` nodes in the tree.
 Tree parse_syntax(std::string_view source);
 
+/// One token as the lexer reads it, before parsing.
+struct Lexeme {
+  enum class Kind : std::uint8_t {
+    Identifier,
+    String,  ///< a closed string, one-line or block
+    Number,
+    Punct,    ///< `{ } = . , * -> --> <-> ->>`
+    Invalid,  ///< a character that is no token, or a string that is not closed
+  };
+  Kind kind = Kind::Invalid;
+  std::uint32_t from = 0;
+  std::uint32_t to = 0;
+};
+
+/// The source's tokens and comments, each in source order, exactly as parse_syntax reads them.
+struct Lexed {
+  std::vector<Lexeme> tokens;
+  std::vector<Comment> comments;
+  /// As in Tree.
+  std::optional<std::uint32_t> unclosed_block_string;
+};
+Lexed lex_source(std::string_view source);
+
 /// Opens and closes a block string, which spans lines (see docs/dsl.md).
 inline constexpr std::string_view kBlockQuote = R"(""")";
 

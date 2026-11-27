@@ -121,7 +121,11 @@ view checkout of shop {
 }
 ```
 
-- Themes: `default`, `dark` (dark background) and `mono` (black on white, grey fills, for print).
+- Themes: `default`, `dark` (dark background) and `mono` (black on white, grey fills, for print);
+  the light `ocean`, `forest`, `sunset`, `lavender`, `sand`, `graphite`, `pastel`, `vivid` and
+  `contrast` (black on white with larger text, for accessibility and projectors); and the dark
+  `blueprint`, `midnight`, `aurora`, `ember` and `terminal`. The
+  [styles and themes guide](guide/styles-and-themes.md#built-in-themes) describes each one.
   A view's `theme` overrides the document's; an unknown name is a warning and draws with
   `default`. Without a `theme` statement every view uses `default`, exactly as before.
 - Selectors: `*` (every element), a kind (`container`), `tag "…"`, a kind and a tag

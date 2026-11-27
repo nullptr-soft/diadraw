@@ -516,10 +516,17 @@ renames }` moves a relationship's ends and renames relationship ids in one step,
   block never makes a model element look imported.
 - **Specificity, not only order.** `*` < kind < tag < kind and tag, then document order within a
   step, then the inline style; close to CSS, and independent of where a block sits in the file.
-- **Themes are built in and named.** `default`, `dark` and `mono`; a document picks one with
-  `theme`, a view may override it. The theme travels with the resolved view, so every host (CLI,
-  WebAssembly, the editor session, native shells) draws it without new render options. Documents
-  without `theme` or `style` render byte for byte as before (checked on every corpus view).
+- **Themes are built in and named.** `default`, `dark`, `mono` and fourteen more (light ones such as
+  `ocean`, `pastel` and `contrast`, dark ones such as `blueprint` and `terminal`); a document picks
+  one with `theme`, a view may override it. The theme travels with the resolved view, so every host
+  (CLI, WebAssembly, the editor session, native shells) draws it without new render options.
+  Documents without `theme` or `style` render byte for byte as before (checked on every corpus
+  view). Each built-in has a background of its own, so it reads the same in a light or a dark app,
+  and the ones after `mono` keep every label at 4.5:1 contrast or better against what it sits on (a
+  test checks it). A library theme that extends a name its library also declares gets the library's
+  theme, so a new built-in does not change libraries written before it. A new built-in name takes
+  that name from documents, which then have to rename a theme they declared with it, so new ones are
+  plain words unlikely to be someone's brand.
 - **Values are words, numbers or strings.** `endArrow open`, `strokeWidth 2`, `fill "#438dd5"`;
   colours need quotes because `#` is not a token. `true`/`false` are stored as `1`/`0` so the
   renderer and the draw.io exporter read one form.
@@ -670,8 +677,8 @@ renames }` moves a relationship's ends and renames relationship ids in one step,
 
 ## Rust bindings
 
-- **Over the C ABI, not the C++ API.** The Rust crates (`src/rust`) call `diadraw.h`, which grew
-  to ABI 2 for them: parse, check, format, layout, render and import, each mirroring the
+- **Over the C ABI, not the C++ API.** The Rust crates (`bindings/rust`) call `diadraw.h`, which
+  grew to ABI 2 for them: parse, check, format, layout, render and import, each mirroring the
   `@diadraw/wasm` function and the CLI command of the same job. A C boundary needs no C++ binding
   generator, keeps exceptions out of Rust, and serves any other C caller too. ABI 2 lives in its
   own library, `diadraw_capi`, because it needs the host and export libraries that themselves
@@ -687,8 +694,8 @@ renames }` moves a relationship's ends and renames relationship ids in one step,
 
 ## Node.js bindings
 
-- **Node-API over the C++ core, not the C ABI.** `@diadraw/node` (`src/node`) is a node-addon-api
-  addon that calls the core and `host/` directly, like the WebAssembly bindings do, so it needs
+- **Node-API over the C++ core, not the C ABI.** `@diadraw/node` (`bindings/node`) is a
+  node-addon-api addon that calls the core and `host/` directly, like the WebAssembly bindings do, so it needs
   nothing added to `diadraw.h`; the C ABI grows for hosts that can only call C. Node-API version
   8 keeps one binary working across Node versions and in worker threads.
 - **The same values as `@diadraw/wasm`.** Models, operations, diagnostics and import results
@@ -722,3 +729,23 @@ renames }` moves a relationship's ends and renames relationship ids in one step,
   rather than in Forge storage or an attachment, so it is copied, versioned and exported with the
   page like any other macro and the app needs no scopes. The image is pinned to the page's light
   or dark theme, since draw.io draws default colours with CSS `light-dark()`.
+
+## Values in rendered SVG and the pages' script policy
+
+- **The renderer escapes what a document gives it.** Style values (`fill`, `stroke`,
+  `fontColor`, `dashPattern`), theme keys and library kinds' colours are text from documents,
+  share links and libraries, and hosts put the SVG into a page as markup. `color()` escapes every
+  style colour, and `render_scene` and `line_sample_svg` draw with a copy of the theme whose
+  colours and font family are escaped, so no value can end its attribute. Values that are valid
+  colours have nothing to escape, so the SVG of ordinary documents is unchanged. Draw.io stencil
+  sets, whose drawings become library shapes, get the same escaping.
+- **A Content Security Policy as a second line.** The web app (`src/apps/web/src/csp.ts`, put in
+  `index.html` by `vite.config.ts`) and the website (`site/scripts/csp.mjs`) carry a policy in a
+  `<meta>` tag, since GitHub Pages cannot send headers. Scripts run only from the site's own files
+  (and, on the website, the inline scripts the build wrote, by hash); `'wasm-unsafe-eval'` lets
+  the core and the site search compile. Inline event handlers never run, so markup that slipped
+  into a page could not run script. Styles may be inline, since the app and Starlight use them.
+  The web app may reach Google Drive and OneDrive. The desktop app keeps the policy in its Tauri
+  configuration (the web build leaves the tag out when `TAURI_ENV_PLATFORM` is set), as Tauri
+  adds to it for its own IPC. Astro's own `security.csp` was not used: it does not hash the inline
+  scripts Starlight adds.

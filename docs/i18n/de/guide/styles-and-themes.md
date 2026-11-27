@@ -23,7 +23,7 @@ Die [DSL-Referenz](../dsl.md#stile-und-designs) nennt alle Selektoren und Schlü
 
 - Verwende einen **Stilblock**, wenn das Aussehen an eine Art oder ein Tag gebunden ist: „Alle Datenbanken sind orange“, „Alles mit dem Tag `external` ist grau und gestrichelt“. Neue Elemente dieser Art oder mit diesem Tag übernehmen den Stil automatisch.
 - Verwende das Feld **Style** des Elements für das eine Element, das anders aussehen soll.
-- Verwende ein **Design** für das gesamte Diagramm: Hintergrund, Linienfarbe, Schrift und Standardfarben jeder Art. Wähle ein eingebautes Design (`default`, `dark`, `mono` für den Druck) oder erstelle ein eigenes.
+- Verwende ein **Design** für das gesamte Diagramm: Hintergrund, Linienfarbe, Schrift und Standardfarben jeder Art. Wähle ein eingebautes Design (`default`, `dark`, `mono` für den Druck, `ocean`, `blueprint` und weitere, siehe [DSL-Referenz](../dsl.md)) oder erstelle ein eigenes.
 
 Treffen mehrere Vorgaben zu, gewinnt die spezifischere: zuerst das Design, dann `*`-Blöcke, Art-Blöcke, Tag-Blöcke, Blöcke für Art und Tag zusammen und zuletzt der eigene Stil des Elements.
 
@@ -55,7 +55,7 @@ Das Feld akzeptiert nur Selektoren, die auf das ausgewählte Element zutreffen: 
 
 Klicke auf eine leere Stelle der Zeichenfläche. Solange nichts ausgewählt ist, zeigt der Eigenschaftenbereich daneben das Dokument:
 
-- **Theme**: die `theme`-Anweisung des Dokuments. Gib `default`, `dark`, `mono`, ein selbst deklariertes Design oder ein Bibliotheksdesign (`acme.corporate`) ein. Leeren des Feldes entfernt die Anweisung.
+- **Theme**: die `theme`-Anweisung des Dokuments. Gib ein eingebautes Design (etwa `default`, `dark`, `ocean`), ein selbst deklariertes Design oder ein Bibliotheksdesign (`acme.corporate`) ein. Leeren des Feldes entfernt die Anweisung.
 - **This view's theme**: das `theme` in der aktuellen Ansicht, das nur für diese Ansicht Vorrang vor dem Dokumentdesign hat. Leer bedeutet, dass die Ansicht das Dokumentdesign verwendet.
 - **Style blocks**: alle Stilblöcke im Dokument, auch Beziehungsstile wie `relationship tag "async": dashed=1`, einer pro Zeile wie oben.
 

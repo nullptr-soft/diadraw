@@ -42,18 +42,9 @@ const char* decompose(std::uint32_t cp) {
   return it == table.end() ? nullptr : it->second;
 }
 
-bool is_word(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'; }
-
-bool iequals(std::string_view a, std::string_view b) {
-  if (a.size() != b.size()) return false;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    if (std::tolower(static_cast<unsigned char>(a[i])) != std::tolower(static_cast<unsigned char>(b[i]))) return false;
-  return true;
-}
-
 /// The value `/<tag\s*\/?>/i`-style helpers below look for: does `s` at `i` start a tag named `name`?
 bool tag_at(std::string_view s, std::size_t i, std::string_view name) {
-  return s.size() >= i + name.size() && iequals(s.substr(i, name.size()), name);
+  return i <= s.size() && starts_with_ascii_icase(s.substr(i), name);
 }
 
 }  // namespace
@@ -73,7 +64,7 @@ std::string to_identifier(std::string_view text, std::string_view fallback) {
   std::string id;
   bool in_run = false;
   for (char c : decomposed) {
-    if (is_word(c)) {
+    if (is_ascii_word(c)) {
       id.push_back(c);
       in_run = false;
     } else if (!in_run) {

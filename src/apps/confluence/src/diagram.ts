@@ -27,7 +27,25 @@ export function readConfig(raw: unknown): MacroConfig {
 }
 
 /** The themes every document can use without declaring them. */
-export const BUILT_IN_THEMES: readonly string[] = ['default', 'dark', 'mono'];
+export const BUILT_IN_THEMES: readonly string[] = [
+  'default',
+  'dark',
+  'mono',
+  'ocean',
+  'forest',
+  'sunset',
+  'lavender',
+  'sand',
+  'graphite',
+  'pastel',
+  'vivid',
+  'contrast',
+  'blueprint',
+  'midnight',
+  'aurora',
+  'ember',
+  'terminal',
+];
 
 /** Formats the importer understands, by the file extension it reads them from. */
 export const IMPORT_FORMATS = [

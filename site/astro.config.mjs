@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { satteri } from '@astrojs/markdown-satteri';
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import csp from './scripts/csp.mjs';
 
 const grammar = JSON.parse(
   readFileSync(
@@ -142,5 +143,7 @@ export default defineConfig({
         },
       ],
     }),
+    // Last, so the policy covers the pages as Starlight wrote them (scripts/csp.mjs).
+    csp(),
   ],
 });

@@ -34,3 +34,5 @@ invalid
 enter name 2nd
 styles
 invalid
+# With nothing selected the inspector is hidden, so set goes to the theme and styles panel
+set theme dark

@@ -160,7 +160,7 @@ W katalogu źródłowym biblioteki znajduje się plik `diadraw-library.json`:
 | `fragments` | Kod źródłowy DiaDraw (plik `.draw` lub kod osadzony w manifeście) wstawiany do `model { … }`; `${param}` oznacza wartość parametru, a `${alias}` — alias, pod którym używana jest biblioteka. |
 | `open` | Akceptuje dowolną nazwę kształtu i rysuje go jako `base` (dla zestawów ikon, które nie wyliczają nazw). |
 | `mappings` | Dla każdego formatu (`plantuml`, `plantuml-include`, `plantuml-local`, `structurizr`, `drawio`, `bpmn`): nazwa zewnętrzna → identyfikator kształtu. |
-| `themes` | Identyfikator → motyw jak w `theme … { … }` ([dsl.md](dsl.md#własne-motywy)): `extends` (motyw wbudowany, motyw tej biblioteki lub `dep.theme`), klucze motywu, `nodes`. |
+| `themes` | Identyfikator → motyw jak w `theme … { … }` ([dsl.md](dsl.md#własne-motywy)): `extends` (motyw tej biblioteki, motyw wbudowany lub `dep.theme`; motyw tej biblioteki ma pierwszeństwo przed wbudowanym o tej samej nazwie, chyba że motyw rozszerza własną nazwę), klucze motywu, `nodes`. |
 | `dependencies` | Biblioteki, z których korzystają kształty złożone: `name` → zakres wersji. |
 
 Pole `kind` zwykłego lub złożonego kształtu wskazuje rodzaj elementu dodawanego z palety.

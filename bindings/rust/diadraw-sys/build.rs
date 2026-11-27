@@ -63,7 +63,7 @@ fn build_with_cmake() -> PathBuf {
         );
     }
     // Only the C++ sources and the files compiled into the core; not src/ as a whole, which holds
-    // Cargo's own target folder.
+    // the apps and the web packages.
     for path in [
         "CMakeLists.txt",
         "VERSION",

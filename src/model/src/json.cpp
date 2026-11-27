@@ -671,10 +671,12 @@ Result<ThemeDef> theme_from_json(const Json& j) {
     } else if (k == "nodes" && v.is_object()) {
       for (const auto& [kind, look] : v.as_object()) {
         Style style;
-        if (look.is_object())
-          for (const auto& [sk, sv] : look.as_object())
+        if (look.is_object()) {
+          for (const auto& [sk, sv] : look.as_object()) {
             if (sv.is_string()) style.set(sk, sv.as_string());
             else if (sv.is_number()) style.set(sk, format_number(sv.as_number()));
+          }
+        }
         t.nodes.emplace_back(kind, std::move(style));
       }
     } else if (v.is_string()) {

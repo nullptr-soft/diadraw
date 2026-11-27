@@ -72,6 +72,7 @@ add_executable(diadraw_winui WIN32
   src/painter.cpp
   src/files.cpp
   src/cloud_window.cpp
+  src/text_folds.cpp
   app.manifest
   app.rc)
 set_target_properties(diadraw_winui PROPERTIES OUTPUT_NAME DiaDraw)
@@ -129,7 +130,8 @@ configure_file(msix/AppxManifest.xml.in "${CMAKE_CURRENT_BINARY_DIR}/AppxManifes
 
 # The shared gesture scripts (label "gui": they open a window).
 if(DIADRAW_BUILD_TESTS)
-  foreach(name gestures undo reconnect grid fit views rename clear-canvas)
+  foreach(name gestures undo reconnect grid fit views rename clear-canvas format
+               folding)
     add_test(NAME winui_${name}
              COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File
                      "${CMAKE_CURRENT_SOURCE_DIR}/../shell-tests/run.ps1" "$<TARGET_FILE:diadraw_winui>" ${name})

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   fileBaseName,
   isEmptyDiagram,
+  MAX_SVG_BYTES,
   packSvg,
   pageNames,
   readConfig,
@@ -51,6 +52,15 @@ describe('packSvg and unpackSvg', () => {
   it('keeps text outside ASCII', async () => {
     const svg = drawn.replace('Login flow', 'Вхід — 登录');
     expect(await unpackSvg(await packSvg(svg))).toBe(svg);
+  });
+
+  it('refuses a stored SVG that decompresses past the limit', async () => {
+    const packed = await packSvg(drawn);
+    expect(await unpackSvg(packed, drawn.length)).toBe(drawn);
+    await expect(unpackSvg(packed, drawn.length - 1)).rejects.toThrow(/larger than/);
+    const bomb = await packSvg(`<svg>${' '.repeat(MAX_SVG_BYTES)}</svg>`);
+    expect(bomb.length).toBeLessThan(100_000);
+    await expect(unpackSvg(bomb)).rejects.toThrow(/larger than 33554432 bytes/);
   });
 
   it('refuses what is not a stored SVG', async () => {

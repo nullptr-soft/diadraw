@@ -4,22 +4,37 @@
 // on: `atob`, `DecompressionStream` (deflate, deflate-raw, gzip), `decodeURIComponent`, and
 // `TextDecoder('latin1')` (which is windows-1252).
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <string_view>
+
+#include "diadraw/base/result.hpp"
 
 namespace dd::io {
 
 /// `atob(text.replace(/\s+/g, ''))`; nullopt where `atob` would throw.
 std::optional<std::string> base64_decode(std::string_view text);
 
-/// Raw deflate (RFC 1951); nullopt on malformed input.
-std::optional<std::string> inflate_raw(std::string_view bytes);
-/// zlib-wrapped deflate (RFC 1950).
-std::optional<std::string> inflate_zlib(std::string_view bytes);
+/// The most bytes one decompression may produce (64 MiB), unless the caller passes a smaller
+/// limit. Deflate expands up to about 1032 times, so without a cap a file of a few hundred KB
+/// could make an import allocate gigabytes.
+inline constexpr std::size_t kMaxInflatedSize = std::size_t{64} << 20;
+
+/// Raw deflate (RFC 1951). An error on malformed input, on a stream that decompresses to nothing,
+/// or when the output would pass `limit` bytes (decompression stops there, so memory stays
+/// bounded by the limit).
+Result<std::string> inflate_raw(std::string_view bytes, std::size_t limit = kMaxInflatedSize);
+/// zlib-wrapped deflate (RFC 1950), with the same errors and limit as `inflate_raw`.
+Result<std::string> inflate_zlib(std::string_view bytes, std::size_t limit = kMaxInflatedSize);
 /// gzip (RFC 1952); plain bytes are returned as they are, as a server may have undone the gzip.
-std::optional<std::string> gunzip(std::string_view bytes);
+/// The same errors and limit as `inflate_raw`.
+Result<std::string> gunzip(std::string_view bytes, std::size_t limit = kMaxInflatedSize);
+/// A size as the decompressors' errors write it: "64 MiB" for whole MiB, else "1000 bytes".
+std::string describe_size(std::size_t bytes);
+/// Whether a decompressor's error is the one for output past its limit (not malformed input).
+bool is_too_large(const Error& error);
 /// gzip-compresses bytes (deflate at the best compression level, no file name).
 std::string gzip(std::string_view bytes);
 /// Standard base64 with padding (`btoa`, `Buffer.toString('base64')`).

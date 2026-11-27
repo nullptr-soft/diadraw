@@ -12,7 +12,7 @@ const read = (path) => readFileSync(new URL(path, root), 'utf8');
 const packages = [
   'src/wasm',
   'src/markdown',
-  'src/node',
+  'bindings/node',
   'src/apps/web',
   'src/apps/desktop',
   'src/apps/vscode',
@@ -31,7 +31,7 @@ const copies = [
     new RegExp(`^ {4}"${dir}": \\{\\n {6}"name": "[^"]+",\\n {6}"version": "([^"]+)"`, 'm'),
   ]),
   ['src/apps/desktop/src-tauri/Cargo.toml', /^version = "([^"]+)"/m],
-  ['src/rust/Cargo.toml', /^version = "([^"]+)"/m],
+  ['bindings/rust/Cargo.toml', /^version = "([^"]+)"/m],
   ['src/apps/desktop/src-tauri/tauri.conf.json', /^ {2}"version": "([^"]+)"/m],
   ['src/apps/gtk/data/com.diadraw.DiaDraw.metainfo.xml', /<release version="([^"]+)"/],
   ['plugins/diadraw/.claude-plugin/plugin.json', /^ {2}"version": "([^"]+)"/m],

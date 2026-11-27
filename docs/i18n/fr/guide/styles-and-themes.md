@@ -23,7 +23,7 @@ La [référence du DSL](../dsl.md#styles-et-thèmes) recense tous les sélecteur
 
 - Utilisez un **bloc de style** si l’apparence dépend d’un type ou d’une étiquette : « toutes les bases de données sont orange », « tout ce qui porte l’étiquette `external` est gris avec un contour en tirets ». Tout nouvel élément de ce type ou portant cette étiquette hérite du style sans intervention.
 - Utilisez le champ **Style** de l’élément pour celui qui doit se distinguer des autres.
-- Utilisez un **thème** pour tout le diagramme : arrière-plan, couleur des traits, police et couleurs par défaut de chaque type. Choisissez un thème intégré (`default`, `dark`, `mono` pour l’impression) ou créez le vôtre.
+- Utilisez un **thème** pour tout le diagramme : arrière-plan, couleur des traits, police et couleurs par défaut de chaque type. Choisissez un thème intégré (`default`, `dark`, `mono` pour l’impression, `ocean`, `blueprint` et d’autres, voir la [référence du DSL](../dsl.md)) ou créez le vôtre.
 
 Quand plusieurs réglages s’appliquent, le plus précis l’emporte : d’abord le thème, puis les blocs `*`, les blocs de type, ceux d’étiquette, ceux combinant type et étiquette, et enfin le style propre à l’élément.
 
@@ -55,7 +55,7 @@ Le champ accepte uniquement les sélecteurs qui s’appliquent à l’élément 
 
 Cliquez sur une zone vide du canevas. Tant que rien n’est sélectionné, le panneau des propriétés à côté du canevas présente le document :
 
-- **Theme** : l’instruction `theme` du document. Saisissez `default`, `dark`, `mono`, le nom d’un thème déclaré ou un thème de bibliothèque (`acme.corporate`). Vider le champ supprime l’instruction.
+- **Theme** : l’instruction `theme` du document. Saisissez un thème intégré (par exemple `default`, `dark`, `ocean`), le nom d’un thème déclaré ou un thème de bibliothèque (`acme.corporate`). Vider le champ supprime l’instruction.
 - **This view’s theme** : le `theme` de la vue active, qui remplace celui du document uniquement pour cette vue. Un champ vide signifie que la vue utilise le thème du document.
 - **Style blocks** : tous les blocs de style du document, y compris ceux des relations comme `relationship tag "async": dashed=1`, un par ligne comme ci-dessus.
 

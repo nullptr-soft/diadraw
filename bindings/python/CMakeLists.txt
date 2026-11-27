@@ -1,5 +1,5 @@
 # The `diadraw` Python package's extension module (nanobind), built by scikit-build-core from the
-# repository's pyproject.toml. See src/python/README.md.
+# repository's pyproject.toml. See bindings/python/README.md.
 
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
              OPTIONAL_COMPONENTS Development.SABIModule)

@@ -16,6 +16,8 @@
 
 #include "canvas_view.hpp"
 #include "cloud_window.hpp"
+#include "diadraw/dsl/format.hpp"
+#include "text_folds.hpp"
 #include "host/document.hpp"
 
 namespace dd::winui {
@@ -63,7 +65,13 @@ class DocumentWindow {
   /// Clear Canvas: makes the diagram empty as one undo step. ask_clear_canvas asks first when
   /// there are unsaved changes.
   winrt::fire_and_forget ask_clear_canvas();
+  /// Help: what the canvas does with the mouse and the keyboard (host/canvas_help.hpp).
+  winrt::fire_and_forget show_help();
   void clear_canvas();
+  /// Format Document: reindents the text with the Indent Size setting, as one undo step.
+  void format_text();
+  /// Indent Size: remembers the size (unless a test script chose it) and checks its menu item.
+  void set_indent_size(int size, bool remember);
   /// Renames an element (its id) and every reference to it; the selection follows.
   void rename_element(const std::string& element, const std::string& to);
 
@@ -113,9 +121,21 @@ class DocumentWindow {
   winrt::Microsoft::UI::Xaml::Window window_;
   winrt::Microsoft::UI::Xaml::Controls::Grid root_;
   winrt::Microsoft::UI::Xaml::Controls::RichEditBox text_;
+  /// The fold markers beside the text; folding restyles the text.
+  TextFolds folds_{text_, [this] {
+                     sync_from_text();
+                     restyle();
+                   }};
   CanvasView canvas_;
   winrt::Microsoft::UI::Xaml::Controls::ComboBox views_;
   winrt::Microsoft::UI::Xaml::Controls::ToggleMenuFlyoutItem grid_item_;  ///< View › Show Grid
+  /// Edit › Indent Size: one item per size in host::kIndentSizes, and the size chosen.
+  std::vector<winrt::Microsoft::UI::Xaml::Controls::RadioMenuFlyoutItem> indent_items_;
+  int indent_size_ = dd::dsl::kDefaultIndentSize;
+  /// Set when a test script chose the size (`indent`), or the settings file could not keep it:
+  /// the size then stays as it is rather than following the file, until a size chosen from the
+  /// menu is saved.
+  bool keep_indent_ = false;
   /// Remove View in the View menu and beside the picker, off while the document has one view.
   winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem remove_view_item_;
   winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutItem remove_view_button_item_;
@@ -123,7 +143,7 @@ class DocumentWindow {
   winrt::Microsoft::UI::Dispatching::DispatcherQueueTimer timer_{nullptr};
   bool setting_ = false;        ///< the window itself is changing the text box
   bool updating_views_ = false;
-  bool asking_ = false;         ///< a name or Clear Canvas dialog is open
+  bool asking_ = false;         ///< a name, Clear Canvas or Help dialog is open
   /// Expires with the window, for coroutines that resume after it may have closed.
   std::shared_ptr<char> alive_ = std::make_shared<char>();
   std::string committed_;       ///< the text as last given to the document

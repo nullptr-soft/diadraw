@@ -75,7 +75,7 @@ view checkout of shop {
 }
 ```
 
-- Motywy: `default`, `dark` (ciemne tło) i `mono` (czerń na białym tle, szare wypełnienia, do druku). Ustawienie `theme` widoku ma pierwszeństwo przed ustawieniem dokumentu. Nieznana nazwa powoduje ostrzeżenie i użycie `default`. Bez instrukcji `theme` każdy widok używa `default`, tak jak wcześniej.
+- Motywy: `default`, `dark` (ciemne tło) i `mono` (czerń na białym tle, szare wypełnienia, do druku), jasne `ocean`, `forest`, `sunset`, `lavender`, `sand`, `graphite`, `pastel`, `vivid`, `contrast` (czerń na bieli z większym tekstem, dla dostępności) oraz ciemne `blueprint`, `midnight`, `aurora`, `ember` i `terminal`. Ustawienie `theme` widoku ma pierwszeństwo przed ustawieniem dokumentu. Nieznana nazwa powoduje ostrzeżenie i użycie `default`. Bez instrukcji `theme` każdy widok używa `default`, tak jak wcześniej.
 - Selektory: `*` (każdy element), rodzaj (`container`), `tag "…"`, rodzaj i znacznik (`container tag "legacy"`), `relationship` oraz `relationship tag "…"`. W selektorze `relationship` i `tag` są słowami kluczowymi, więc nie ma selektora rodzaju o żadnej z tych nazw.
 - Każdy wiersz bloku ma postać `key value`. Klucze są takie same jak w zapisie `style "…"` bezpośrednio przy obiekcie (wymieniono je wyżej; nieznane klucze są zachowywane). Wartością może być ciąg znaków, liczba lub słowo. Wartości `true` i `false` są przechowywane jako `1` i `0`, tak jak zapisuje je draw.io.
 - Kolejność od najniższego priorytetu: motyw, bloki `*`, bloki rodzaju, bloki znacznika, bloki rodzaju ze znacznikiem (w obrębie jednego poziomu wygrywa późniejszy blok), na końcu `style "…"` zapisany bezpośrednio przy obiekcie.

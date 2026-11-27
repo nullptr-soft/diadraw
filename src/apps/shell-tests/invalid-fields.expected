@@ -56,7 +56,10 @@ ok   enter name 2nd
 ok   styles
 invalid:
 ok   invalid
+ok   set theme dark
 --- text
+theme dark
+
 // a comment that must survive
 model {
   user = person "Customer"
@@ -70,4 +73,4 @@ view main {
   layout layered direction down
 }
 --- status
-"2bad" is not a name: use letters, digits and _, not starting with a digit
+

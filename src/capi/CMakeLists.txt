@@ -4,7 +4,7 @@ target_sources(diadraw PRIVATE
 target_include_directories(diadraw PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 # ABI 2 of the C ABI (the DSL, layout, rendering and import) needs the host and export libraries,
-# so it is a library of its own for language bindings (src/rust) and other C callers.
+# so it is a library of its own for language bindings (bindings/rust) and other C callers.
 if(NOT EMSCRIPTEN)
   add_library(diadraw_capi STATIC src/capi_diagram.cpp)
   target_link_libraries(diadraw_capi PUBLIC diadraw diadraw_host diadraw_export PRIVATE diadraw_warnings)

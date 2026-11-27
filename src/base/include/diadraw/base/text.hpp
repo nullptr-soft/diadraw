@@ -12,6 +12,30 @@
 
 namespace dd {
 
+/// A character of ECMAScript `\s` in the C locale: space, \t, \n, \v, \f or \r.
+[[nodiscard]] constexpr bool is_ascii_space(char c) { return c == ' ' || (c >= '\t' && c <= '\r'); }
+
+/// A character that `\w` matches, which `\b` treats as part of a word.
+[[nodiscard]] constexpr bool is_ascii_word(char c) {
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
+}
+
+/// `c` in lowercase when it is an ASCII capital, else `c`.
+[[nodiscard]] constexpr char ascii_lower(char c) { return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c; }
+
+/// Whether `text` starts with `prefix`, ignoring ASCII case.
+[[nodiscard]] constexpr bool starts_with_ascii_icase(std::string_view text, std::string_view prefix) {
+  if (text.size() < prefix.size()) return false;
+  for (std::size_t i = 0; i < prefix.size(); ++i)
+    if (ascii_lower(text[i]) != ascii_lower(prefix[i])) return false;
+  return true;
+}
+
+/// Whether `a` and `b` are equal, ignoring ASCII case.
+[[nodiscard]] constexpr bool ascii_iequals(std::string_view a, std::string_view b) {
+  return a.size() == b.size() && starts_with_ascii_icase(a, b);
+}
+
 /// ASCII whitespace plus the no-break space and BOM, as the DSL treats them.
 [[nodiscard]] bool is_js_space(std::string_view s, std::size_t i, std::size_t* length);
 
@@ -63,5 +87,8 @@ void append_utf8(std::string& out, std::uint32_t cp);
 [[nodiscard]] double js_to_number(std::string_view s);
 /// ECMAScript ToInt32, for `x & 1`: NaN and infinities are 0, the rest wraps modulo 2^32.
 [[nodiscard]] std::int32_t js_to_int32(double d);
+
+/// `text` escaped for XML text or a double-quoted attribute value: `&`, `<`, `>` and `"`.
+[[nodiscard]] std::string escape_xml(std::string_view text);
 
 }  // namespace dd

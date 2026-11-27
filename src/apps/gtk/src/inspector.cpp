@@ -247,14 +247,14 @@ void Inspector::set_choices(const dd::host::FieldChoices& choices) {
 }
 
 void Inspector::show_fields(const std::optional<ElementFields>& fields) {
-  // One panel at a time: showing an element hides a relationship, and the other way round.
-  if (fields) show<RelationshipFields>(relationship_, std::nullopt, "");
+  // One panel at a time: showing an element or nothing hides a relationship, and the other way round.
+  show<RelationshipFields>(relationship_, std::nullopt, "");
   show(element_, fields, fields ? fields->id : "");
-  set_visible(element_.shown || relationship_.shown);
+  set_visible(fields.has_value());
 }
 
 void Inspector::show_fields(const std::optional<RelationshipFields>& fields) {
-  if (fields) show<ElementFields>(element_, std::nullopt, "");
+  show<ElementFields>(element_, std::nullopt, "");
   std::string title;
   if (fields) {
     title = fields->source + " " + fields->arrow + " " + fields->target;
@@ -264,7 +264,7 @@ void Inspector::show_fields(const std::optional<RelationshipFields>& fields) {
   // Without a name, the field shows the id derived from the ends, greyed.
   for (auto& [field, member] : relationship_.fields)
     if (field.key == "name" && fields) field.entry->set_placeholder_text(fields->name.empty() ? fields->id : "");
-  set_visible(element_.shown || relationship_.shown);
+  set_visible(fields.has_value());
 }
 
 template <class Fields>

@@ -25,8 +25,12 @@ the [DSL reference](../dsl.md); the guide links to it rather than repeating it.
   in any view, and the `size` and `rotate` lines that keeps.
 - [The grid](grid.md): showing a grid on the canvas, and how moves, resizes and bends line up
   with it while it shows.
+- [Formatting the text](formatting.md): Format Document in every app, what it changes and what
+  it leaves alone, and the indent size setting.
 - [Clearing the canvas](clear-canvas.md): starting the open diagram again from nothing, and how
   Undo brings it back.
+- [Folding blocks in the text](folding.md): hiding a `model`, `view` or container block behind
+  the triangle in the text pane's margin, and showing it again.
 - [Drawing by hand in fixed views](fixed-views.md): moving and resizing boxes and bending lines
   on the canvas, and the `pin` and `route` lines that keeps.
 - [Drawing with AI agents](agents.md): the MCP server (`diadraw mcp`) and the Claude Code

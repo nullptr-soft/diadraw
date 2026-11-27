@@ -4,8 +4,8 @@ Everything the plan in `docs/` promises that `main` does not do yet, plus a few 
 marked _beyond plan_. This is the single list of open work: other documents link here instead of
 keeping their own open-point lists. A copy is kept in a Claude Doc; this file is the source.
 
-Checked against `main` at `bbb1ce5` (2026-11-21, after PR #21). When an item lands on `main`, move it to
-"Recently done".
+Checked against `main` at `a46feb8` (2026-11-26, after PR #87). When an item lands on `main`, take it
+off this list; the history of done work is in the git log and the pull requests.
 
 ## DSL
 
@@ -66,8 +66,8 @@ Checked against `main` at `bbb1ce5` (2026-11-21, after PR #21). When an item lan
 
 The planned set (diagnostics, outline, go to definition, hover, completion) is done.
 
-- [ ] _Beyond plan:_ find references, rename, formatting (the CLI already has `format`), code
-      actions.
+- [ ] _Beyond plan:_ find references and code actions. (Formatting, rename and folding are
+      done.)
 
 ## Apps and distribution
 
@@ -75,9 +75,11 @@ The planned set (diagnostics, outline, go to definition, hover, completion) is d
       the Windows thread reported that it runs and its two GUI tests pass. Confirm, then rewrite
       that section.
 - [ ] **Windows ZIP and MSIX packages** (written, not built).
-- [ ] **Build the WinUI app with the latest changes.** Rotate (#9), drop-where-let-go (#13), the
-      implied view (#16), the grid (#17, #19) and the Add drop-down (#4) changed WinUI code or
-      the shared canvas, and none of them was compiled on Windows. Check Show Grid there too.
+- [ ] **Build the WinUI app with the latest changes.** Since #4, many changes reached WinUI code
+      or the shared canvas (among them rotate #9, the grid #17 and #19, views #31, splitters #37,
+      multi-line names #60, the Help dialog #82, folding #83 and formatting #84), and CI, which
+      would build it with the `windows-headless` preset, has not run since 2026-11-20 (see
+      below). Build it on Windows and run its GUI tests.
 - [ ] **Run the web app with the latest changes.** The web inspector and theme panel (#11, #12)
       and the Add drop-down (#4) were not run, because the web app needs the WASM module and the
       cloud has no emsdk (`npm run dev:web`).
@@ -87,44 +89,16 @@ The planned set (diagnostics, outline, go to definition, hover, completion) is d
 - [ ] **Tauri on macOS**: needs Rust 1.77.2 or newer (the Mac has 1.68).
 - [ ] **Publish the VS Code extension** (`vsce`, a publisher id).
 - [ ] **Publish `@diadraw/wasm`** as an npm library (every package is private today).
-- [ ] **Decide on the README vision items** that the C++ port dropped: Markdown/docs plugins and a
-      render server. Build them or take them out of the README.
+- [ ] **Decide on the render server** that the README's vision still promises ("a render server
+      later"): build it or take it out. (The Markdown plugins are done, #48.)
 
 ## Development workflow
 
 - [ ] **Fix GitHub Actions billing.** Since 2026-11-20 every CI job fails without starting
-      ("recent account payments have failed or your spending limit needs to be increased").
-- [ ] **Let the cloud build the C++ core and the WASM module.** Cloud sessions were refused
-      downloads from github.com (403), so the C++ build could not run there (#13, #16), and there
-      is no emsdk, so `npm run typecheck`, `npm test` and the web app cannot run either.
-
-## Recently done
-
-| Item                                                                                                                     | Commit or PR on `main`          |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
-| More line ends and line styles on relationships, exported to draw.io, with a user guide chapter                          | #20, #21                        |
-| C++ review commands and reviewer agents                                                                                  | #18                             |
-| A grid on the canvas (macOS, GTK, WinUI), with snapping                                                                  | #17, #19                        |
-| A canvas edit writes the implied view when the text has none                                                             | #16                             |
-| A dragged box drops where it is let go, in every view                                                                    | #13                             |
-| Inspector fields and the theme and styles panel use controls (pickers, colour wells, style blocks) on macOS, web and GTK | #7, #8, #10, #11, #12, #14, #15 |
-| Resize and rotate any element in any view (shared C++ canvas)                                                            | #9                              |
-| The macOS app comes to the front on launch                                                                               | #6                              |
-| The properties panel stays visible whatever is selected (macOS, GTK, web)                                                | #5                              |
-| Add elements from one Add drop-down in every app                                                                         | #4                              |
-| The macOS app builds and passes its GUI tests with the styles panel, relationship inspector and reconnect                | built on the Mac for #7–#21     |
-| Claude threads work through GitHub pull requests (`CLAUDE.md`)                                                           | `3916b4b` (PR #2)               |
-| Reconnect an edge to another element from the canvas                                                                     | `c840ea5`                       |
-| Tree, grid, radial and force layouts; unknown layout names warn                                                          | `335f722`                       |
-| Edit relationships from the properties panel                                                                             | `26fd0ea`                       |
-| Resize nodes and drag bend points in fixed views                                                                         | `91dbc8a`                       |
-| Edit style blocks and themes from the canvas                                                                             | `c0ddfb5`                       |
-| All apps build and test on Windows; the WinUI app runs (its two GUI tests pass); `.gitattributes` fixes line endings     | `a45ded4` (PR #1)               |
-| Edit element properties from the canvas (properties panel), with a user guide chapter                                    | `75c8219`                       |
-| Explicit relationship ids (`name = a -> b`), and a user guide chapter on relationships                                   | `834ce77`, `ed83871`            |
-| View-level notes, text and boxes                                                                                         | `a44a4ad`                       |
-| User-defined themes in documents and libraries                                                                           | `fb73a3e`                       |
-| Style blocks and built-in themes                                                                                         | `914518a`                       |
-| Libraries that add element kinds                                                                                         | `124cf4d`                       |
-| Architecture diagram re-rendered without Lezer and ELK                                                                   | `4377904`, `d972ec0`            |
-| `dsl.md`, README and `decisions.md` brought in line with the code                                                        | `71882ff`                       |
+      ("recent account payments have failed or your spending limit needs to be increased"), still
+      on `a46feb8`, so neither CI nor the GitHub Pages site (#32) is built.
+- [ ] **Let the cloud build the C++ core and the WASM module.** This session's cloud
+      environment is still refused downloads from github.com and codeload.github.com (403), so
+      `cmake --workflow --preset core` (#74) cannot fetch its dependencies; allow both hosts in the
+      environment's network policy. There is no emsdk either, so `npm run typecheck`, `npm test`
+      and the web app cannot run.
