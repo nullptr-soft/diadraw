@@ -13,7 +13,9 @@
 #import "DDInspector.h"
 #import "DDStylePanel.h"
 #import "DDSyntax.h"
+#import "DDTextFolds.h"
 #include "diadraw/base/text.hpp"
+#include "diadraw/dsl/format.hpp"
 #include "diadraw/dsl/print.hpp"
 #include "diadraw/export/export.hpp"
 #include "diadraw/io/bpmn.hpp"
@@ -33,7 +35,7 @@ NSString* const kShowGrid = @"DDShowGrid";
 NSString* const kGridSize = @"DDGridSize";
 NSString* const kGridChanged = @"DDGridChanged";
 
-// The toolbar's editing items, centred; Give Feedback follows them at the trailing end.
+// The toolbar's editing items, centred; Help and Give Feedback follow them at the trailing end.
 NSArray<NSToolbarItemIdentifier>* const kEditingItems = @[ @"view", @"viewActions", @"grid", @"add" ];
 constexpr double kDefaultGridSize = 10;
 
@@ -44,6 +46,15 @@ double grid_size() {
 
 /// The step to show the grid with: the chosen size, or 0 while it is hidden.
 double shown_grid_step() { return [NSUserDefaults.standardUserDefaults boolForKey:kShowGrid] ? grid_size() : 0; }
+
+// Format Document's indent size, the person's preference for every document.
+NSString* const kIndentSize = @"DDIndentSize";
+
+int indent_size() {
+  NSInteger size = [NSUserDefaults.standardUserDefaults integerForKey:kIndentSize];
+  return size >= dd::dsl::kMinIndentSize && size <= dd::dsl::kMaxIndentSize ? static_cast<int>(size)
+                                                                          : dd::dsl::kDefaultIndentSize;
+}
 
 NSString* const kDefaultText =
     @"model {\n  user = person \"Customer\"\n  shop = system \"Shop\"\n  user -> shop \"browses\"\n}\n";
@@ -88,6 +99,8 @@ NSString* const kDefaultText =
   std::unique_ptr<dd::host::Document> _doc;
   NSString* _loadedText;
   NSTextView* _textView;
+  /// The fold markers beside the text.
+  DDTextFolds* _folds;
   DDCanvasView* _canvas;
   DDInspector* _inspector;
   DDStylePanel* _stylePanel;
@@ -98,6 +111,8 @@ NSString* const kDefaultText =
   NSButton* _gridButton;
   NSTextField* _status;
   NSTimer* _timer;
+  /// The indent size a test script chose (`indent`), or 0 for the user defaults'.
+  int _scriptIndentSize;
   BOOL _applying;
   /// The diagnostics as placed in the text, the status summary, and whether the status line
   /// currently shows the diagnostic under the caret instead of the summary.
@@ -185,6 +200,7 @@ NSString* const kDefaultText =
   _textView.textContainer.widthTracksTextView = NO;
   _textView.textContainer.containerSize = NSMakeSize(CGFLOAT_MAX, CGFLOAT_MAX);
   _textView.delegate = self;
+  _folds = [[DDTextFolds alloc] initWithTextView:_textView];
 
   NSScrollView* canvasScroll = [[NSScrollView alloc] initWithFrame:NSZeroRect];
   canvasScroll.hasVerticalScroller = YES;
@@ -313,13 +329,13 @@ NSString* const kDefaultText =
   toolbar.delegate = (id<NSToolbarDelegate>)self;
   toolbar.displayMode = NSToolbarDisplayModeIconOnly;
   // The editing items (view and its menu, grid, Add) sit together in the middle of the toolbar;
-  // Give Feedback stays at the trailing end.
+  // Help and Give Feedback stay at the trailing end.
   toolbar.centeredItemIdentifiers = [NSSet setWithArray:kEditingItems];
   return toolbar;
 }
 
 - (NSArray<NSToolbarItemIdentifier>*)toolbarDefaultItemIdentifiers:(NSToolbar*)toolbar {
-  return [kEditingItems arrayByAddingObjectsFromArray:@[ NSToolbarFlexibleSpaceItemIdentifier, @"feedback" ]];
+  return [kEditingItems arrayByAddingObjectsFromArray:@[ NSToolbarFlexibleSpaceItemIdentifier, @"help", @"feedback" ]];
 }
 
 - (NSArray<NSToolbarItemIdentifier>*)toolbarAllowedItemIdentifiers:(NSToolbar*)toolbar {
@@ -373,6 +389,15 @@ NSString* const kDefaultText =
     add.toolTip = @"Add an element of the chosen kind";
     item.view = add;
     item.label = @"Add";
+  } else if ([identifier isEqualToString:@"help"]) {
+    // Help: what the canvas does with the mouse and the keyboard. No target: the app delegate
+    // answers showCanvasHelp:, as it does for the Help menu's item.
+    NSImage* image = [NSImage imageWithSystemSymbolName:@"questionmark.circle" accessibilityDescription:@"Help"];
+    NSButton* help = [NSButton buttonWithImage:image target:nil action:@selector(showCanvasHelp:)];
+    help.bezelStyle = NSBezelStyleTexturedRounded;
+    help.toolTip = @"What the canvas does with the mouse and the keyboard";
+    item.view = help;
+    item.label = @"Help";
   } else if ([identifier isEqualToString:@"feedback"]) {
     // Give Feedback: always in sight and one click away. No target: the app delegate answers
     // sendFeedback:, as it does for the Help menu's item.
@@ -403,12 +428,14 @@ NSString* const kDefaultText =
   _textView.string = text;
   _applying = NO;
   DDColourSyntax(_textView);
+  [_folds textDidChange];
   [self.undoManager removeAllActions];
   [self refresh];
 }
 
 - (void)textDidChange:(NSNotification*)note {
   DDColourSyntax(_textView);
+  [_folds textDidChange];
   if (_applying) return;
   [_timer invalidate];
   _timer = [NSTimer scheduledTimerWithTimeInterval:0.06
@@ -419,6 +446,8 @@ NSString* const kDefaultText =
 }
 
 - (void)syncFromText {
+  [_timer invalidate];  // what it would read is read now, so it must not refresh again later
+  _timer = nil;
   std::string text = _textView.string.UTF8String;
   _doc->set_text(text);
   [self refresh];
@@ -429,7 +458,7 @@ NSString* const kDefaultText =
   auto refreshed = _doc->refresh();
   const auto& views = _doc->views();
   [_views removeAllItems];
-  for (const auto& id : views) [_views addItemWithTitle:ns("view " + id)];
+  for (const auto& view_id : views) [_views addItemWithTitle:ns("view " + view_id)];
   if (!_doc->view().empty())
     [_views selectItemAtIndex:std::find(views.begin(), views.end(), _doc->view()) - views.begin()];
   _views.enabled = views.size() > 1;  // nothing to choose between with one view
@@ -487,6 +516,7 @@ NSString* const kDefaultText =
 }
 
 - (void)textViewDidChangeSelection:(NSNotification*)note {
+  [_folds selectionDidChange];
   [self showCaretDiagnostic];
 }
 
@@ -619,9 +649,7 @@ static NSString* const kNameRules = @"Letters, digits and _, not starting with a
 
 /// Typing still waiting for its sync goes in now (a fired one-shot timer is no longer valid).
 - (void)syncPendingText {
-  if (!_timer.valid) return;
-  [_timer invalidate];
-  [self syncFromText];
+  if (_timer.valid) [self syncFromText];
 }
 
 - (void)clearCanvasNow {
@@ -629,14 +657,30 @@ static NSString* const kNameRules = @"Letters, digits and _, not starting with a
   [self change:[&] { return _doc->clear(); }];  // the refresh drops the selection, as nothing selected is left
 }
 
+// ── Formatting ──
+
+/// Edit › Format Document: reindents the text with the chosen indent size, as one undo step.
+- (IBAction)formatDocument:(id)sender {
+  [self formatWithIndentSize:_scriptIndentSize > 0 ? _scriptIndentSize : indent_size()];
+}
+
+- (void)formatWithIndentSize:(int)size {
+  [self syncPendingText];  // format what is typed, not what was last read
+  [self change:[&] { return _doc->format(size); }];
+}
+
+- (IBAction)chooseIndentSize:(NSMenuItem*)sender {
+  [NSUserDefaults.standardUserDefaults setInteger:sender.tag forKey:kIndentSize];
+}
+
 - (void)addViewNamed:(NSString*)name {
-  std::string id = name.UTF8String;
-  [self change:[&] { return _doc->add_view(id); }];
+  std::string view_id = name.UTF8String;
+  [self change:[&] { return _doc->add_view(view_id); }];
 }
 
 - (void)renameViewTo:(NSString*)name {
-  std::string id = name.UTF8String;
-  [self change:[&] { return _doc->rename_view(id); }];
+  std::string view_id = name.UTF8String;
+  [self change:[&] { return _doc->rename_view(view_id); }];
 }
 
 // ── Renaming elements ──
@@ -644,10 +688,7 @@ static NSString* const kNameRules = @"Letters, digits and _, not starting with a
 /// The text cursor in UTF-8 bytes, once a text change still waiting for its sync is in, so the
 /// cursor and the parse agree.
 - (std::size_t)caretByte {
-  if (_timer.valid) {
-    [_timer invalidate];
-    [self syncFromText];
-  }
+  [self syncPendingText];
   return dd::byte_offset(_doc->text(), _textView.selectedRange.location);
 }
 
@@ -985,6 +1026,19 @@ static NSString* const kNameRules = @"Letters, digits and _, not starting with a
       [self removeView:nil];
     } else if ([cmd isEqualToString:@"clear-canvas"]) {
       [self clearCanvasNow];
+    } else if ([cmd isEqualToString:@"indent"] && w.count > 1) {
+      // indent <size>: chooses Indent Size for this run (the user defaults stay as they are)
+      _scriptIndentSize = static_cast<int>(w[1].integerValue);
+    } else if ([cmd isEqualToString:@"format"]) {
+      [self formatDocument:nil];
+    } else if ([cmd isEqualToString:@"fold"] && w.count > 1) {
+      // fold <line>: clicks the fold marker on that line (1-based), folding or unfolding its block
+      ok = [_folds toggleLine:w[1].integerValue - 1];
+    } else if ([cmd isEqualToString:@"folds"]) {
+      // folds: logs the lines with a fold marker, the folded ones marked with *
+      [log appendString:@"folds:"];
+      for (const auto& m : [_folds foldMarkers]) [log appendFormat:@" %ld%@", (long)(m.line + 1), m.folded ? @"*" : @""];
+      [log appendString:@"\n"];
     } else if ([cmd isEqualToString:@"views"]) {
       // views: logs the views, the one on the canvas marked with *
       [log appendString:@"views:"];
@@ -1222,6 +1276,12 @@ static NSString* const kNameRules = @"Letters, digits and _, not starting with a
   // Rename Element… stays enabled: with nothing to rename it says how to pick an element.
   if (item.action == @selector(renameElement:)) return _doc != nullptr;
   if (item.action == @selector(removeView:)) return _doc && _doc->views().size() > 1;  // a document keeps one view
+  if (item.action == @selector(formatDocument:)) return _doc != nullptr;
+  if (item.action == @selector(chooseIndentSize:)) {
+    if ([(id)item isKindOfClass:NSMenuItem.class])
+      ((NSMenuItem*)item).state = item.tag == indent_size() ? NSControlStateValueOn : NSControlStateValueOff;
+    return YES;
+  }
   if (item.action == @selector(chooseGridSize:)) {
     if ([(id)item isKindOfClass:NSMenuItem.class])
       ((NSMenuItem*)item).state = item.tag == grid_size() ? NSControlStateValueOn : NSControlStateValueOff;

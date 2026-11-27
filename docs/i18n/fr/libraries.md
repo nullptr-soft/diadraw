@@ -135,7 +135,7 @@ Le dossier source d’une bibliothèque contient `diadraw-library.json` :
 | `fragments` | source DiaDraw (fichier `.draw` ou texte en ligne) à insérer dans `model { … }` ; `${param}` reçoit un paramètre, `${alias}` l’alias attribué à la bibliothèque |
 | `open` | accepter tout nom de forme et la dessiner avec `base` (pour les jeux d’icônes dont les noms ne sont pas énumérés) |
 | `mappings` | pour chaque format (`plantuml`, `plantuml-include`, `plantuml-local`, `structurizr`, `drawio`, `bpmn`), nom externe → identifiant de forme |
-| `themes` | identifiant → thème comme dans `theme … { … }` ([dsl.md](dsl.md#vos-propres-thèmes)) : `extends` (thème intégré, de cette bibliothèque ou `dep.theme`), clés de thème, `nodes` |
+| `themes` | identifiant → thème comme dans `theme … { … }` ([dsl.md](dsl.md#vos-propres-thèmes)) : `extends` (thème de cette bibliothèque, thème intégré ou `dep.theme` ; un thème de cette bibliothèque l’emporte sur un thème intégré du même nom, sauf s’il étend son propre nom), clés de thème, `nodes` |
 | `dependencies` | bibliothèques sur lesquelles reposent les formes composites, `name` → plage de versions |
 
 Le `kind` d’une forme simple ou composite (le type de l’élément que la palette ajoute pour elle) désigne un type propre à la bibliothèque si elle en possède un de ce nom ; sinon, il désigne un type intégré.

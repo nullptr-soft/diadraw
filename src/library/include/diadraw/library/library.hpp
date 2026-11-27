@@ -75,9 +75,14 @@ struct SvgArt {
   std::string view_box;
   double width = 0, height = 0;
 };
-/// Makes SVG markup safe to inline: no scripts, handlers, foreign objects or external references,
-/// ids prefixed. The inner markup and the view box.
+/// Makes SVG markup safe to inline: the first `<svg>` element read into an allowlist of SVG
+/// elements and attributes and written back out escaped, so no scripts, event handlers, styles,
+/// foreign objects, animation or external references; ids prefixed. The inner markup and the view
+/// box; nullopt without an `<svg>` or without a size.
 std::optional<SvgArt> sanitize_svg(std::string_view svg, const std::string& id_prefix);
+/// The same rules for the inner markup of an `<svg>` (a bundle's shape drawing). Without a prefix
+/// it is idempotent: a sanitised drawing comes back as it is.
+std::string sanitize_svg_body(std::string_view body, std::string_view id_prefix = {});
 
 /// Reads a file next to the manifest; nullopt when missing.
 using FileReader = std::function<std::optional<std::string>(const std::string& path)>;

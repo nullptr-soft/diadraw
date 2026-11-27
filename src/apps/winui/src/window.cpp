@@ -13,9 +13,11 @@
 #include "diadraw/dsl/highlight.hpp"
 #include "files.hpp"
 #include "host/about.hpp"
+#include "host/canvas_help.hpp"
 #include "host/credits.hpp"
 #include "host/examples.hpp"
 #include "host/feedback.hpp"
+#include "host/settings.hpp"
 
 namespace dd::winui {
 
@@ -217,8 +219,19 @@ DocumentWindow::DocumentWindow(AppActions actions, std::string path, const std::
   text_.BorderThickness(ThicknessHelper::FromUniformLength(0));
   ScrollViewer::SetHorizontalScrollBarVisibility(text_, ScrollBarVisibility::Auto);
   text_.Document().UndoLimit(0);  // the window keeps the undo history
-  Grid::SetColumn(text_, 0);
-  panes.Children().Append(text_);
+  // The fold markers in a gutter left of the text.
+  Grid text_pane;
+  ColumnDefinition gutter_column, text_column;
+  gutter_column.Width(GridLengthHelper::Auto());
+  text_column.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
+  text_pane.ColumnDefinitions().Append(gutter_column);
+  text_pane.ColumnDefinitions().Append(text_column);
+  Grid::SetColumn(folds_.gutter(), 0);
+  text_pane.Children().Append(folds_.gutter());
+  Grid::SetColumn(text_, 1);
+  text_pane.Children().Append(text_);
+  Grid::SetColumn(text_pane, 0);
+  panes.Children().Append(text_pane);
   auto canvas = canvas_.root().as<FrameworkElement>();
   Grid::SetColumn(canvas, 2);
   panes.Children().Append(canvas);
@@ -247,7 +260,9 @@ DocumentWindow::DocumentWindow(AppActions actions, std::string path, const std::
     timer_.Start();
   });
   text_.SelectionChanged([this](auto const&, auto const&) {
-    if (!setting_) show_caret_diagnostic();
+    if (setting_) return;
+    folds_.reveal_caret(true);
+    show_caret_diagnostic();
   });
   text_.PreviewKeyDown([this](auto const&, KeyRoutedEventArgs const& e) {
     auto ctrl = winrt::Microsoft::UI::Input::InputKeyboardSource::GetKeyStateForCurrentThread(VirtualKey::Control);
@@ -274,6 +289,7 @@ DocumentWindow::DocumentWindow(AppActions actions, std::string path, const std::
     selection.SetRange(static_cast<int>(dd::utf16_offset(t, span->from)), static_cast<int>(dd::utf16_offset(t, span->to)));
     selection.ScrollIntoView(text::PointOptions::None);
     setting_ = false;
+    folds_.reveal_caret();
   };
   auto run = [this](auto f) {
     std::string before = doc_->text();
@@ -361,6 +377,22 @@ UIElement DocumentWindow::build_toolbar() {
     std::string before = doc_->text();
     apply(doc_->fit(elements), before);
   }));
+  edit.Items().Append(MenuFlyoutSeparator());
+  // The text: Format Document (Shift+Alt+F, as in VS Code and the web app) and its one setting.
+  edit.Items().Append(menu_item(L"Format Document", [this] { format_text(); }, VirtualKey::F,
+                                VirtualKeyModifiers::Shift | VirtualKeyModifiers::Menu));
+  MenuFlyoutSubItem indent;
+  indent.Text(L"Indent Size");
+  for (int size : dd::host::kIndentSizes) {
+    RadioMenuFlyoutItem item;
+    item.Text(winrt::to_hstring(size));
+    item.GroupName(L"indent-size");
+    item.Click([this, size](auto const&, auto const&) { set_indent_size(size, true); });
+    indent.Items().Append(item);
+    indent_items_.push_back(item);
+  }
+  edit.Items().Append(indent);
+  set_indent_size(dd::host::read_indent_size(), false);
   menu.Items().Append(edit);
 
   MenuBarItem view;
@@ -389,6 +421,9 @@ UIElement DocumentWindow::build_toolbar() {
 
   MenuBarItem help;
   help.Title(L"Help");
+  help.Items().Append(menu_item(L"Mouse and Keyboard", [this] { show_help(); }, VirtualKey::F1,
+                                VirtualKeyModifiers::None));
+  help.Items().Append(MenuFlyoutSeparator());
   help.Items().Append(menu_item(L"Report a Bug…", [this] { open_feedback(dd::host::FeedbackKind::Bug, handle_of(window_)); }));
   help.Items().Append(menu_item(L"Give Feedback…", [this] { open_feedback(dd::host::FeedbackKind::Feedback, handle_of(window_)); }));
   help.Items().Append(MenuFlyoutSeparator());
@@ -448,6 +483,18 @@ UIElement DocumentWindow::build_toolbar() {
                              winrt::box_value(L"Send an idea, a wish or anything that could be easier (opens a form on GitHub)"));
   feedback.VerticalAlignment(VerticalAlignment::Center);
 
+  // Help: what the canvas does with the mouse and the keyboard, beside Give Feedback.
+  Button help_button;  // `help` is the Help menu above, in the same scope
+  help_button.Content(winrt::box_value(L"Help"));
+  help_button.Click([this](auto const&, auto const&) { show_help(); });
+  ToolTipService::SetToolTip(help_button, winrt::box_value(L"What the canvas does with the mouse and the keyboard"));
+  help_button.VerticalAlignment(VerticalAlignment::Center);
+  StackPanel end;
+  end.Orientation(Orientation::Horizontal);
+  end.Spacing(8);
+  end.Children().Append(help_button);
+  end.Children().Append(feedback);
+
   Grid toolbar;
   ColumnDefinition left, right;
   left.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
@@ -456,9 +503,9 @@ UIElement DocumentWindow::build_toolbar() {
   toolbar.ColumnDefinitions().Append(right);
   toolbar.Padding(ThicknessHelper::FromLengths(0, 0, 8, 0));
   Grid::SetColumn(bar, 0);
-  Grid::SetColumn(feedback, 1);
+  Grid::SetColumn(end, 1);
   toolbar.Children().Append(bar);
-  toolbar.Children().Append(feedback);
+  toolbar.Children().Append(end);
   return toolbar;
 }
 
@@ -574,6 +621,7 @@ void DocumentWindow::restyle() {
   auto all = document.GetRange(0, map[t.size()] + 1);
   all.CharacterFormat().ForegroundColor(kText);
   all.CharacterFormat().Underline(text::UnderlineType::None);
+  all.CharacterFormat().Hidden(text::FormatEffect::Off);
   for (const auto& token : dd::dsl::highlight(t))
     if (auto c = colour_of(token.kind)) document.GetRange(map[token.from], map[token.to]).CharacterFormat().ForegroundColor(*c);
   for (const auto& m : marks_) {
@@ -581,8 +629,11 @@ void DocumentWindow::restyle() {
     format.Underline(text::UnderlineType::Wave);
     format.ForegroundColor(m.error ? kError : kWarning);
   }
+  folds_.update(t, map);
+  folds_.hide(document);
   document.ApplyDisplayUpdates();
   setting_ = false;
+  folds_.redraw();
 }
 
 void DocumentWindow::refresh() {
@@ -698,6 +749,21 @@ winrt::fire_and_forget DocumentWindow::ask_clear_canvas() {
   if (result == ContentDialogResult::Primary) clear_canvas();
 }
 
+void DocumentWindow::format_text() {
+  sync_from_text();  // format what is typed, not what was last read
+  // Another window may have chosen a size since: the settings file has the latest.
+  if (!keep_indent_) set_indent_size(dd::host::read_indent_size(), false);
+  std::string before = doc_->text();
+  apply(doc_->format(indent_size_), before);
+}
+
+void DocumentWindow::set_indent_size(int size, bool remember) {
+  indent_size_ = size;
+  for (std::size_t i = 0; i < indent_items_.size(); ++i)
+    indent_items_[i].IsChecked(dd::host::kIndentSizes[i] == size);
+  if (remember) keep_indent_ = !dd::host::write_indent_size(size);
+}
+
 void DocumentWindow::clear_canvas() {
   sync_from_text();  // the change replaces the whole text, typing included
   std::string before = doc_->text();
@@ -743,6 +809,65 @@ void DocumentWindow::rename_element(const std::string& element, const std::strin
   if (renamed.empty() || renamed == element) return;
   canvas_.canvas().set_selection(doc_->follow_rename(std::move(selection), element, renamed));
   canvas_.redraw();
+}
+
+winrt::fire_and_forget DocumentWindow::show_help() {
+  // One dialog at a time, as ask_name: ShowAsync throws while another is open.
+  if (asking_) co_return;
+  asking_ = true;
+  std::weak_ptr<char> alive = alive_;
+  // A heading and a two-column list per section: the keys, then what they do.
+  StackPanel sections;
+  sections.Spacing(4);
+  bool first = true;
+  for (const auto& section : dd::host::canvas_help(dd::host::HelpKeys::windows)) {
+    TextBlock heading;
+    heading.Text(wide(section.title));
+    heading.FontWeight(text::FontWeights::SemiBold());
+    if (!first) heading.Margin(ThicknessHelper::FromLengths(0, 12, 0, 0));
+    first = false;
+    sections.Children().Append(heading);
+    Grid rows;
+    ColumnDefinition keys, action;
+    keys.Width(GridLengthHelper::FromPixels(200));
+    action.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
+    rows.ColumnDefinitions().Append(keys);
+    rows.ColumnDefinitions().Append(action);
+    rows.ColumnSpacing(16);
+    rows.RowSpacing(4);
+    int row = 0;
+    for (const auto& entry : section.entries) {
+      rows.RowDefinitions().Append(RowDefinition());
+      TextBlock k, a;
+      k.Text(wide(entry.keys));
+      k.TextWrapping(TextWrapping::Wrap);
+      k.Opacity(0.7);
+      a.Text(wide(entry.action));
+      a.TextWrapping(TextWrapping::Wrap);
+      Grid::SetRow(k, row);
+      Grid::SetRow(a, row);
+      Grid::SetColumn(a, 1);
+      rows.Children().Append(k);
+      rows.Children().Append(a);
+      ++row;
+    }
+    sections.Children().Append(rows);
+  }
+  ScrollViewer scroll;
+  scroll.Content(sections);
+  scroll.MaxHeight(520);
+  ContentDialog dialog;
+  dialog.XamlRoot(root_.XamlRoot());
+  dialog.Title(winrt::box_value(L"Mouse and Keyboard"));
+  dialog.Content(scroll);
+  dialog.CloseButtonText(L"Close");
+  dialog.DefaultButton(ContentDialogButton::Close);
+  try {
+    co_await dialog.ShowAsync();
+  } catch (const winrt::hresult_error&) {
+  }
+  if (alive.expired()) co_return;  // the window closed while the dialog was open
+  asking_ = false;
 }
 
 winrt::fire_and_forget DocumentWindow::ask_name(winrt::hstring title, winrt::hstring header, winrt::hstring verb,
@@ -1021,6 +1146,20 @@ std::string DocumentWindow::run_script(const std::string& script) {
       remove_view();
     } else if (cmd == "clear-canvas") {
       clear_canvas();
+    } else if (cmd == "indent" && w.size() > 1) {
+      // indent <size>: chooses Indent Size for this run (the settings file stays as it is)
+      keep_indent_ = true;
+      set_indent_size(std::stoi(w[1]), false);
+    } else if (cmd == "format") {
+      format_text();
+    } else if (cmd == "fold" && w.size() > 1) {
+      // fold <line>: clicks the fold marker on that line (1-based), folding or unfolding its block
+      ok = folds_.toggle(std::stoi(w[1]) - 1);
+    } else if (cmd == "folds") {
+      // folds: logs the lines with a fold marker, the folded ones marked with *
+      log << "folds:";
+      for (const auto& m : folds_.markers()) log << " " << m.line + 1 << (m.folded ? "*" : "");
+      log << "\n";
     } else if (cmd == "views") {
       // views: logs the views, the one on the canvas marked with *
       log << "views:";

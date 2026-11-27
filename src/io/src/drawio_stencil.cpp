@@ -108,19 +108,22 @@ Drawn stencil_to_svg(const XmlNode& shape) {
     if (!c || c->empty() || *c == "default") return std::string(fallback);
     return *c == "none" ? std::string("none") : *c;
   };
+  // The stencil's own values (colours, dash pattern, join, cap) are escaped: the drawing becomes a
+  // library shape that hosts put into a page.
   auto paint = [&](bool fill, bool stroke) {
     if (d.empty()) return;
     std::string attrs = "d=\"" + std::string(js_trim(d)) + "\"";
-    attrs += " fill=\"" + (fill ? state.fill : std::string("none")) + "\"";
+    attrs += " fill=\"" + (fill ? escape_xml(state.fill) : std::string("none")) + "\"";
     if (fill && state.fill != "none" && state.alpha * state.fill_alpha < 1)
       attrs += " fill-opacity=\"" + n(state.alpha * state.fill_alpha) + "\"";
     if (stroke && state.stroke != "none") {
-      attrs += " stroke=\"" + state.stroke + "\" stroke-width=\"" + n(state.stroke_width) + "\"";
+      attrs += " stroke=\"" + escape_xml(state.stroke) + "\" stroke-width=\"" + n(state.stroke_width) + "\"";
       if (state.alpha * state.stroke_alpha < 1)
         attrs += " stroke-opacity=\"" + n(state.alpha * state.stroke_alpha) + "\"";
-      if (state.dashed) attrs += " stroke-dasharray=\"" + state.dash.value_or("3 3") + "\"";
-      if (state.join) attrs += " stroke-linejoin=\"" + *state.join + "\"";
-      if (state.cap) attrs += " stroke-linecap=\"" + (*state.cap == "flat" ? std::string("butt") : *state.cap) + "\"";
+      if (state.dashed) attrs += " stroke-dasharray=\"" + escape_xml(state.dash.value_or("3 3")) + "\"";
+      if (state.join) attrs += " stroke-linejoin=\"" + escape_xml(*state.join) + "\"";
+      if (state.cap)
+        attrs += " stroke-linecap=\"" + (*state.cap == "flat" ? std::string("butt") : escape_xml(*state.cap)) + "\"";
       if (state.miter && !std::isnan(*state.miter) && *state.miter != 0)
         attrs += " stroke-miterlimit=\"" + js_number_string(*state.miter) + "\"";
     } else {
@@ -272,7 +275,7 @@ std::unique_ptr<XmlNode> decode_stencil_binary(std::string_view base64) {
   auto bytes = base64_decode(base64);
   if (!bytes) throw std::runtime_error("bad base64");
   auto inflated = inflate_raw(*bytes);
-  if (!inflated) throw std::runtime_error("cannot inflate");
+  if (!inflated) throw std::runtime_error(inflated.error().message);
   const std::string& data = *inflated;
   auto u8 = [&](std::size_t i) -> unsigned {
     if (i >= data.size()) throw std::runtime_error("truncated");
@@ -387,8 +390,8 @@ std::vector<StencilSet> read_stencil_sets(std::string_view text, std::string_vie
     try {
       auto doc = decode_stencil_binary(data);
       sets.push_back(convert_document(*doc, name));
-    } catch (const std::exception&) {
-      sets.push_back({name, name, {}, {{name, "cannot inflate"}}});
+    } catch (const std::exception& e) {
+      sets.push_back({name, name, {}, {{name, std::string("cannot inflate: ") + e.what()}}});
     }
   }
   return sets;

@@ -11,17 +11,10 @@
 
 namespace dd::host {
 
+using detail::take;
 using detail::trim_ascii;
 
 namespace {
-
-/// The next field of `line` up to `sep` (the rest when there is none), taken off `line`.
-std::string_view take(std::string_view& line, char sep) {
-  auto end = line.find(sep);
-  std::string_view field = line.substr(0, end);
-  line = end == std::string_view::npos ? std::string_view() : line.substr(end + 1);
-  return field;
-}
 
 constexpr std::size_t kFields = 5;  // name, version, licence, address, apps
 

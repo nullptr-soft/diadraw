@@ -111,6 +111,41 @@ TEST(LanguageServer, AnswersAndPublishesThroughItsCallback) {
   EXPECT_EQ(server.exit_code(), 0);
 }
 
+TEST(LanguageServer, FormatsWithTheEditorsTabSize) {
+  std::vector<Json> sent;
+  lsp::Server server([&](const Json& m) { sent.push_back(m); });
+  server.handle(message(R"({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}})"));
+  EXPECT_TRUE(sent.back().get("result")->get("capabilities")->get("documentFormattingProvider")->as_bool());
+  server.handle(message(
+      R"({"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"untitled:f","version":1,"text":"model {\n// \"Ä\"\na = process\n}\n"}}})"));
+  server.handle(message(
+      R"({"jsonrpc":"2.0","id":2,"method":"textDocument/formatting","params":{"textDocument":{"uri":"untitled:f"},"options":{"tabSize":4,"insertSpaces":true}}})"));
+  const auto& edits = sent.back().get("result")->as_array();
+  ASSERT_EQ(edits.size(), 1u);
+  EXPECT_EQ(edits[0].get("newText")->as_string(), "model {\n    // \"Ä\"\n    a = process\n}\n");
+  EXPECT_EQ(edits[0].get("range")->get("end")->get("line")->as_number(), 4);
+
+  // Formatted already: no edits. A size out of range is clamped.
+  server.handle(message(
+      R"({"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"untitled:f","version":2},"contentChanges":[{"text":"model {\n        a = process\n}\n"}]}})"));
+  server.handle(message(
+      R"({"jsonrpc":"2.0","id":3,"method":"textDocument/formatting","params":{"textDocument":{"uri":"untitled:f"},"options":{"tabSize":1e300}}})"));
+  EXPECT_TRUE(sent.back().get("result")->as_array().empty());
+}
+
+TEST(LanguageServer, FoldsBlocks) {
+  std::vector<Json> sent;
+  lsp::Server server([&](const Json& m) { sent.push_back(m); });
+  server.handle(message(R"({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}})"));
+  EXPECT_TRUE(sent[0].get("result")->get("capabilities")->get("foldingRangeProvider")->as_bool());
+  server.handle(message(
+      R"({"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"untitled:a","version":1,"text":"model {\n  s = system {\n    a = process\n  }\n}\nview v {\n  include *\n}\n"}}})"));
+  server.handle(message(
+      R"({"jsonrpc":"2.0","id":2,"method":"textDocument/foldingRange","params":{"textDocument":{"uri":"untitled:a"}}})"));
+  EXPECT_EQ(sent.back().get("result")->dump(),
+            R"([{"startLine":0,"endLine":3},{"startLine":1,"endLine":2},{"startLine":5,"endLine":6}])");
+}
+
 TEST(LanguageServer, ReadsLibrariesNextToTheDocument) {
   auto fs = std::make_shared<FakeFileSystem>();
   fs->vars["DIADRAW_CACHE"] = "/cache";

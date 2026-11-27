@@ -6,6 +6,8 @@
 
 #include "diadraw/base/text.hpp"
 #include "diadraw/diadraw.h"
+#include "diadraw/dsl/format.hpp"
+#include "diadraw/dsl/highlight.hpp"
 #include "diadraw/editor/editor.hpp"
 #include "diadraw/library/builtin.hpp"
 
@@ -218,8 +220,10 @@ void Server::handle(const Json& msg) {
                      {"capabilities",
                       Json(Json::Object{{"textDocumentSync", Json(2)},
                                         {"documentSymbolProvider", Json(true)},
+                                        {"foldingRangeProvider", Json(true)},
                                         {"definitionProvider", Json(true)},
                                         {"hoverProvider", Json(true)},
+                                        {"documentFormattingProvider", Json(true)},
                                         {"renameProvider", Json(Json::Object{{"prepareProvider", Json(true)}})},
                                         {"completionProvider",
                                          Json(Json::Object{{"triggerCharacters", Json(Json::Array{Json("."), Json(" "), Json("=")})}})}})},
@@ -264,6 +268,15 @@ void Server::handle(const Json& msg) {
     if (doc)
       for (const auto& s : lsp::document_symbols(doc->parsed)) out.push_back(symbol_json(doc->text, s));
     respond(*id, Json(std::move(out)));
+  } else if (method == "textDocument/foldingRange") {
+    // The `{` … `}` blocks; the `}` line stays visible, as in the shells and the web app.
+    auto [uri, doc] = doc_of(params);
+    Json::Array out;
+    if (doc)
+      for (const auto& f : dsl::fold_ranges(doc->text))
+        out.push_back(Json(Json::Object{{"startLine", Json(static_cast<double>(f.start_line))},
+                                        {"endLine", Json(static_cast<double>(f.end_line))}}));
+    respond(*id, Json(std::move(out)));
   } else if (method == "textDocument/definition") {
     auto [uri, doc] = doc_of(params);
     std::optional<dsl::Span> span;
@@ -305,6 +318,24 @@ void Server::handle(const Json& msg) {
       for (const auto& e : (*renamed)->update.edits)
         edits.emplace_back(Json::Object{{"range", range_of(doc->text, {e.from, e.to})}, {"newText", Json(e.insert)}});
     respond(*id, Json(Json::Object{{"changes", Json(Json::Object{{uri, Json(std::move(edits))}})}}));
+  } else if (method == "textDocument/formatting") {
+    // Format Document with the editor's indentation (its tab size), as one edit over the whole
+    // text; none when it is formatted already.
+    auto [uri, doc] = doc_of(params);
+    Json::Array edits;
+    if (doc) {
+      const Json* options = params->get("options");
+      const Json* tab_size = options ? options->get("tabSize") : nullptr;
+      int indent = dsl::kDefaultIndentSize;
+      // Clamped as a double first: a huge or NaN size would not convert to int.
+      if (double size = tab_size && tab_size->is_number() ? tab_size->as_number() : 0; size >= dsl::kMinIndentSize)
+        indent = static_cast<int>(std::min(size, static_cast<double>(dsl::kMaxIndentSize)));
+      std::string formatted = dsl::format_source(doc->text, dsl::FormatOptions{indent});
+      if (formatted != doc->text)
+        edits.emplace_back(Json::Object{{"range", range_of(doc->text, {0, static_cast<std::uint32_t>(doc->text.size())})},
+                                        {"newText", Json(std::move(formatted))}});
+    }
+    respond(*id, Json(std::move(edits)));
   } else if (method == "textDocument/completion") {
     auto [uri, doc] = doc_of(params);
     Json::Array items;

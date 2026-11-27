@@ -192,6 +192,10 @@ class Document {
   /// diagram back; nothing when the text is that already. The canvas moves to the empty
   /// diagram's one view on the next refresh().
   Result<std::optional<Change>> clear();
+  /// Format Document: reindents and respaces the text (dsl::format_source) with `indent_size`
+  /// spaces per level, as one change covering what differs; nothing when the text is
+  /// formatted already.
+  Result<std::optional<Change>> format(int indent_size);
   /// What every native shell's Clear Canvas confirmation says, under the question "Clear the
   /// canvas?". The web app has the same words in src/apps/web/src/app.ts.
   static constexpr std::string_view kClearDetail =

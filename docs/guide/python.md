@@ -42,4 +42,4 @@ way the canvas writes its edits back.
 
 The package is built from the repository: `pip install .` in a checkout (it needs CMake and a
 C++20 compiler), or a ready-made wheel from the repository's `Python` workflow. Every function,
-and how to work on the bindings, is in [src/python/README.md](../../src/python/README.md).
+and how to work on the bindings, is in [bindings/python/README.md](../../bindings/python/README.md).

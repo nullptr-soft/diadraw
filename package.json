@@ -6,7 +6,7 @@
   "workspaces": [
     "src/wasm",
     "src/markdown",
-    "src/node",
+    "bindings/node",
     "src/apps/*"
   ],
   "engines": {

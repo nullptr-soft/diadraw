@@ -83,9 +83,11 @@ export interface RawModule {
   loadDrawioIndex(indexJson: string): string;
   readStencilSets(text: string, file: string): string;
   highlight(text: string): string;
+  formatSource(text: string, indentSize: number): string;
   exportDrawio(modelJson: string, pagesJson: string): string;
   exportBpmn(modelJson: string, pagesJson: string): string;
   bpmnFixedPages(modelJson: string): string;
+  foldRanges(text: string): string;
   addLibrary(bundleJson: string): string;
   libraryList(): string;
   libraryPalette(modelJson: string): string;

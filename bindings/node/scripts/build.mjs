@@ -53,7 +53,7 @@ const run = (command, extra = []) =>
 run('configure');
 run('build', ['--target', 'diadraw_node']);
 
-// src/node/CMakeLists.txt puts it in `out/addon` with every generator.
+// bindings/node/CMakeLists.txt puts it in `out/addon` with every generator.
 const built = join(out, 'addon', 'diadraw.node');
 if (!existsSync(built)) {
   console.error(`@diadraw/node: the build finished but ${built} is missing`);

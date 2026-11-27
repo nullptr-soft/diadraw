@@ -21,6 +21,18 @@ using namespace dd;
 
 namespace {
 
+/// The built-in themes in the order `theme_names()` lists them.
+const std::vector<std::string> kBuiltInThemes{
+    "default",  "dark",   "mono",    "ocean",     "forest",   "sunset", "lavender", "sand",     "graphite",
+    "pastel",   "vivid",  "contrast", "blueprint", "midnight", "aurora", "ember",    "terminal"};
+
+/// The built-in themes as the "Unknown theme" warning lists them.
+std::string built_in_list() {
+  std::string out;
+  for (const auto& n : kBuiltInThemes) out += (out.empty() ? "" : ", ") + n;
+  return out;
+}
+
 const char* const kStyled = R"(theme dark
 
 style * {
@@ -76,11 +88,7 @@ std::vector<std::string> messages(const dsl::ParseResult& r) {
   return out;
 }
 
-std::string render(const Model& model, std::string_view view_id) {
-  auto view = dd::test::ok(resolve_view(model, view_id));
-  auto geometry = dd::test::ok(layout(view, create_measure()));
-  return render_svg(view, geometry);
-}
+using dd::test::render;
 
 using dd::test::item_svg;
 
@@ -132,9 +140,9 @@ TEST(Styles, ReportsUnknownThemesAndRepeatedThemes) {
   auto r = dsl::parse("theme neon\ntheme dark\nmodel { a = process }\nview v { include * theme sepia }\n");
   auto m = messages(r);
   ASSERT_EQ(m.size(), 3u);
-  EXPECT_EQ(m[0], "Unknown theme \"neon\" (themes: default, dark, mono)");
+  EXPECT_EQ(m[0], "Unknown theme \"neon\" (themes: " + built_in_list() + ")");
   EXPECT_EQ(m[1], "The theme is already set; the last `theme` wins");
-  EXPECT_EQ(m[2], "Unknown theme \"sepia\" (themes: default, dark, mono)");
+  EXPECT_EQ(m[2], "Unknown theme \"sepia\" (themes: " + built_in_list() + ")");
   EXPECT_EQ(r.diagnostics[0].severity, dsl::Severity::Warning);
   EXPECT_EQ(r.model.theme, "dark");
 }
@@ -473,7 +481,7 @@ view v { include s s.a }
 
 TEST(Styles, OnlyKnownThemesArePickedAndUnknownOnesFallBack) {
   auto names = theme_names();
-  EXPECT_EQ(names, (std::vector<std::string>{"default", "dark", "mono"}));
+  EXPECT_EQ(names, kBuiltInThemes);
   EXPECT_EQ(find_theme("dark")->background, "#0f172a");
   EXPECT_FALSE(find_theme("neon"));
   ResolvedView v;
@@ -481,6 +489,42 @@ TEST(Styles, OnlyKnownThemesArePickedAndUnknownOnesFallBack) {
   EXPECT_EQ(theme_for(v).name, "default");
   v.theme = "mono";
   EXPECT_EQ(theme_for(v).name, "mono");
+}
+
+namespace {
+
+/// WCAG relative luminance of `#rrggbb`.
+double luminance(const std::string& hex) {
+  auto channel = [&](std::size_t at) {
+    double c = std::stoi(hex.substr(at, 2), nullptr, 16) / 255.0;
+    return c <= 0.03928 ? c / 12.92 : std::pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}
+
+/// WCAG contrast ratio of two `#rrggbb` colours.
+double contrast(const std::string& a, const std::string& b) {
+  double la = luminance(a), lb = luminance(b);
+  return (std::max(la, lb) + 0.05) / (std::min(la, lb) + 0.05);
+}
+
+}  // namespace
+
+TEST(Styles, BuiltInThemesKeepTextReadable) {
+  for (const auto& name : theme_names()) {
+    const Theme& t = *find_theme(name);
+    SCOPED_TRACE(name);
+    // The original three keep rendering byte for byte as before; some of `default`'s white
+    // labels (container, external) are below 4.5:1.
+    if (name == "default" || name == "dark" || name == "mono") continue;
+    for (const auto* text : {&t.edge_text, &t.boundary_text, &t.label_text})
+      EXPECT_GE(contrast(*text, t.background), 4.5) << *text << " on " << t.background;
+    // `edge` is also the ink of sequence frame, separator and `ref` labels on the background.
+    EXPECT_GE(contrast(t.edge, t.background), 4.5) << t.edge << " on " << t.background;
+    EXPECT_GE(contrast(t.edge, t.divider_fill), 4.5) << "divider label " << t.edge << " on " << t.divider_fill;
+    for (const auto& [kind, n] : t.nodes) EXPECT_GE(contrast(n.text, n.fill), 4.5) << kind;
+    EXPECT_GE(contrast(t.external.text, t.external.fill), 4.5) << "external";
+  }
 }
 
 TEST(Styles, CompletesThemesSelectorsKeysAndValues) {
@@ -494,7 +538,7 @@ TEST(Styles, CompletesThemesSelectorsKeysAndValues) {
     auto r = dsl::parse(text);
     return labels(lsp::completions(text, at, r, nullptr));
   };
-  EXPECT_EQ(at_end("theme "), (std::vector<std::string>{"default", "dark", "mono"}));
+  EXPECT_EQ(at_end("theme "), kBuiltInThemes);
   auto top = at_end("model { a = process }\n");
   EXPECT_TRUE(contains(top, "style"));
   EXPECT_TRUE(contains(top, "theme"));
@@ -650,13 +694,33 @@ theme x.y
   EXPECT_TRUE(contains(m, "Unknown theme key \"edgeColour\""));
   EXPECT_TRUE(contains(m, "Unknown theme node key \"glow\""));
   EXPECT_TRUE(contains(m, "Theme \"b\" is already declared"));
-  EXPECT_TRUE(contains(m, "Unknown theme \"nowhere\" (themes: default, dark, mono, a, b, c)"));
-  EXPECT_TRUE(contains(m, "Unknown theme \"x.y\" (themes: default, dark, mono, a, b, c)"));
+  EXPECT_TRUE(contains(m, "Unknown theme \"nowhere\" (themes: " + built_in_list() + ", a, b, c)"));
+  EXPECT_TRUE(contains(m, "Unknown theme \"x.y\" (themes: " + built_in_list() + ", a, b, c)"));
   // A cycle never hangs the renderer: the view falls back to the default theme.
   ResolvedView v;
   v.theme = "a";
   v.themes = r.model.themes;
   EXPECT_EQ(theme_for(v).name, "default");
+}
+
+TEST(Themes, ALibraryThemeExtendsItsOwnThemeOverABuiltInOfTheSameName) {
+  // Written before `ocean` was built in: its `deep` must keep extending the library's own `ocean`.
+  auto bundle = Json::parse(R"({"format":"diadraw-library","formatVersion":1,"name":"sea","version":"1.0.0",
+    "license":"MIT","themes":{
+      "ocean":{"edge":"#010203"},
+      "deep":{"extends":"ocean","background":"#000000"},
+      "dark":{"extends":"dark","edge":"#040506"},
+      "night":{"extends":"midnight"},
+      "dusk":{"extends":"dark"}}})");
+  library::LibrarySet lib({{{"sea", "^1", "sea"}, std::make_shared<const Json>(*bundle)}});
+  EXPECT_EQ(lib.theme("sea.deep")->base, "sea.ocean");
+  EXPECT_EQ(lib.theme("sea.dark")->base, "dark");  // its own name: the built-in, not a cycle
+  EXPECT_EQ(lib.theme("sea.night")->base, "midnight");
+  EXPECT_EQ(lib.theme("sea.dusk")->base, "sea.dark");  // the library's own `dark`, then the built-in
+  auto t = resolve_theme("sea.deep", {}, lib.theme_resolver());
+  ASSERT_TRUE(t);
+  EXPECT_EQ(t->edge, "#010203");
+  EXPECT_EQ(t->background, "#000000");
 }
 
 TEST(Themes, ComeFromLibraries) {

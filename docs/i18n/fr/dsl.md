@@ -75,7 +75,7 @@ view checkout of shop {
 }
 ```
 
-- Thèmes : `default`, `dark` (fond sombre) et `mono` (noir sur blanc, remplissages gris, pour l’impression). Le `theme` d’une vue prime sur celui du document ; un nom inconnu produit un avertissement et utilise `default` pour le rendu. Sans instruction `theme`, toutes les vues utilisent `default`, exactement comme auparavant.
+- Thèmes : `default`, `dark` (fond sombre) et `mono` (noir sur blanc, remplissages gris, pour l’impression), les thèmes clairs `ocean`, `forest`, `sunset`, `lavender`, `sand`, `graphite`, `pastel`, `vivid`, `contrast` (noir sur blanc avec un texte plus grand, pour l’accessibilité) et les thèmes sombres `blueprint`, `midnight`, `aurora`, `ember` et `terminal`. Le `theme` d’une vue prime sur celui du document ; un nom inconnu produit un avertissement et utilise `default` pour le rendu. Sans instruction `theme`, toutes les vues utilisent `default`, exactement comme auparavant.
 - Sélecteurs : `*` (tous les éléments), un type (`container`), `tag "…"`, un type et une étiquette (`container tag "legacy"`), `relationship` et `relationship tag "…"`. Dans un sélecteur, `relationship` et `tag` sont des mots-clés ; on ne peut donc pas sélectionner un type qui porterait l’un de ces deux noms.
 - Chaque ligne d’un bloc a la forme `key value`. Les clés sont celles du style local `style "…"` (voir ci-dessus ; les clés inconnues sont conservées). La valeur est une chaîne, un nombre ou un mot ; `true` et `false` sont enregistrés sous la forme `1` et `0`, comme dans draw.io.
 - Par priorité croissante : le thème, les blocs `*`, les blocs de type, les blocs d’étiquette, les blocs combinant type et étiquette (à priorité égale, le dernier l’emporte), puis le `style "…"` local de l’objet.

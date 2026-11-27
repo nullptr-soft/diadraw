@@ -26,10 +26,28 @@ describe('@diadraw/wasm', () => {
     expect(dd.print(dd.parse(printed).model)).toBe(printed);
   });
 
+  it('formats text with an indent size, keeping comments', () => {
+    const source = 'model {\n// "😀"\na=process\n}\n';
+    expect(dd.formatSource(source)).toBe('model {\n  // "😀"\n  a = process\n}\n');
+    expect(dd.formatSource(source, { indentSize: 4 })).toBe(
+      'model {\n    // "😀"\n    a = process\n}\n',
+    );
+  });
+
   it('reports syntax errors with UTF-16 lines and columns', () => {
     const { diagnostics } = dd.parse('model {\n  ö = process "😀" ]\n}\n');
     expect(diagnostics.length).toBeGreaterThan(0);
     expect(diagnostics[0]).toMatchObject({ severity: 'error', line: 2 });
+  });
+
+  it('finds foldable blocks, in UTF-16 offsets', () => {
+    const source = 'model {\n  s = system "😀" {\n    a = process\n  }\n}\n';
+    const folds = dd.foldRanges(source);
+    expect(folds.map((f) => [f.startLine, f.endLine])).toEqual([
+      [0, 3],
+      [1, 2],
+    ]);
+    expect(source.slice(folds[1]!.from, folds[1]!.to)).toBe('\n    a = process');
   });
 
   it('patches text minimally, in UTF-16 offsets', () => {

@@ -1120,4 +1120,25 @@ class Parser {
 
 Tree parse_syntax(std::string_view source) { return Parser(source).run(); }
 
+Lexed lex_source(std::string_view source) {
+  Lexed out;
+  std::vector<Token> tokens;
+  lex(source, tokens, out.comments, out.unclosed_block_string);
+  out.tokens.reserve(tokens.size());
+  for (const Token& t : tokens) {
+    using K = Lexeme::Kind;
+    K kind = K::Invalid;
+    switch (t.kind) {
+      case Tok::Ident: kind = K::Identifier; break;
+      case Tok::String: kind = K::String; break;
+      case Tok::Number: kind = K::Number; break;
+      case Tok::Punct: kind = K::Punct; break;
+      case Tok::Invalid: kind = K::Invalid; break;
+      case Tok::End: continue;
+    }
+    out.tokens.push_back({kind, t.from, t.to});
+  }
+  return out;
+}
+
 }  // namespace dd::dsl

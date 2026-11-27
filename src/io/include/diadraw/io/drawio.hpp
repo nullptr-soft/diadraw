@@ -11,6 +11,7 @@
 
 #include "diadraw/base/json.hpp"
 #include "diadraw/io/builder.hpp"
+#include "diadraw/io/codec.hpp"
 #include "diadraw/layout/types.hpp"
 
 namespace dd::io {
@@ -34,6 +35,10 @@ struct DrawioOptions {
   bool keep_geometry = true;
   /// Draw stencils with the artwork of the `drawio-*` libraries, when an index is given.
   const DrawioIndex* stencils = nullptr;
+  /// The most bytes one import may decompress: the file itself (`.drawio.svg`, `.drawio.png`)
+  /// and its compressed pages together. Pages past it are dropped with a message; a file that
+  /// passes it alone imports nothing and says why.
+  std::size_t max_inflated = kMaxInflatedSize;
 };
 
 /// The draw.io XML in a file of any supported form (plain, compressed, `.drawio.svg`,
@@ -41,11 +46,18 @@ struct DrawioOptions {
 struct DrawioFile {
   std::optional<std::string> xml;
   std::optional<std::string> problem;
+  /// Bytes decompressed to get `xml` (0 for a plain file), which count against the import's
+  /// budget (`DrawioOptions::max_inflated`).
+  std::size_t inflated = 0;
 };
-DrawioFile read_drawio_file(std::string_view bytes);
+/// `limit` caps what a `.drawio.svg` or `.drawio.png` may decompress to.
+DrawioFile read_drawio_file(std::string_view bytes, std::size_t limit = kMaxInflatedSize);
 
-/// A compressed page: base64 of raw deflate of the URI-encoded XML. nullopt when it is not one.
-std::optional<std::string> inflate_page(std::string_view text);
+/// A compressed page: base64 of raw deflate of the URI-encoded XML. An error when it is not one,
+/// or when it decompresses to more than `limit` bytes (see `is_too_large`). `inflated`, when
+/// given, receives the decompressed size before URI decoding (written only on success).
+Result<std::string> inflate_page(std::string_view text, std::size_t limit = kMaxInflatedSize,
+                                 std::size_t* inflated = nullptr);
 
 /// HTML labels to text: line breaks and blocks become newlines, tags go, entities decode.
 std::string html_to_text(std::string_view html);

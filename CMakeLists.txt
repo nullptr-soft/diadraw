@@ -25,9 +25,10 @@ endif()
 option(DIADRAW_BUILD_GTK "Build the gtkmm app (apps/gtk); needs gtkmm-4.0" ${DIADRAW_GTK_DEFAULT})
 option(DIADRAW_BUILD_WINUI "Build the WinUI 3 app (apps/winui); Windows and MSVC only" OFF)
 option(DIADRAW_SANITIZE "Build with address and undefined-behaviour sanitizers" OFF)
-option(DIADRAW_BUILD_PYTHON "Build the Python extension module (src/python); needs nanobind" OFF)
-# The Node.js addon (src/node); configured by cmake-js through `npm run build -w @diadraw/node`.
-option(DIADRAW_BUILD_NODE "Build the Node.js addon (src/node); needs cmake-js" OFF)
+# The Python extension module (bindings/python); built by scikit-build-core from pyproject.toml.
+option(DIADRAW_BUILD_PYTHON "Build the Python extension module; needs nanobind" OFF)
+# The Node.js addon (bindings/node); configured by cmake-js: `npm run build -w @diadraw/node`.
+option(DIADRAW_BUILD_NODE "Build the Node.js addon; needs cmake-js" OFF)
 if(DIADRAW_BUILD_PYTHON OR DIADRAW_BUILD_NODE)
   # The static libraries end up inside a shared extension module or addon.
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -136,8 +137,10 @@ if(DIADRAW_BUILD_TESTS)
     src/base/tests/text_test.cpp
     src/base/tests/ordered_map_test.cpp
     src/dsl/tests/highlight_test.cpp
+    src/dsl/tests/format_test.cpp
     src/canvas/tests/canvas_test.cpp
     src/library/tests/library_test.cpp
+    src/library/tests/svg_sanitize_test.cpp
     src/export/tests/export_test.cpp
     src/model/tests/operations_test.cpp
     src/model/tests/history_test.cpp
@@ -161,6 +164,7 @@ if(DIADRAW_BUILD_TESTS)
     src/dsl/tests/relationship_update_test.cpp
     src/dsl/tests/reconnect_test.cpp
     src/dsl/tests/rename_element_test.cpp
+    src/render/tests/svg_escape_test.cpp
   )
   target_link_libraries(diadraw_tests PRIVATE diadraw diadraw_capi diadraw_export GTest::gtest_main diadraw_warnings
                         miniz_inflate)
@@ -171,6 +175,16 @@ if(DIADRAW_BUILD_TESTS)
 endif()
 
 add_subdirectory(src)
+
+# ── Language bindings (bindings/) ───────────────────────────────────────────────────────────────
+# The Rust crates in bindings/rust build the C ABI with Cargo and have no CMake targets here.
+if(DIADRAW_BUILD_NODE AND NOT EMSCRIPTEN)
+  add_subdirectory(bindings/node "${CMAKE_BINARY_DIR}/node")
+endif()
+
+if(DIADRAW_BUILD_PYTHON AND NOT EMSCRIPTEN)
+  add_subdirectory(bindings/python "${CMAKE_BINARY_DIR}/python")
+endif()
 
 # ── Packages (CPack) ─────────────────────────────────────────────────────────────────────────────
 if(NOT EMSCRIPTEN AND (DIADRAW_BUILD_MACOS OR DIADRAW_BUILD_GTK OR DIADRAW_BUILD_WINUI))

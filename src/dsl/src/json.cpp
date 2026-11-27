@@ -148,4 +148,15 @@ Json highlight_json(std::string_view text) {
   return Json(std::move(tokens));
 }
 
+Json fold_ranges_json(std::string_view text) {
+  Utf16 u(text);
+  Json::Array out;
+  for (const auto& f : fold_ranges(text))
+    out.push_back(Json(Json::Object{{"from", Json(u(f.from))},
+                                    {"to", Json(u(f.to))},
+                                    {"startLine", Json(static_cast<double>(f.start_line))},
+                                    {"endLine", Json(static_cast<double>(f.end_line))}}));
+  return Json(std::move(out));
+}
+
 }  // namespace dd::dsl

@@ -1,0 +1,22 @@
+ok   type    note   =   process "Typed"     // typed, untidy
+ok   indent 4
+ok   format
+ok   undo
+ok   format
+ok   caret 1 1
+--- text
+// a comment that must survive
+model {
+    user = person "Customer"
+    shop = system "Shop"
+    db = database "Orders"
+    user -> shop "browses"
+}
+
+view main {
+    include *
+    layout layered direction down
+}
+note = process "Typed" // typed, untidy
+--- status
+1 error(s), first on line 13: Unexpected "note". The diagram shows what could be read.

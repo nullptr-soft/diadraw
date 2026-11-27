@@ -1,0 +1,14 @@
+# Code folding in the text pane: a fold marker on every block that spans lines (here the model
+# and the view). Folding hides the lines between the braces; an edit elsewhere keeps the fold, and
+# the caret moving into a folded block (selecting from the canvas) unfolds it.
+folds
+fold 2
+fold 9
+folds
+type // more
+folds
+select db
+folds
+fold 9
+fold 3
+folds

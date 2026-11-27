@@ -31,7 +31,7 @@
 - (void)showFields:(const std::optional<dd::host::ElementFields>&)fields;
 /// What the pickers offer (dd::host::Document::choices); set before showing fields.
 - (void)setChoices:(const dd::host::FieldChoices&)choices;
-/// The same for a relationship.
+/// The same for a relationship. Either call replaces what the other showed.
 - (void)showRelationshipFields:(const std::optional<dd::host::RelationshipFields>&)fields;
 /// For scripted tests: types `value` into the field `key` of the panel shown (an element's id,
 /// kind, name, technology, shape, tags, description, style, props; a relationship's label, technology,

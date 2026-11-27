@@ -2,7 +2,7 @@
  * DiaDraw C ABI.
  *
  * The stable entry point for native shells and language bindings (Swift, C#, Kotlin through JNI,
- * Rust: src/rust). Rules:
+ * Rust: bindings/rust). Rules:
  *   - Handles are opaque. Every `dd_*_new` has a matching `dd_*_free`.
  *   - Strings are UTF-8. Strings the library returns are owned by the caller and released with
  *     `dd_string_free`.

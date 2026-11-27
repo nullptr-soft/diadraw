@@ -229,4 +229,55 @@ std::vector<Token> highlight(std::string_view text) {
   return out;
 }
 
+std::vector<FoldRange> fold_ranges(std::string_view text) {
+  // Where each line starts and where its text ends (at its line break), so a brace's line is a
+  // binary search away. Lines end at \n, \r\n or \r, as in `highlight`.
+  std::vector<std::uint32_t> starts{0}, ends;
+  for (std::size_t i = text.find_first_of("\r\n"); i != std::string_view::npos; i = text.find_first_of("\r\n", i)) {
+    ends.push_back(static_cast<std::uint32_t>(i));
+    i += text.substr(i, 2) == "\r\n" ? 2 : 1;
+    starts.push_back(static_cast<std::uint32_t>(i));
+  }
+  ends.push_back(static_cast<std::uint32_t>(text.size()));
+  auto line_of = [&](std::uint32_t offset) {
+    return static_cast<std::uint32_t>(std::upper_bound(starts.begin(), starts.end(), offset) - starts.begin() - 1);
+  };
+
+  std::vector<FoldRange> out;
+  std::vector<std::uint32_t> open;  // offsets of the `{`s not yet closed
+  for (const auto& t : highlight(text)) {
+    if (t.kind != TokenKind::Bracket) continue;
+    // One token is a run of adjacent braces, like `{}` or `}}`.
+    for (std::uint32_t i = t.from; i < t.to; ++i) {
+      if (text[i] == '{') {
+        open.push_back(i);
+        continue;
+      }
+      if (open.empty()) continue;  // a stray `}`
+      std::uint32_t o = open.back();
+      open.pop_back();
+      std::uint32_t start = line_of(o), close_line = line_of(i);
+      if (close_line < start + 2) continue;  // nothing between the `{` line and the `}` line
+      std::uint32_t end = close_line - 1;
+      out.push_back({.open = o,
+                     .close = i,
+                     .start_line = start,
+                     .end_line = end,
+                     .line = starts[start],
+                     .from = ends[start],
+                     .to = ends[end],
+                     .first = starts[start + 1],
+                     .last = starts[close_line]});
+    }
+  }
+  // Outer blocks close after inner ones; keep the outermost per start line.
+  std::sort(out.begin(), out.end(), [](const FoldRange& a, const FoldRange& b) {
+    return a.start_line != b.start_line ? a.start_line < b.start_line : a.close > b.close;
+  });
+  out.erase(std::unique(out.begin(), out.end(),
+                        [](const FoldRange& a, const FoldRange& b) { return a.start_line == b.start_line; }),
+            out.end());
+  return out;
+}
+
 }  // namespace dd::dsl

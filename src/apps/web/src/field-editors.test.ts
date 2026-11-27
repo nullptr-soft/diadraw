@@ -58,7 +58,26 @@ describe('field choices', () => {
     expect(c.shapes.some((s) => s.value === 'aws.x')).toBe(false);
     expect(c.tags).toEqual(['async', 'external', 'legacy']);
     expect(c.technologies).toEqual(['AMQP', 'React']);
-    expect(c.themes.map((t) => t.value)).toEqual(['default', 'dark', 'mono', 'brand']);
+    expect(c.themes.map((t) => t.value)).toEqual([
+      'default',
+      'dark',
+      'mono',
+      'ocean',
+      'forest',
+      'sunset',
+      'lavender',
+      'sand',
+      'graphite',
+      'pastel',
+      'vivid',
+      'contrast',
+      'blueprint',
+      'midnight',
+      'aurora',
+      'ember',
+      'terminal',
+      'brand',
+    ]);
     expect(c.themes.at(-1)!.group).toBe('Declared');
   });
 

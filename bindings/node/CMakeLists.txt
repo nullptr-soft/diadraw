@@ -1,4 +1,4 @@
-# The Node.js addon (`@diadraw/node`), built by cmake-js from src/node/scripts/build.mjs, which
+# The Node.js addon (`@diadraw/node`), built by cmake-js from bindings/node/scripts/build.mjs, which
 # configures the repository root with DIADRAW_BUILD_NODE=ON. cmake-js supplies Node's headers
 # (CMAKE_JS_INC), the Windows delay-load hook (CMAKE_JS_SRC) and node.lib (CMAKE_JS_LIB); the
 # build script passes node-addon-api's include directory as NODE_ADDON_API_DIR.

@@ -75,7 +75,7 @@ view checkout of shop {
 }
 ```
 
-- Designs: `default`, `dark` (dunkler Hintergrund) und `mono` (Schwarz auf Weiß mit grauen Füllungen für den Druck). Das `theme` einer Ansicht hat Vorrang vor dem des Dokuments. Bei unbekanntem Namen erscheint eine Warnung und die Ansicht wird mit `default` gezeichnet. Ohne `theme`-Anweisung verwendet jede Ansicht wie bisher `default`.
+- Designs: `default`, `dark` (dunkler Hintergrund) und `mono` (Schwarz auf Weiß mit grauen Füllungen für den Druck), die hellen `ocean`, `forest`, `sunset`, `lavender`, `sand`, `graphite`, `pastel`, `vivid`, `contrast` (Schwarz auf Weiß mit größerer Schrift, für Barrierefreiheit) und die dunklen `blueprint`, `midnight`, `aurora`, `ember` und `terminal`. Das `theme` einer Ansicht hat Vorrang vor dem des Dokuments. Bei unbekanntem Namen erscheint eine Warnung und die Ansicht wird mit `default` gezeichnet. Ohne `theme`-Anweisung verwendet jede Ansicht wie bisher `default`.
 - Selektoren: `*` (alle Elemente), eine Art (`container`), `tag "…"`, Art und Tag (`container tag "legacy"`), `relationship` und `relationship tag "…"`. Im Selektor sind `relationship` und `tag` Schlüsselwörter. Für gleichnamige Arten gibt es deshalb keinen Selektor.
 - Jede Blockzeile hat die Form `key value`. Die Schlüssel entsprechen denen des Inline-Stils `style "…"` (siehe oben; unbekannte Schlüssel bleiben erhalten). Ein Wert ist eine Zeichenkette, eine Zahl oder ein Wort. `true` und `false` werden wie bei draw.io als `1` und `0` gespeichert.
 - Rangfolge, beginnend mit der niedrigsten Priorität: Design, `*`-Blöcke, Art-Blöcke, Tag-Blöcke, kombinierte Art-und-Tag-Blöcke (innerhalb einer Stufe gewinnt der spätere Block), schließlich der eigene Inline-Stil `style "…"` des Objekts.

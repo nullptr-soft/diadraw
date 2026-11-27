@@ -345,10 +345,10 @@ NSString* describe_time(std::int64_t ms) {
   const File* chosen = [self chosen];
   if (!chosen || _busy) return;
   const Provider provider = _provider;
-  const std::string id = chosen->id;
+  const std::string file_id = chosen->id;
   auto contents = std::make_shared<dd::Result<std::optional<cloud::Contents>>>(dd::fail(""));
   __weak DDCloudPanel* weak = self;
-  std::function<void()> work = [provider, id, contents] { *contents = cloud::drive(provider).read(id); };
+  std::function<void()> work = [provider, file_id, contents] { *contents = cloud::drive(provider).read(file_id); };
   std::function<void()> done = [weak, provider, contents] {
     DDCloudPanel* panel = weak;
     if (!panel) return;

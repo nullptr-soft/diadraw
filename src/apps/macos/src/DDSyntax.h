@@ -18,6 +18,9 @@ struct DDMark {
   NSString* message;
 };
 
+/// The UTF-16 offset (what the text view counts) of every UTF-8 byte offset of `text`, and of its end.
+std::vector<NSUInteger> DDUtf16Map(const std::string& text);
+
 /// Recolours all of `view`'s text from its current contents.
 void DDColourSyntax(NSTextView* view);
 

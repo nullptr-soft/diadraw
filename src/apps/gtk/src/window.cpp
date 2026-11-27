@@ -7,6 +7,7 @@
 
 #include "diadraw/dsl/highlight.hpp"
 #include "host/examples.hpp"
+#include "host/settings.hpp"
 
 namespace dd::gtk {
 
@@ -148,7 +149,19 @@ void DocumentWindow::build() {
   edit->append("Actual Size", "win.zoom-actual");
   edit->append("Show Grid", "win.grid");
   menu->append_section(edit);
+  // The text: Format Document and its one setting.
+  auto text_menu = Gio::Menu::create();
+  text_menu->append("Format Document", "win.format");
+  auto indent_sizes = Gio::Menu::create();
+  for (int size : dd::host::kIndentSizes) {
+    auto entry = Gio::MenuItem::create(std::to_string(size), "");
+    entry->set_action_and_target("win.indent-size", Glib::Variant<int>::create(size));
+    indent_sizes->append_item(entry);
+  }
+  text_menu->append_submenu("Indent Size", indent_sizes);
+  menu->append_section(text_menu);
   auto help = Gio::Menu::create();
+  help->append("Mouse and Keyboard", "app.help");
   help->append("Report a Bug…", "app.report-bug");
   help->append("Give Feedback…", "app.send-feedback");
   menu->append_section(help);
@@ -161,6 +174,8 @@ void DocumentWindow::build() {
   auto menu_button = Gtk::make_managed<Gtk::MenuButton>();
   menu_button->set_icon_name("open-menu-symbolic");
   menu_button->set_menu_model(menu);
+  // Indent Size is shared by every window: show the size another window may have chosen.
+  if (auto* popover = menu_button->get_popover()) popover->signal_show().connect([this] { sync_indent_size(); });
   header->pack_end(*menu_button);
   // Give Feedback: always in sight and one click away, beside the main menu.
   auto feedback = Gtk::make_managed<Gtk::Button>("Give Feedback");
@@ -168,6 +183,11 @@ void DocumentWindow::build() {
   feedback->set_tooltip_text("Send an idea, a wish or anything that could be easier (opens a form on GitHub)");
   feedback->add_css_class("suggested-action");
   header->pack_end(*feedback);
+  // Help: what the canvas does with the mouse and the keyboard, one click away.
+  auto help_button = Gtk::make_managed<Gtk::Button>("Help");
+  help_button->set_action_name("app.help");
+  help_button->set_tooltip_text("What the canvas does with the mouse and the keyboard");
+  header->pack_end(*help_button);
   // One menu button: choosing a kind adds an element of it.
   auto kinds = Gio::Menu::create();
   for (const auto& k : dd::host::element_kinds()) kinds->append(k, "win.add::" + k);
@@ -210,6 +230,13 @@ void DocumentWindow::build() {
     canvas_.canvas().set_grid(on ? 0 : 10);
     canvas_.redraw();
   });
+  add_action("format", sigc::mem_fun(*this, &DocumentWindow::format_text));
+  // Indent Size: remembered in the settings file for every window and the next run.
+  indent_action_ = add_action_radio_integer("indent-size", [this](int size) {
+    indent_action_->change_state(size);
+    // Kept for this window when the settings file cannot be written.
+    kept_indent_ = dd::host::write_indent_size(size) ? 0 : size;
+  }, dd::host::read_indent_size());
   add_action_with_parameter("add", Glib::VARIANT_TYPE_STRING, [this](const Glib::VariantBase& kind) {
     add_element(Glib::VariantBase::cast_dynamic<Glib::Variant<Glib::ustring>>(kind).get());
   });
@@ -237,6 +264,7 @@ void DocumentWindow::build() {
   text_.set_wrap_mode(Gtk::WrapMode::NONE);
   text_.set_left_margin(8);
   text_.set_top_margin(8);
+  folds_ = std::make_unique<TextFolds>(text_);
   buffer_->signal_changed().connect([this] {
     restyle();
     if (applying_) return;
@@ -598,6 +626,19 @@ void DocumentWindow::clear_canvas() {
   if (timer_.connected()) sync_from_text();  // the change replaces the whole text, typing included
   std::string before = doc_->text();
   apply(doc_->clear(), before);  // the refresh drops the selection, as nothing selected is left
+}
+
+int DocumentWindow::sync_indent_size() {
+  int size = kept_indent_ > 0 ? kept_indent_ : dd::host::read_indent_size();
+  indent_action_->change_state(size);
+  return size;
+}
+
+void DocumentWindow::format_text() {
+  if (timer_.connected()) sync_from_text();  // format what is typed, not what was last read
+  int size = sync_indent_size();
+  std::string before = doc_->text();
+  apply(doc_->format(size), before);
 }
 
 void DocumentWindow::ask_name(const std::string& title, const std::string& prompt, const std::string& verb,
@@ -987,6 +1028,20 @@ std::string DocumentWindow::run_script(const std::string& script) {
       remove_view();
     } else if (cmd == "clear-canvas") {
       clear_canvas();
+    } else if (cmd == "indent" && w.size() > 1) {
+      // indent <size>: chooses Indent Size for this run (the settings file stays as it is)
+      kept_indent_ = std::stoi(w[1]);
+      sync_indent_size();
+    } else if (cmd == "format") {
+      format_text();
+    } else if (cmd == "fold" && w.size() > 1) {
+      // fold <line>: clicks the fold marker on that line (1-based), folding or unfolding its block
+      ok = folds_->toggle(std::stoi(w[1]) - 1);
+    } else if (cmd == "folds") {
+      // folds: logs the lines with a fold marker, the folded ones marked with *
+      log << "folds:";
+      for (const auto& m : folds_->markers()) log << " " << m.line + 1 << (m.folded ? "*" : "");
+      log << "\n";
     } else if (cmd == "views") {
       // views: logs the views, the one on the canvas marked with *
       log << "views:";

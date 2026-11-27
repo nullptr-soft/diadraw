@@ -142,19 +142,19 @@ A library's source folder holds `diadraw-library.json`:
 }
 ```
 
-| Field             | Meaning                                                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`, `version` | npm-style name (lowercase, `-._`, optional `@scope/`), semver version                                                                                                                                    |
-| `license`         | SPDX expression for the drawings; `licenseNotes` for terms beyond it                                                                                                                                     |
-| `source`          | where the drawings come from: `original`, `drawio-stencils`, `plantuml-stdlib`, `svg`, `other`, with `url`, `commit`, `sets`                                                                             |
-| `shapes`          | id (an identifier) → `svg` (file path or inline markup) or `base` (a renderer base shape), `label`, `category`, `kind` for new elements, size, `keywords`, `style`                                       |
-| `composites`      | a shape drawn from `parts`, each a shape of this library (or `dep.shape` of a dependency) placed in the composite's box                                                                                  |
-| `kinds`           | id (an identifier) → element kind: `shape` (a shape or composite of this library, or `dep.shape`) or `base`, `fill`, `stroke`, `fontColor`, `stereotype`, `label`, `description`, `category`, `keywords` |
-| `fragments`       | DiaDraw source (a `.draw` file or inline) that goes inside `model { … }`; `${param}` takes a parameter, `${alias}` the alias the library is used under                                                   |
-| `open`            | accept any shape name, drawn as `base` (for icon sets whose names are not listed)                                                                                                                        |
-| `mappings`        | per format (`plantuml`, `plantuml-include`, `plantuml-local`, `structurizr`, `drawio`, `bpmn`), foreign name → shape id                                                                                  |
-| `themes`          | id → a theme as in `theme … { … }` ([dsl.md](dsl.md#your-own-themes)): `extends` (a built-in, a theme of this library, or `dep.theme`), theme keys, `nodes`                                              |
-| `dependencies`    | libraries composites build on, `name` → range                                                                                                                                                            |
+| Field             | Meaning                                                                                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`, `version` | npm-style name (lowercase, `-._`, optional `@scope/`), semver version                                                                                                                                                                                             |
+| `license`         | SPDX expression for the drawings; `licenseNotes` for terms beyond it                                                                                                                                                                                              |
+| `source`          | where the drawings come from: `original`, `drawio-stencils`, `plantuml-stdlib`, `svg`, `other`, with `url`, `commit`, `sets`                                                                                                                                      |
+| `shapes`          | id (an identifier) → `svg` (file path or inline markup) or `base` (a renderer base shape), `label`, `category`, `kind` for new elements, size, `keywords`, `style`                                                                                                |
+| `composites`      | a shape drawn from `parts`, each a shape of this library (or `dep.shape` of a dependency) placed in the composite's box                                                                                                                                           |
+| `kinds`           | id (an identifier) → element kind: `shape` (a shape or composite of this library, or `dep.shape`) or `base`, `fill`, `stroke`, `fontColor`, `stereotype`, `label`, `description`, `category`, `keywords`                                                          |
+| `fragments`       | DiaDraw source (a `.draw` file or inline) that goes inside `model { … }`; `${param}` takes a parameter, `${alias}` the alias the library is used under                                                                                                            |
+| `open`            | accept any shape name, drawn as `base` (for icon sets whose names are not listed)                                                                                                                                                                                 |
+| `mappings`        | per format (`plantuml`, `plantuml-include`, `plantuml-local`, `structurizr`, `drawio`, `bpmn`), foreign name → shape id                                                                                                                                           |
+| `themes`          | id → a theme as in `theme … { … }` ([dsl.md](dsl.md#your-own-themes)): `extends` (a theme of this library, a built-in, or `dep.theme`; this library's theme wins over a built-in of the same name, except when a theme extends its own name), theme keys, `nodes` |
+| `dependencies`    | libraries composites build on, `name` → range                                                                                                                                                                                                                     |
 
 A shape's or composite's `kind` (the kind of the element the palette adds for it) names one of
 the library's own kinds when it has one by that name, else a built-in kind.
@@ -192,10 +192,19 @@ relationships, views) works as for any element.
 
 Kinds stay qualified in the model (`team.topic`), so a document keeps them when it is printed.
 
-`lib build` reads the SVG files, sanitises them (no scripts, event handlers, foreign objects or
-external references; ids are prefixed per shape so icons on one page do not clash), inlines
-everything into one bundle (`format: "diadraw-library"`, `formatVersion: 1`), and checks that
-every fragment parses. A `.ddlib` is that bundle, gzipped.
+`lib build` reads the SVG files, sanitises them, inlines everything into one bundle
+(`format: "diadraw-library"`, `formatVersion: 1`), and checks that every fragment parses. A
+`.ddlib` is that bundle, gzipped.
+
+Sanitising reads each drawing into an allowlist of SVG elements and attributes (shapes, groups,
+gradients, patterns, clip paths, masks, markers, text and filter primitives) and writes it back in
+one escaped form. Everything else goes: scripts, event handlers, styles (the `style` attribute
+keeps presentation properties only), `foreignObject`, animation, and every URL but same-document
+references (`#id`, `url(#id)`) and PNG, JPEG, GIF or WebP images embedded in an `<image>`; quoted
+CSS strings only in font families. Ids are prefixed per shape so icons on one page do not clash. A
+bundle may come from anyone, so DiaDraw sanitises each drawing again when it draws it, on every
+platform, with its ids prefixed again (`lib-<alias>-<shape>-`), and keeps only plain colours
+(`#rgb` to `#rrggbbaa`, or a name) in a library's `colors`.
 
 ## Licences
 

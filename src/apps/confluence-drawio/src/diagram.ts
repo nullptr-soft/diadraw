@@ -20,6 +20,37 @@ export function readConfig(raw: unknown): MacroConfig {
   return typeof diagram === 'string' && diagram ? { diagram } : {};
 }
 
+/**
+ * The most a stored diagram may decompress to (32 MiB). The configuration is anyone's to write
+ * who can edit the page, and deflate expands about a thousandfold, so without a limit a small
+ * stored value could make the viewer's tab allocate gigabytes.
+ */
+export const MAX_SVG_BYTES = 32 << 20;
+
+/** Reads a stream to its end, failing once it has given more than `limit` bytes. */
+async function readAtMost(stream: ReadableStream<Uint8Array>, limit: number): Promise<Uint8Array> {
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > limit) {
+      await reader.cancel();
+      throw new Error(`the stored diagram is larger than ${limit} bytes`);
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, at);
+    at += chunk.length;
+  }
+  return out;
+}
+
 async function pipe(
   bytes: Uint8Array<ArrayBuffer>,
   stream: GenericTransformStream,
@@ -48,9 +79,15 @@ export async function packSvg(svg: string): Promise<string> {
   return toBase64(await pipe(new TextEncoder().encode(svg), new CompressionStream('deflate-raw')));
 }
 
-/** The SVG from the stored form; throws when it is not one `packSvg` wrote. */
-export async function unpackSvg(packed: string): Promise<string> {
-  const bytes = await pipe(fromBase64(packed), new DecompressionStream('deflate-raw'));
+/**
+ * The SVG from the stored form; throws when it is not one `packSvg` wrote, or when it decompresses
+ * to more than `limit` bytes.
+ */
+export async function unpackSvg(packed: string, limit = MAX_SVG_BYTES): Promise<string> {
+  const stream = new Blob([fromBase64(packed)])
+    .stream()
+    .pipeThrough(new DecompressionStream('deflate-raw'));
+  const bytes = await readAtMost(stream, limit);
   const svg = new TextDecoder().decode(bytes);
   if (!/^\s*(<\?xml[^>]*>\s*)?<svg[\s>]/.test(svg))
     throw new Error('the stored diagram is not an SVG');

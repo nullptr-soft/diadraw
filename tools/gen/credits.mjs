@@ -47,7 +47,7 @@ const WORKSPACES = {
   'src/apps/confluence': ['confluence'],
   'src/apps/confluence-drawio': ['confluence-drawio'],
   'src/markdown': ['markdown'],
-  'src/node': ['node'],
+  'bindings/node': ['node'],
 };
 
 const expand = (apps) => [...new Set(apps.flatMap((a) => ALIASES[a] ?? [a]))];

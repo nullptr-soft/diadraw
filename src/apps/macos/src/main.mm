@@ -5,18 +5,31 @@
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #import "DDDocument.h"
+
+#include <algorithm>
+#include <cmath>
+#include <string>
 #include "host/about.hpp"
+#include "host/canvas_help.hpp"
 #include "host/credits.hpp"
 #include "host/document.hpp"
 #include "host/examples.hpp"
 #include "host/feedback.hpp"
 #include "host/libraries.hpp"
+#include "host/settings.hpp"
 
 
 @interface DDAppDelegate : NSObject <NSApplicationDelegate>
 @end
 
+@interface DDAppDelegate ()
+/// Help › Mouse and Keyboard, kept for the next time.
+@property(nonatomic, strong) NSPanel* helpPanel;
+@end
+
 namespace {
+
+NSString* ns(const std::string& s) { return [NSString stringWithUTF8String:s.c_str()] ?: @""; }
 
 NSMenuItem* item(NSString* title, SEL action, NSString* key, NSEventModifierFlags flags = NSEventModifierFlagCommand) {
   NSMenuItem* i = [[NSMenuItem alloc] initWithTitle:title action:action keyEquivalent:key];
@@ -97,6 +110,19 @@ NSMenu* build_menu() {
   [edit addItem:item(@"Size to Fit Content", @selector(fitToContent:), @"=",
                      NSEventModifierFlagCommand | NSEventModifierFlagOption)];
   [edit addItem:NSMenuItem.separatorItem];
+  // The text: Format Document (⇧⌥F, as in VS Code and the web app) and its one setting.
+  [edit addItem:item(@"Format Document", @selector(formatDocument:), @"f",
+                     NSEventModifierFlagShift | NSEventModifierFlagOption)];
+  NSMenuItem* indentTop = [[NSMenuItem alloc] initWithTitle:@"Indent Size" action:nil keyEquivalent:@""];
+  NSMenu* indents = [[NSMenu alloc] initWithTitle:@"Indent Size"];
+  for (int size : dd::host::kIndentSizes) {
+    NSMenuItem* entry = item([NSString stringWithFormat:@"%d", size], @selector(chooseIndentSize:), @"");
+    entry.tag = size;
+    [indents addItem:entry];
+  }
+  indentTop.submenu = indents;
+  [edit addItem:indentTop];
+  [edit addItem:NSMenuItem.separatorItem];
   [edit addItem:item(@"Find…", @selector(performFindPanelAction:), @"f")];
 
   NSMenu* view = submenu(bar, @"View");
@@ -128,6 +154,9 @@ NSMenu* build_menu() {
   NSApp.windowsMenu = window;
 
   NSMenu* help = submenu(bar, @"Help");
+  // ⌘? is the Mac's key for an app's help.
+  [help addItem:item(@"Mouse and Keyboard", @selector(showCanvasHelp:), @"?")];
+  [help addItem:NSMenuItem.separatorItem];
   [help addItem:item(@"Report a Bug…", @selector(reportBug:), @"")];
   [help addItem:item(@"Give Feedback…", @selector(sendFeedback:), @"")];
   NSApp.helpMenu = help;
@@ -153,7 +182,6 @@ NSMenu* build_menu() {
     NSForegroundColorAttributeName : NSColor.labelColor,
     NSParagraphStyleAttributeName : centered,
   };
-  auto text = [](const std::string& s) { return [NSString stringWithUTF8String:s.c_str()]; };
   auto append = [](NSMutableAttributedString* out, NSString* s, NSDictionary* attributes) {
     [out appendAttributedString:[[NSAttributedString alloc] initWithString:s attributes:attributes]];
   };
@@ -163,16 +191,16 @@ NSMenu* build_menu() {
     append(out, s, attributes);
   };
   NSMutableAttributedString* credits = [[NSMutableAttributedString alloc] init];
-  append(credits, [text(dd::host::kSummary) stringByAppendingString:@"\nFree software under the "], body);
-  link(credits, text(dd::host::kLicense), text(dd::host::kLicenseUrl));
+  append(credits, [ns(dd::host::kSummary) stringByAppendingString:@"\nFree software under the "], body);
+  link(credits, ns(dd::host::kLicense), ns(dd::host::kLicenseUrl));
   append(credits, @".\n\n", body);
   append(credits, @"Open-source software\n", heading);
   for (const auto& credit : dd::host::credits_for("macos")) {
-    link(credits, text(dd::host::credit_label(credit)), text(credit.url));
+    link(credits, ns(dd::host::credit_label(credit)), ns(credit.url));
     append(credits, @"\n", body);
   }
   append(credits, @"\n", body);
-  link(credits, @"Everything DiaDraw uses, and what for", text(dd::host::kCreditsUrl));
+  link(credits, @"Everything DiaDraw uses, and what for", ns(dd::host::kCreditsUrl));
   [NSApp orderFrontStandardAboutPanelWithOptions:@{NSAboutPanelOptionCredits : credits}];
 }
 
@@ -248,6 +276,78 @@ NSMenu* build_menu() {
     [NSPasteboard.generalPasteboard clearContents];
     [NSPasteboard.generalPasteboard setString:url forType:NSPasteboardTypeString];
   }
+}
+
+/// Help › Mouse and Keyboard, and the toolbar's Help button: what the canvas does with the mouse
+/// and the keyboard (host/canvas_help.hpp), a heading and a two-column list per section.
+/// Not showHelp:, which NSApplication implements itself and answers before its delegate.
+- (IBAction)showCanvasHelp:(id)sender {
+  if (!self.helpPanel) {
+    constexpr CGFloat kWidth = 580, kKeys = 230;  // the panel's width and the keys' column
+    NSFont* font = [NSFont systemFontOfSize:NSFont.systemFontSize];
+    NSMutableParagraphStyle* rows = [[NSMutableParagraphStyle alloc] init];
+    rows.tabStops = @[ [[NSTextTab alloc] initWithTextAlignment:NSTextAlignmentLeft location:kKeys options:@{}] ];
+    rows.headIndent = kKeys;  // what a line does wraps under itself, not under the keys
+    rows.paragraphSpacing = 4;
+    NSMutableParagraphStyle* headings = [[NSMutableParagraphStyle alloc] init];
+    headings.paragraphSpacingBefore = 10;
+    headings.paragraphSpacing = 4;
+    NSDictionary* heading = @{
+      NSFontAttributeName : [NSFont boldSystemFontOfSize:NSFont.systemFontSize],
+      NSForegroundColorAttributeName : NSColor.labelColor,
+      NSParagraphStyleAttributeName : headings,
+    };
+    NSDictionary* keys = @{
+      NSFontAttributeName : font,
+      NSForegroundColorAttributeName : NSColor.secondaryLabelColor,
+      NSParagraphStyleAttributeName : rows,
+    };
+    NSDictionary* action = @{
+      NSFontAttributeName : font,
+      NSForegroundColorAttributeName : NSColor.labelColor,
+      NSParagraphStyleAttributeName : rows,
+    };
+    auto append = [](NSMutableAttributedString* out, NSString* s, NSDictionary* attributes) {
+      [out appendAttributedString:[[NSAttributedString alloc] initWithString:s attributes:attributes]];
+    };
+    NSMutableAttributedString* body = [[NSMutableAttributedString alloc] init];
+    for (const auto& section : dd::host::canvas_help(dd::host::HelpKeys::mac)) {
+      append(body, [ns(section.title) stringByAppendingString:@"\n"], heading);
+      for (const auto& entry : section.entries) {
+        append(body, ns(entry.keys), keys);
+        append(body, [@"\t" stringByAppendingString:[ns(entry.action) stringByAppendingString:@"\n"]], action);
+      }
+    }
+    // AppKit's ready-made scrolling text view: it grows with its text and wraps to the width.
+    NSScrollView* scroll = [NSTextView scrollableTextView];
+    NSTextView* view = scroll.documentView;
+    view.editable = NO;
+    view.selectable = YES;
+    view.drawsBackground = NO;
+    view.textContainerInset = NSMakeSize(16, 12);
+    [view.textStorage setAttributedString:body];
+    scroll.drawsBackground = NO;
+    scroll.hasVerticalScroller = YES;
+    // Tall enough for the whole list, measured by the view's own layout at the panel's width;
+    // past 640 points it scrolls.
+    scroll.frame = NSMakeRect(0, 0, kWidth, 640);
+    [view.layoutManager ensureLayoutForTextContainer:view.textContainer];
+    CGFloat used = NSHeight([view.layoutManager usedRectForTextContainer:view.textContainer]) +
+                   2 * view.textContainerInset.height;
+    CGFloat height = std::min<CGFloat>(std::ceil(used), 640);
+    scroll.frame = NSMakeRect(0, 0, kWidth, height);
+    NSPanel* panel = [[NSPanel alloc] initWithContentRect:NSMakeRect(0, 0, kWidth, height)
+                                                styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
+                                                  backing:NSBackingStoreBuffered
+                                                    defer:YES];
+    panel.title = @"Mouse and Keyboard";
+    panel.releasedWhenClosed = NO;
+    panel.hidesOnDeactivate = NO;
+    panel.contentView = scroll;
+    [panel center];
+    self.helpPanel = panel;
+  }
+  [self.helpPanel makeKeyAndOrderFront:sender];
 }
 
 - (IBAction)reportBug:(id)sender {

@@ -5,8 +5,12 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
+#include "diadraw/layout/layout.hpp"
 #include "diadraw/model/operations.hpp"
+#include "diadraw/model/views.hpp"
+#include "diadraw/render/svg.hpp"
 
 namespace dd::test {
 
@@ -39,6 +43,13 @@ inline std::string apply_error(const Model& m, const Operation& op) {
   auto r = apply_operation(m, op);
   if (r.ok()) stop("the operation was expected to fail");
   return r.error().message;
+}
+
+/// One view of a model, laid out with the renderer's measure and rendered as SVG.
+inline std::string render(const Model& model, std::string_view view_id, const RenderOptions& options = {}) {
+  auto view = ok(resolve_view(model, view_id));
+  auto geometry = ok(layout(view, create_measure()));
+  return render_svg(view, geometry, options);
 }
 
 /// The `<g class="cls" data-id="id" …>…` group of one rendered node or edge (turned or not), up

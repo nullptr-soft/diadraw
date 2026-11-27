@@ -9,7 +9,25 @@ import { isName } from './relationship-fields';
 type Style = Readonly<Record<string, string>>;
 
 /** The themes the core draws without a declaration. */
-export const BUILT_IN_THEMES = ['default', 'dark', 'mono'] as const;
+export const BUILT_IN_THEMES = [
+  'default',
+  'dark',
+  'mono',
+  'ocean',
+  'forest',
+  'sunset',
+  'lavender',
+  'sand',
+  'graphite',
+  'pastel',
+  'vivid',
+  'contrast',
+  'blueprint',
+  'midnight',
+  'aurora',
+  'ember',
+  'terminal',
+] as const;
 
 const quote = (text: string): string =>
   `"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;

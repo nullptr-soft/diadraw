@@ -72,6 +72,18 @@ export interface ParseResult {
 
 export type HighlightToken = readonly [from: number, to: number, tag: string];
 
+/**
+ * A block a text pane can fold (`model`, `view`, an element with children, a group, …): `from`
+ * and `to` are the hidden text in UTF-16 offsets, from the end of the `{` line (`startLine`) to
+ * the end of the line before the `}` (`endLine`), so the `}` keeps its line. Lines are 0-based.
+ */
+export interface FoldRange {
+  readonly from: number;
+  readonly to: number;
+  readonly startLine: number;
+  readonly endLine: number;
+}
+
 export interface TextEdit {
   readonly from: number;
   readonly to: number;
@@ -421,10 +433,17 @@ export interface DiaDraw {
    * (`keyword`, `typeName`, `string`, …); text between runs is plain.
    */
   highlight(text: string): readonly HighlightToken[];
+  /**
+   * Format Document: the text reindented with `indentSize` spaces per level (1 to 8, default 2)
+   * and respaced, keeping every token, comment and line break between tokens.
+   */
+  formatSource(text: string, options?: { readonly indentSize?: number }): string;
   /** Applies an operation to source text as a minimal patch. */
   updateSource(source: string, operation: Operation): SourceUpdate;
   /** A standalone SVG document for a view, laid out and rendered by the core. */
   renderSvg(model: Model, viewId: string): string;
+  /** The foldable `{` … `}` blocks of DiaDraw source, one per start line, in order. */
+  foldRanges(text: string): readonly FoldRange[];
   /**
    * An editing session. With `path` (where the file is saved) and a file system from
    * `setFileSystem`, library shapes resolve like the CLI resolves them for that file.
@@ -632,10 +651,12 @@ function wrap(raw: RawModule): DiaDraw {
       return text;
     },
     highlight: (text) => decode<HighlightToken[]>(raw.highlight(text)),
+    formatSource: (text, options = {}) => raw.formatSource(text, options.indentSize ?? 2),
     updateSource: (source, operation) =>
       decode<SourceUpdate>(raw.updateSource(source, JSON.stringify(operation))),
     renderSvg: (model, viewId) =>
       decode<{ svg: string }>(raw.renderView(JSON.stringify(model), viewId)).svg,
+    foldRanges: (text) => decode<FoldRange[]>(raw.foldRanges(text)),
     createSession: (source = '', options = {}) =>
       wrapSession((listener) => new raw.Session(source, options.path ?? '', listener)),
     createLanguageServer: (options = {}) => wrapLanguageServer(raw, options.cwd ?? ''),

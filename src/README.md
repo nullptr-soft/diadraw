@@ -3,13 +3,14 @@
 The platform-independent C++20 core of DiaDraw. It is built five ways from this one CMake tree:
 
 - a native static library with a stable C ABI (`capi/include/diadraw/diadraw.h`) for native shells
-  and language bindings (the Rust crates in `rust/`);
+  and language bindings (the Rust crates in [`bindings/rust`](../bindings/rust/README.md));
 - a WebAssembly module (`diadraw-build/wasm/diadraw.mjs` + `.wasm` + `.d.ts`) for the web app and VS Code;
 - the native `diadraw` command-line tool;
-- a Python extension module (`src/python`, nanobind) for the `diadraw` Python package, built by
-  `pip install .` from the repository root (see [python/README.md](python/README.md));
-- a Node.js addon (`src/node`, `@diadraw/node`), built by cmake-js with `DIADRAW_BUILD_NODE=ON`
-  (see [node/README.md](node/README.md)).
+- a Python extension module (`bindings/python`, nanobind) for the `diadraw` Python package, built
+  by `pip install .` from the repository root (see
+  [bindings/python/README.md](../bindings/python/README.md));
+- a Node.js addon (`bindings/node`, `@diadraw/node`), built by cmake-js with
+  `DIADRAW_BUILD_NODE=ON` (see [bindings/node/README.md](../bindings/node/README.md)).
 
 It began as a port of a TypeScript implementation, checked against it on the corpus module by
 module; the TypeScript engine has since been removed, and every JavaScript host (the web app, the
@@ -212,6 +213,7 @@ src/                   CMake project and presets
   tests/               shared googletest helpers
   tools/               generators, highlighter check and import coverage
 assets/                built-in libraries, draw.io stencil sets and notices
+bindings/              Python (nanobind), Node.js (Node-API) and Rust (C ABI) bindings
 ```
 
 ## Conventions

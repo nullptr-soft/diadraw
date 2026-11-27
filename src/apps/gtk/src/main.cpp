@@ -15,6 +15,7 @@
 
 #include "diadraw/diadraw.h"
 #include "host/about.hpp"
+#include "host/canvas_help.hpp"
 #include "host/credits.hpp"
 #include "host/document.hpp"
 #include "host/examples.hpp"
@@ -97,6 +98,7 @@ class App : public Gtk::Application {
     add_action("report-bug", [this] { open_feedback(dd::host::FeedbackKind::Bug); });
     add_action("send-feedback", [this] { open_feedback(dd::host::FeedbackKind::Feedback); });
     add_action("about", sigc::mem_fun(*this, &App::show_about));
+    add_action("help", sigc::mem_fun(*this, &App::show_help));
     set_accel_for_action("app.new", "<Primary>n");
     set_accel_for_action("app.open", "<Primary>o");
     set_accel_for_action("app.import", "<Primary><Shift>i");
@@ -111,6 +113,8 @@ class App : public Gtk::Application {
     set_accel_for_action("win.zoom-actual", "<Primary>0");
     set_accel_for_action("win.grid", "<Primary>apostrophe");
     set_accel_for_action("win.rename-element", "F2");
+    set_accel_for_action("win.format", "<Shift><Alt>f");
+    set_accel_for_action("app.help", "F1");
   }
 
   void on_activate() override { open_window("", ""); }
@@ -214,6 +218,62 @@ class App : public Gtk::Application {
     about_->present();
   }
 
+  /// Help: what the canvas does with the mouse and the keyboard (host/canvas_help.hpp), a
+  /// heading and a two-column list per section. One dialog, kept for the next time.
+  void show_help() {
+    if (!help_) {
+      help_ = std::make_unique<Gtk::Window>();
+      help_->set_title("Mouse and Keyboard");
+      // One grid for every section, so that the columns line up: a heading across both, then a
+      // row per entry, the keys dimmed beside what they do.
+      auto grid = Gtk::make_managed<Gtk::Grid>();
+      grid->set_margin(18);
+      grid->set_row_spacing(6);
+      grid->set_column_spacing(18);
+      // Ctrl and Alt everywhere. On macOS (a test build with Homebrew's gtkmm4) the canvas still
+      // reads Control, but the menu accelerators (<Primary>) are ⌘ there, so undo, the grid and
+      // size to fit show Ctrl though they take ⌘: a known gap of that build.
+      constexpr auto keys = dd::host::HelpKeys::pc;
+      int row = 0;
+      for (const auto& section : dd::host::canvas_help(keys)) {
+        auto heading = Gtk::make_managed<Gtk::Label>();
+        heading->set_markup("<b>" + Glib::Markup::escape_text(section.title) + "</b>");
+        heading->set_xalign(0);
+        if (row > 0) heading->set_margin_top(12);
+        grid->attach(*heading, 0, row++, 2, 1);
+        for (const auto& entry : section.entries) {
+          auto gesture = Gtk::make_managed<Gtk::Label>(entry.keys);
+          gesture->set_xalign(0);
+          gesture->set_wrap(true);
+          gesture->set_max_width_chars(28);
+          gesture->add_css_class("dim-label");
+          auto action = Gtk::make_managed<Gtk::Label>(entry.action);
+          action->set_xalign(0);
+          action->set_wrap(true);
+          action->set_hexpand(true);
+          grid->attach(*gesture, 0, row);
+          grid->attach(*action, 1, row++);
+        }
+      }
+      auto scroll = Gtk::make_managed<Gtk::ScrolledWindow>();
+      scroll->set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
+      scroll->set_propagate_natural_height(true);
+      scroll->set_max_content_height(640);
+      scroll->set_child(*grid);
+      help_->set_child(*scroll);
+      help_->set_default_size(520, -1);
+      help_->set_modal(true);
+      help_->set_hide_on_close(true);
+      // Escape closes it, as it does the About dialog.
+      auto close = Gtk::ShortcutController::create();
+      close->add_shortcut(Gtk::Shortcut::create(Gtk::KeyvalTrigger::create(GDK_KEY_Escape),
+                                                Gtk::NamedAction::create("window.close")));
+      help_->add_controller(close);
+    }
+    if (auto* parent = get_active_window()) help_->set_transient_for(*parent);
+    help_->present();
+  }
+
   void choose_and_open() {
     auto dialog = Gtk::FileDialog::create();
     dialog->open([this, dialog](const Glib::RefPtr<Gio::AsyncResult>& result) {
@@ -271,6 +331,7 @@ class App : public Gtk::Application {
   }
 
   std::unique_ptr<Gtk::AboutDialog> about_;
+  std::unique_ptr<Gtk::Window> help_;
 };
 
 }  // namespace

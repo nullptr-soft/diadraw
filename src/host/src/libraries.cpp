@@ -193,7 +193,8 @@ Built build_folder(const fs::path& path) {
 
 std::optional<Json> read_bundle_bytes(const std::string& bytes) {
   bool gz = bytes.size() >= 2 && static_cast<unsigned char>(bytes[0]) == 0x1F && static_cast<unsigned char>(bytes[1]) == 0x8B;
-  auto text = gz ? io::gunzip(bytes) : std::optional<std::string>(bytes);
+  if (!gz) return library::parse_bundle(bytes);
+  auto text = io::gunzip(bytes);
   return text ? library::parse_bundle(*text) : std::nullopt;
 }
 

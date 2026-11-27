@@ -1,5 +1,6 @@
 # The `diadraw` Python package: the C++ core as a nanobind extension module, built from this
-# repository's CMake tree by scikit-build-core. `pip install .` builds it; see src/python/README.md.
+# repository's CMake tree by scikit-build-core. `pip install .` builds it; see
+# bindings/python/README.md.
 
 [build-system]
 requires = ["scikit-build-core>=0.10", "nanobind>=2.4"]
@@ -9,7 +10,7 @@ build-backend = "scikit_build_core.build"
 name = "diadraw"
 dynamic = ["version"]
 description = "Parse, check, format, render and import DiaDraw diagrams from Python"
-readme = "src/python/README.md"
+readme = "bindings/python/README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 classifiers = [
@@ -33,7 +34,7 @@ Homepage = "https://github.com/mykulyak/diadraw"
 minimum-version = "build-system.requires"
 build-dir = "build/python/{wheel_tag}"
 cmake.build-type = "Release"
-wheel.packages = ["src/python/diadraw"]
+wheel.packages = ["bindings/python/diadraw"]
 # Python 3.12 and later share one stable-ABI wheel.
 wheel.py-api = "cp312"
 install.components = ["python"]
@@ -54,13 +55,13 @@ input = "VERSION"
 regex = "(?P<value>\\d+\\.\\d+\\.\\d+)"
 
 [tool.pytest.ini_options]
-testpaths = ["src/python/tests"]
+testpaths = ["bindings/python/tests"]
 
 [tool.cibuildwheel]
 build = ["cp310-*", "cp311-*", "cp312-*"]
 skip = ["*-win32", "*_i686", "*-musllinux_*"]
 test-extras = ["test"]
-test-command = "pytest {project}/src/python/tests"
+test-command = "pytest {project}/bindings/python/tests"
 build-verbosity = 1
 
 [tool.cibuildwheel.linux]

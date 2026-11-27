@@ -22,6 +22,7 @@ add_executable(diadraw_macos MACOSX_BUNDLE
   src/DDThemeEditors.mm
   src/DDDrawing.mm
   src/DDSyntax.mm
+  src/DDTextFolds.mm
   src/DDCloudPanel.mm)
 set_target_properties(diadraw_macos PROPERTIES
   OUTPUT_NAME DiaDraw
@@ -71,7 +72,8 @@ install(TARGETS diadraw_macos BUNDLE DESTINATION . COMPONENT app)
 # Scripted gesture tests: they open a window, so they need a logged-in session (label "gui").
 if(DIADRAW_BUILD_TESTS)
   foreach(name gestures undo inspector styles relationship-inspector reconnect style-editor grid fit multi-select views
-               rename rename-inspector invalid-fields clear-canvas)
+               rename rename-inspector invalid-fields clear-canvas format
+               folding)
     add_test(NAME macos_${name}
              COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/../shell-tests/run.sh" "$<TARGET_FILE:diadraw_macos>" ${name})
     set_tests_properties(macos_${name} PROPERTIES LABELS gui TIMEOUT 60)

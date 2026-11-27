@@ -1,0 +1,38 @@
+// What the canvas does with the mouse and the keyboard: the Help dialog every app opens from its
+// Help button (dd::host::canvas_help() in the native shells, src/apps/web/src/help.ts in the web
+// app). Keep it to what every shell does; a gesture one shell lacks gets `-` in its column.
+//
+// `# Heading` starts a section. Every other line is four fields separated by tabs:
+//
+//   what it does <TAB> macOS <TAB> Linux and the web app elsewhere <TAB> the Windows app
+//
+// A key column of `=` repeats the column before it, and `-` leaves the line out for that column.
+// Blank lines and `//` comment lines are skipped.
+
+# Select
+Select an element or a line	Click	=	=
+Add to the selection, or take out of it	Shift-click or ⌘-click	Shift-click or Ctrl-click	=
+Select everything a band encloses	Drag over empty space	=	=
+Select everything	⌘A	Ctrl+A	-
+Clear the selection	Esc	=	=
+
+# Move and shape
+Move to the exact spot	Drag an element	=	=
+Place by the neighbours	⌥-drag	Alt-drag	=
+Resize	Drag a corner	=	=
+Size to fit the content	Double-click a corner, or ⌥⌘=	Double-click a corner, or Ctrl+Alt+=	Double-click a corner, or Edit › Size to Fit Content
+Turn	Drag the round handle	=	=
+Show the grid: drags line up with it	⌘'	Ctrl+'	View › Show Grid
+
+# Connect
+Connect two elements	Drag the dot	=	=
+Reconnect a line	Drag an end of a selected line	=	=
+Reroute a line in a fixed view	Drag a bend point	=	=
+
+# Edit
+Rename an element or relabel a line	Double-click	=	=
+Rename the id everywhere	F2	=	=
+Edit properties	Select one element or line	=	=
+Remove what is selected	Delete	=	=
+Undo and redo, in both panes	⌘Z / ⇧⌘Z	Ctrl+Z / Ctrl+Shift+Z	-
+Undo and redo in the text pane	-	-	Ctrl+Z / Ctrl+Y

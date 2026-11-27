@@ -243,15 +243,6 @@ dd-canvas {
   color: var(--warning);
 }
 
-.canvas-pane .help {
-  margin: 0;
-  padding: 0.4rem 1rem;
-  font-size: 0.75rem;
-  color: var(--muted);
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-
 /* Narrow windows stack the text over the canvas; only the panel's splitter is left. */
 @media (max-width: 760px) {
   .panes {
@@ -1124,4 +1115,76 @@ dd-about .about-credits {
 
 dd-about a {
   color: var(--accent);
+}
+
+/* Help: what the canvas does with the mouse and the keyboard, as a two-column list per section. */
+dd-help dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: min(40rem, calc(100vh - 4rem));
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.18);
+}
+
+dd-help dialog::backdrop {
+  background: rgb(15 23 42 / 0.25);
+}
+
+dd-help .help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+dd-help .help-head button {
+  border: none;
+}
+
+dd-help h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+dd-help h3 {
+  margin: 1rem 0 0.375rem;
+  font-size: 0.875rem;
+}
+
+dd-help dl {
+  display: grid;
+  grid-template-columns: 15rem 1fr; /* the same in every section, so they line up */
+  gap: 0.375rem 1rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+dd-help dt,
+dd-help dd {
+  margin: 0;
+}
+
+dd-help kbd {
+  font-family: inherit;
+  padding: 0.0625rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Phones: one column, the keys above what they do. */
+@media (max-width: 480px) {
+  dd-help dl {
+    grid-template-columns: 1fr;
+    gap: 0.125rem;
+  }
+
+  dd-help dd {
+    margin-bottom: 0.375rem;
+  }
 }

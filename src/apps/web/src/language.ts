@@ -1,7 +1,9 @@
-import { LanguageSupport, StreamLanguage } from '@codemirror/language';
+import { foldService, LanguageSupport, StreamLanguage } from '@codemirror/language';
 import type { Diagnostic as LintDiagnostic } from '@codemirror/lint';
 import { linter } from '@codemirror/lint';
-import type { Diagnostic } from '@diadraw/wasm';
+import type { Extension } from '@codemirror/state';
+import { StateField } from '@codemirror/state';
+import type { Diagnostic, FoldRange } from '@diadraw/wasm';
 
 /**
  * DiaDraw highlighting for CodeMirror. The grammar itself lives in the C++ core; the editor only
@@ -84,8 +86,34 @@ const language = StreamLanguage.define<State>({
   languageData: { commentTokens: { line: '//', block: { open: '/*', close: '*/' } } },
 });
 
-/** Highlighting plus lint from the core's diagnostics for the current text. */
-export function diadraw(diagnostics: (text: string) => readonly Diagnostic[]): LanguageSupport {
+/**
+ * Folding from the core's fold ranges: `model`, `view`, elements with children and every other
+ * `{` … `}` block spanning lines. The ranges are found once per change, keyed by start line, and
+ * the fold gutter (in `basicSetup`) asks per line.
+ */
+function folding(folds: (text: string) => readonly FoldRange[]): Extension {
+  const byLine = (text: string) => new Map(folds(text).map((f) => [f.startLine, f] as const));
+  const ranges = StateField.define<ReadonlyMap<number, FoldRange>>({
+    create: (state) => byLine(state.doc.toString()),
+    update: (value, tr) => (tr.docChanged ? byLine(tr.state.doc.toString()) : value),
+  });
+  return [
+    ranges,
+    foldService.of((state, lineStart) => {
+      const fold = state.field(ranges).get(state.doc.lineAt(lineStart).number - 1);
+      return fold && fold.to <= state.doc.length ? { from: fold.from, to: fold.to } : null;
+    }),
+  ];
+}
+
+/**
+ * Highlighting, lint from the core's diagnostics for the current text, and folding from the
+ * core's fold ranges.
+ */
+export function diadraw(
+  diagnostics: (text: string) => readonly Diagnostic[],
+  folds: (text: string) => readonly FoldRange[] = () => [],
+): LanguageSupport {
   const lint = linter(
     (view) =>
       diagnostics(view.state.doc.toString()).map((d): LintDiagnostic => ({
@@ -96,5 +124,5 @@ export function diadraw(diagnostics: (text: string) => readonly Diagnostic[]): L
       })),
     { delay: 200 },
   );
-  return new LanguageSupport(language, [lint]);
+  return new LanguageSupport(language, [lint, folding(folds)]);
 }

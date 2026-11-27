@@ -11,7 +11,12 @@ import os
 import re
 import sys
 
-ROOTS = [*glob("src/*/src"), *glob("src/*/include"), *glob("src/apps/*/src")]
+ROOTS = [
+    *glob("src/*/src"),
+    *glob("src/*/include"),
+    *glob("src/apps/*/src"),
+    *glob("bindings/*/src"),
+]
 MOVE = re.compile(r"std::move\(\s*\**\s*([A-Za-z_][A-Za-z0-9_]*)")
 CALL = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\s*\(")
 

@@ -17,5 +17,8 @@ Json to_json(const SourceUpdate& update, std::string_view before);
 /// Syntax colouring (`highlight`) as `[[from, to, tag], …]`: UTF-16 offsets and CodeMirror tag
 /// names, what the JavaScript hosts take.
 Json highlight_json(std::string_view text);
+/// The foldable blocks (`fold_ranges`) as `[{ from, to, startLine, endLine }, …]`: the hidden
+/// text in UTF-16 offsets, lines 0-based.
+Json fold_ranges_json(std::string_view text);
 
 }  // namespace dd::dsl

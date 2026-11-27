@@ -17,7 +17,8 @@ add_executable(diadraw_gtk
   src/field_controls.cpp
   src/style_panel.cpp
   src/painter.cpp
-  src/cloud_dialog.cpp)
+  src/cloud_dialog.cpp
+  src/text_folds.cpp)
 set_target_properties(diadraw_gtk PROPERTIES OUTPUT_NAME diadraw-gtk)
 target_link_libraries(diadraw_gtk PRIVATE diadraw diadraw_host diadraw_cloud diadraw_export PkgConfig::GTKMM)
 # About's logo when the app runs from the build tree, before its icons are installed.
@@ -56,7 +57,8 @@ endif()
 # Scripted gesture tests, the same scripts as the macOS app's (label "gui": they open a window).
 if(DIADRAW_BUILD_TESTS)
   foreach(name gestures undo inspector styles relationship-inspector reconnect style-editor grid fit multi-select views
-               rename rename-inspector invalid-fields clear-canvas)
+               rename rename-inspector invalid-fields clear-canvas format
+               folding)
     add_test(NAME gtk_${name}
              COMMAND sh "${CMAKE_CURRENT_SOURCE_DIR}/../shell-tests/run.sh" "$<TARGET_FILE:diadraw_gtk>" ${name})
     set_tests_properties(gtk_${name} PROPERTIES LABELS gui TIMEOUT 60)
